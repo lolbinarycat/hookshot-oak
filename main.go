@@ -16,28 +16,81 @@ import (
 const Ground collision.Label = 1
 
 type ControlConfig struct {
-	Left, Right, Jump string
+	Left, Right, Jump, Jump2, UpwardForce string
 }
 
-//type Player struct {
-//
-//	Body
+var currentControls ControlConfig = ControlConfig{
+	Left:        key.LeftArrow,
+	Right:       key.RightArrow,
+	Jump:        key.Z,
+	Jump2:       key.X,
+	UpwardForce: key.A,
+}
+
+//type State struct {
 //}
 
-var currentControls ControlConfig = ControlConfig{
-	Left:  key.LeftArrow,
-	Right: key.RightArrow,
-	Jump:  key.Z,
+var player Player
+
+type Player struct {
+	Body  *entities.Moving
+	State func() func()
+}
+
+func (p Player) AirState() func() { //start in air state
+	//gravity
+	fallSpeed := .1
+
+	if isOnGround(p.Body) {
+		return func() { player.State = player.GroundState }
+		//panic("t")
+	} else {
+		p.Body.Delta.ShiftY(fallSpeed)
+
+	}
+	p.Body.ShiftY(p.Body.Delta.Y())
+
+	//return p.State
+	//panic("e")
+	return func() {}
+}
+
+func (p Player) GroundState() func() {
+	if isOnGround(p.Body) {
+
+		p.Body.Delta.SetY(0)
+
+		if oak.IsDown(currentControls.Jump2) {
+
+			p.Body.Delta.ShiftY(-p.Body.Speed.Y())
+			p.Body.ShiftY(p.Body.Delta.Y())
+			return func() { player.State = player.AirState }
+		}
+	} else {
+		return func() { player.State = player.AirState }
+	}
+	return func() { player.State = player.AirState }
+}
+
+func isOnGround(mov *entities.Moving) bool {
+	onGround := mov.HitLabel(Ground)
+	if onGround == nil {
+		return false
+	} else {
+		return true
+	}
 }
 
 func main() {
 	oak.Add("platformer", func(string, interface{}) {
-		playerBody := entities.NewMoving(100, 100, 16, 32,
+
+		player.Body = entities.NewMoving(100, 100, 16, 32,
 			render.NewColorBox(16, 32, color.RGBA{255, 0, 0, 255}),
 			nil, 0, 0)
+		player.State = player.AirState
 
-		render.Draw(playerBody.R)
-		playerBody.Speed = physics.NewVector(3, 3)
+		render.Draw(player.Body.R)
+		player.Body.Speed = physics.NewVector(3, 3)
 
 		ground := entities.NewSolid(0, 400, 500, 20,
 			render.NewColorBox(500, 20, color.RGBA{0, 0, 255, 255}),
@@ -46,28 +99,16 @@ func main() {
 
 		render.Draw(ground.R)
 
-		playerBody.Bind(func(id int, nothing interface{}) int {
+		player.Body.Bind(func(id int, nothing interface{}) int {
+
 			if oak.IsDown(currentControls.Left) {
-				playerBody.ShiftX(-playerBody.Speed.X())
+				player.Body.ShiftX(-player.Body.Speed.X())
 			}
 			if oak.IsDown(currentControls.Right) {
-				playerBody.ShiftX(playerBody.Speed.X())
+				player.Body.ShiftX(player.Body.Speed.X())
 			}
 
-			//gravity
-			fallSpeed := .1
-			onGround := playerBody.HitLabel(Ground)
-			if onGround == nil {
-				playerBody.Delta.ShiftY(fallSpeed)
-			} else {
-				playerBody.Delta.SetY(0)
-
-				if oak.IsDown(currentControls.Jump) {
-					playerBody.Delta.ShiftY(-playerBody.Speed.Y())
-				}
-			}
-			//apply gravity
-			playerBody.ShiftY(playerBody.Delta.Y())
+			player.State()()
 
 			return 0
 		}, event.Enter)
