@@ -27,7 +27,7 @@ const (
 	RightWallHit               = 2
 )
  
-func HowIsHittingLabel(mov *entities.Moving, label collision.Label) CollisionType{
+func howIsHittingLabel(mov *entities.Moving, label collision.Label) CollisionType{
 	oldX, _ := mov.GetPos()
 	hit := collision.HitLabel(mov.Space, Ground)
 	if hit != nil {
@@ -103,13 +103,13 @@ func (p Player) AirState()  { //start in air state
 	//gravit
 	fallSpeed := .1
 
-	if (isInGround(p.Body)) {
-		hit := collision.HitLabel(p.Body.Space, Ground)
+	if (howIsHittingLabel(p.Body,Ground) == GroundHit) {
+		//hit := collision.HitLabel(p.Body.Space, Ground)
 		// Correct our y if we started falling into the ground
-		p.Body.SetY(hit.Y() - p.Body.H)
-		p.Body.Delta.SetY(0)
+		//p.Body.SetY(hit.Y() - p.Body.H)
+		//p.Body.Delta.SetY(0)
 		player.State = player.GroundState
-		print("ground")
+		//print("ground")
 	} else if isOnGround(p.Body) {
 		 player.State = player.GroundState
 		 //return func() {}
@@ -133,11 +133,7 @@ func (p Player) GroundState() {
 		p.Body.Delta.SetY(0)
 
 		if oak.IsDown(currentControls.Jump) {
-
-			p.Body.Delta.ShiftY(-p.Body.Speed.Y())
-			p.Body.ShiftY(p.Body.Delta.Y())
-			//return func() { player.State = player.GroundState }
-			p.SetState(p.AirState)
+			p.Jump()
 		} //else {
 		//p.Body.Delta.ShiftY(fallSpeed)
 		//}
@@ -145,6 +141,7 @@ func (p Player) GroundState() {
 		//print("air")
 		p.SetState(player.CoyoteState)
 	}
+	howIsHittingLabel(p.Body,Ground)
 }
 
 
@@ -170,16 +167,21 @@ func (p Player) CoyoteState() {
 		//panic("t")
 
 	} else {
+		//p.SetState(p.AirState)
 		p.Body.Delta.ShiftY(0.1)
 
 	}
+	p.Body.ShiftY(p.Body.Delta.Y())
 	if oak.IsDown(currentControls.Jump) {
-		p.Body.Delta.ShiftY(-p.Body.Speed.Y())
-		p.Body.ShiftY(p.Body.Delta.Y())
-		//return func() { player.State = player.GroundState }
-		p.SetState(p.AirState)
+		p.Jump()
 	}
 
+}
+
+func (p Player) Jump() {
+	p.Body.Delta.ShiftY(-p.Body.Speed.Y())
+	p.Body.ShiftY(p.Body.Delta.Y())
+	p.SetState(p.AirState)
 }
 
 func (p Player) SetState(state func()) {
