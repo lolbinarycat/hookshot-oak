@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"os"
 	"time"
-	"fmt"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
@@ -166,12 +166,13 @@ func (object *PhysObject) doCollision(updater func()) {
 		} else if object.Body.Delta.X() < 0 {
 			object.ActiColls.LeftWallHit = true
 			//object.Body.SetX(object.Body.X() - xover)
-			object.Body.SetX(oldX)
+			//object.Body.SetX(oldX)
+			object.Body.SetX(hit.X()+hit.W())
 		}
 	}
 
 	object.Body.ShiftY(object.Body.Delta.Y())
-	if hit := collision.HitLabel(object.Body.Space, Ground);hit != nil {
+	if hit := collision.HitLabel(object.Body.Space, Ground); hit != nil {
 		//_, yover := object.Body.Space.Overlap(hit)
 		if object.Body.Delta.Y() > 0 {
 			object.ActiColls.GroundHit = true
@@ -211,11 +212,22 @@ func loadScene() {
 	ground2 := entities.NewSolid(0, 200, 20, 500,
 		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
 		nil, 1)
+	ground3 :=  entities.NewSolid(300, 200, 20, 500,
+		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
+		nil, 2)
+
+	blockArr := make([]*entities.Solid,10)
+	for i := 0;i < 10;i++ {
+		blockArr[i] = entities.NewSolid(float64(10*i), 50,10,10, render.NewColorBox(10,10,color.RGBA{255,0,uint8(16*i),255}), nil, event.CID(i+3))
+		render.Draw(blockArr[i].R,8+i)
+	}
 	ground.UpdateLabel(Ground)
 	ground2.UpdateLabel(Ground)
+	ground3.UpdateLabel(Ground)
 
 	render.Draw(ground.R)
 	render.Draw(ground2.R, 1)
+	render.Draw(ground3.R, 1)
 
 }
 
