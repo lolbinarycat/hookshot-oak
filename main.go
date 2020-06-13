@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"os"
 	"time"
+	"fmt"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
@@ -17,7 +18,8 @@ import (
 
 const Ground collision.Label = 1
 
-const JumpHeight int = 3
+const JumpHeight int = 6
+const Gravity  float64 = 0.2
 const CoyoteTime time.Duration = time.Millisecond * 7
 
 //type CollisionType int8
@@ -28,7 +30,6 @@ type ActiveCollisions struct {
 	RightWallHit bool
 	CeilingHit   bool
 }
-
 
 type ControlConfig struct {
 	Left, Right, Jump, Quit string
@@ -52,65 +53,59 @@ var player Player
 //StateInit is a variable that should be set to true when changing states
 //it tells the state to initialize values like StateTimer
 type Player struct {
-	Body *entities.Moving
-	ActiColls ActiveCollisions
-	State      func()
+	//Body           *entities.Moving
+	//ActiColls      ActiveCollisions
+	PhysObject
+	State          func()
 	StateStartTime time.Time
-	//StateInit  bool
 }
 
-func (p Player) AirState() { //start in air state
-	//gravit
+type PhysObject struct {
+	Body *entities.Moving
+	ActiColls ActiveCollisions
+}
+
+func (p *Player) AirState() { //start in air state
+	//print("a")
 	fallSpeed := .1
-	//hitType, _, _ := howIsHittingLabel(p.Body, Ground)
-	if player.ActiColls.GroundHit {
-		//hit := collision.HitLabel(p.Body.Space, Ground)
-		// Correct our y if we started falling into the ground
-		//p.Body.SetY(hit.Y() - p.Body.H)
-		//p.Body.Delta.SetY(0)
-		print("g")
+
+	if player.PhysObject.ActiColls.GroundHit {
 		player.State = player.GroundState
 		//print("ground")
-	} else if isOnGround(p.Body) {
-		player.State = player.GroundState
-		//return func() {}
-		//panic("t")
-
 	} else {
 		p.Body.Delta.ShiftY(fallSpeed)
 
 	}
-	p.Body.ShiftY(p.Body.Delta.Y())
+	//p.Body.ShiftY(p.Body.Delta.Y())
 
 	//return p.State
 	//panic("e")
 }
 
-func (p Player) GroundState() {
+func (p *Player) GroundState() {
 	//fallSpeed := .1
 	//print("groundstate")
 	//hitType,_,_ := howIsHittingLabel(p.Body,Ground)
-	if player.ActiColls.GroundHit {
-		p.Body.Delta.SetY(0)
+	if player.PhysObject.ActiColls.GroundHit == true {
+		//p.Body.Delta.SetY(0)
 
 		if oak.IsDown(currentControls.Jump) {
 			p.Jump()
-		} //else {
-		//p.Body.Delta.ShiftY(fallSpeed)
-		//}
+		}
 	} else {
-		print("c")
+		//print("c")
 		p.SetState(player.CoyoteState)
 	}
+	//p.Body.Delta.ShiftY(0.001)
 	//howIsHittingLabel(p.Body, Ground)
 }
 
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 func (p Player) CoyoteState() {
-	if p.StateStartTime.Add(CoyoteTime).Before( time.Now()) {
+	if p.StateStartTime.Add(CoyoteTime).Before(time.Now()) {
 		p.SetState(p.AirState)
-	} 
+	}
 	//inherit code from AirState
 	p.AirState()
 	if oak.IsDown(currentControls.Jump) {
@@ -125,11 +120,17 @@ func (p Player) Jump() {
 	player.SetState(p.AirState)
 }
 
-func (p Player) SetState(state func()) {
-	player.StateStartTime = time.Now()
-	player.State = state
+func (p *Player) SetState(state func()) {
+	p.StateStartTime = time.Now()
+	p.State = state
 }
 
+//TimeFromStateStart gets how long it has been since the last state transition
+func (p Player) TimeFromStateStart() time.Duration {
+	return p.StateStartTime.Sub(time.Now())
+}
+
+//this functon should not be used, use Body.ActiColls.GroundHit instead
 func isOnGround(mov *entities.Moving) bool {
 	onGround := mov.HitLabel(Ground)
 	if onGround == nil {
@@ -139,6 +140,7 @@ func isOnGround(mov *entities.Moving) bool {
 	}
 }
 
+// Depreciated, do not use
 func isInGround(mov *entities.Moving) bool {
 	_, oldY := mov.GetPos()
 	hit := collision.HitLabel(mov.Space, Ground)
@@ -147,6 +149,50 @@ func isInGround(mov *entities.Moving) bool {
 	}
 
 	return false
+}
+
+func (object *PhysObject) doCollision(updater func()) {
+	oldX, oldY := object.Body.GetPos()
+	updater()
+	object.ActiColls = ActiveCollisions{} //reset the struct to be all false
+	
+
+	object.Body.ShiftX(object.Body.Delta.X())
+	if hit := collision.HitLabel(object.Body.Space, Ground); hit != nil {
+		//xover, _ := object.Body.Space.Overlap(hit)
+		if object.Body.Delta.X() > 0 {
+			object.ActiColls.RightWallHit = true
+			object.Body.SetX(oldX)
+		} else if object.Body.Delta.X() < 0 {
+			object.ActiColls.LeftWallHit = true
+			//object.Body.SetX(object.Body.X() - xover)
+			object.Body.SetX(oldX)
+		}
+	}
+
+	object.Body.ShiftY(object.Body.Delta.Y())
+	if hit := collision.HitLabel(object.Body.Space, Ground);hit != nil {
+		//_, yover := object.Body.Space.Overlap(hit)
+		if object.Body.Delta.Y() > 0 {
+			object.ActiColls.GroundHit = true
+			//object.Body.SetY(object.Body.Y() - yover)
+			//object.Body.Delta.SetY(0.7*yover)
+			//print("u")
+			//object.Body.SetY(object.Body.Y()-object.Body.Delta.Y())
+			object.Body.SetY(hit.Y()-object.Body.H)
+		} else if object.Body.Delta.Y() < 0 {
+			object.ActiColls.CeilingHit = true
+			object.Body.SetY(oldY)
+		}
+		object.Body.Delta.SetY(0)
+	}
+
+
+
+
+
+	
+
 }
 
 func loadScene() {
@@ -187,32 +233,14 @@ func main() {
 				player.Body.Delta.SetX(0)
 			}
 			if oak.IsDown(currentControls.Quit) {
+				if oak.IsDown(key.I) {
+					fmt.Println(player)
+				}
 				os.Exit(0)
 			}
 
-			//HowIsHittingLabel(player.Body,Ground)
-			//this is all it takes to make collision, why is everyone overcomplicating it? <- this statement won't age well
-			oldX, oldY := player.Body.GetPos()
-			player.State()
-			player.ActiColls = ActiveCollisions{}
-			player.Body.ShiftX(player.Body.Delta.X())
-			if collision.HitLabel(player.Body.Space, Ground) != nil {
-				player.Body.SetX(oldX)
-			}
 
-			player.Body.ShiftY(player.Body.Delta.Y())
-
-			if collision.HitLabel(player.Body.Space, Ground) != nil {
-				if player.Body.Delta.Y() > 0 {
-					player.ActiColls.GroundHit = true
-				} else if player.Body.Delta.Y() < 0 {
-					player.ActiColls.CeilingHit = true
-				}
-				
-				//  player.Body.Delta.SetY(0)
-				player.Body.SetY(oldY)
-			
-			}
+			player.doCollision(player.State)
 
 			return 0
 		}, event.Enter)
@@ -224,3 +252,5 @@ func main() {
 
 	oak.Init("platformer")
 }
+
+
