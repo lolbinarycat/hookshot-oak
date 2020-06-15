@@ -1,3 +1,4 @@
+//levels are to be stored as pbm images
 package main
 
 import (
@@ -14,6 +15,7 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/spakin/netpbm"
 )
 
 const Ground collision.Label = 1
@@ -30,6 +32,7 @@ const Gravity float64 = 0.35
 const CoyoteTime time.Duration = time.Millisecond * 7
 
 //type CollisionType int8
+//test comment
 
 type ActiveCollisions struct {
 	GroundHit    bool
