@@ -217,27 +217,6 @@ func (p Player) TimeFromStateStart() time.Duration {
 	return p.StateStartTime.Sub(time.Now())
 }
 
-//this functon should not be used, use Body.ActiColls.GroundHit instead
-func isOnGround(mov *entities.Moving) bool {
-	onGround := mov.HitLabel(Ground)
-	if onGround == nil {
-		return false
-	} else {
-		return true
-	}
-}
-
-// Depreciated, do not use
-func isInGround(mov *entities.Moving) bool {
-	_, oldY := mov.GetPos()
-	hit := collision.HitLabel(mov.Space, Ground)
-	if hit != nil && !(oldY != mov.Y() && oldY+mov.H > hit.Y()) {
-		return true
-	}
-
-	return false
-}
-
 func (object *PhysObject) doCollision(updater func()) {
 	oldX, oldY := object.Body.GetPos()
 	updater()
