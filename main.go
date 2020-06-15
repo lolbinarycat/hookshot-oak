@@ -20,7 +20,8 @@ const Ground collision.Label = 1
 
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
-const WallJumpWidth float64 = 5
+const WallJumpWidth float64 = 3
+const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
 const (
 	AirAccel float64 = 0.4
 	AirMaxSpeed float64 = 3
@@ -85,7 +86,6 @@ type PlayerModule struct {
 
 func (p *Player) AirState() { //start in air state
 	//print("a")
-	fallSpeed := Gravity
 
 	if player.PhysObject.ActiColls.GroundHit {
 		p.SetState(p.GroundState)
@@ -99,7 +99,7 @@ func (p *Player) AirState() { //start in air state
 			}
 		}
 
-		p.Body.Delta.ShiftY(fallSpeed)
+		p.DoGravity()
 	}
 
 	if oak.IsDown(currentControls.Left)  && p.Body.Delta.X() > -AirMaxSpeed {
@@ -130,14 +130,11 @@ func (p *Player) GroundState() {
 	//print("groundstate")
 	//hitType,_,_ := howIsHittingLabel(p.Body,Ground)
 	if player.PhysObject.ActiColls.GroundHit == true {
-		//p.Body.Delta.SetY(0)
-
 		if oak.IsDown(currentControls.Jump) {
 			p.Jump()
 		} 
 
 	} else {
-		//print("c")
 		p.SetState(player.CoyoteState)
 	}
 
@@ -160,7 +157,7 @@ func (p *Player) CoyoteState() {
 		p.SetState(p.AirState)
 	}
 	//inherit code from AirState
-	p.AirState()
+	//p.AirState()
 	if oak.IsDown(currentControls.Jump) {
 		p.Jump()
 	}
@@ -168,29 +165,34 @@ func (p *Player) CoyoteState() {
 }
 
 func (p *Player) WallSlideLeftState() {
-	//print("l")
 	if isJumpInput() {
 		p.Body.Delta.SetY(-WallJumpHeight)
 		p.Body.Delta.SetX(WallJumpWidth)
-		p.SetState(p.AirState)
+		p.SetState(p.WallJumpLaunchState)
 		return
 	}
-
 	p.AirState()
-
 }
 
 func (p *Player) WallSlideRightState() {
-	//print("l")
 	if isJumpInput() {
 		p.Body.Delta.SetY(-WallJumpHeight)
 		p.Body.Delta.SetX(-WallJumpWidth)
+		p.SetState(p.WallJumpLaunchState)
+		return
+	}
+	p.AirState()
+}
+
+//func WallJumpLaunchState is entered after you walljump,
+//temporaraly disabling your controls. This should prevent one sided
+//walljumps
+func (p *Player) WallJumpLaunchState() {
+	if p.TimeFromStateStart() >= WallJumpLaunchDuration {
 		p.SetState(p.AirState)
 		return
 	}
-
-	p.AirState()
-
+	p.DoGravity()
 }
 
 func isJumpInput() bool {
@@ -213,41 +215,39 @@ func (p *Player) SetState(state PlayerState) {
 }
 
 //TimeFromStateStart gets how long it has been since the last state transition
-func (p Player) TimeFromStateStart() time.Duration {
-	return p.StateStartTime.Sub(time.Now())
+func (p *Player) TimeFromStateStart() time.Duration {
+	return time.Now().Sub(p.StateStartTime)
 }
 
-func (object *PhysObject) doCollision(updater func()) {
-	oldX, oldY := object.Body.GetPos()
+func (o *PhysObject) DoGravity() {
+
+	o.Body.Delta.ShiftY(Gravity)
+}
+
+func (object *PhysObject) DoCollision(updater func()) {
+	_, oldY := object.Body.GetPos()
 	updater()
 	object.ActiColls = ActiveCollisions{} //reset the struct to be all false
 
 	object.Body.ShiftX(object.Body.Delta.X())
 	if hit := collision.HitLabel(object.Body.Space, Ground); hit != nil {
-		//xover, _ := object.Body.Space.Overlap(hit)
-		if object.Body.Delta.X() > 0 {
+		if object.Body.Delta.X() > 0 { //Right Wall
 			object.ActiColls.RightWallHit = true
-			object.Body.SetX(oldX)
-		} else if object.Body.Delta.X() < 0 {
+			object.Body.SetX(hit.X() - object.Body.W)
+		} else if object.Body.Delta.X() < 0 { //Left Wall
 			object.ActiColls.LeftWallHit = true
-			//object.Body.SetX(object.Body.X() - xover)
-			//object.Body.SetX(oldX)
 			object.Body.SetX(hit.X() + hit.W())
 		}
 	}
 
 	object.Body.ShiftY(object.Body.Delta.Y())
 	if hit := collision.HitLabel(object.Body.Space, Ground); hit != nil {
-		//_, yover := object.Body.Space.Overlap(hit)
-		if object.Body.Delta.Y() > 0 {
+		if object.Body.Delta.Y() > 0 { //Ground
 			object.ActiColls.GroundHit = true
-			//object.Body.SetY(object.Body.Y() - yover)
-			//object.Body.Delta.SetY(0.7*yover)
-			//print("u")
-			//object.Body.SetY(object.Body.Y()-object.Body.Delta.Y())
 			object.Body.SetY(hit.Y() - object.Body.H)
-		} else if object.Body.Delta.Y() < 0 {
+		} else if object.Body.Delta.Y() < 0 { //Ceiling
 			object.ActiColls.CeilingHit = true
+			//TODO: make this work like other collision
 			object.Body.SetY(oldY)
 		}
 		object.Body.Delta.SetY(0)
@@ -275,7 +275,7 @@ func loadScene() {
 		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
 		nil, 2)
 
-	const blockArrLen int = 8
+	/*const blockArrLen int = 8
 	const blockSize int = 1
 	blockArr := make([][]*entities.Solid, blockArrLen)
 	for j := 0; j < blockArrLen; j++ {
@@ -285,7 +285,7 @@ func loadScene() {
 				render.NewColorBox(10, 10, color.RGBA{uint8(j), 0, uint8(i), 255}), nil, event.CID(j*i+3))
 			render.Draw(blockArr[j][i].R, 8+i*j)
 		}
-	}
+	}*/
 	ground.UpdateLabel(Ground)
 	ground2.UpdateLabel(Ground)
 	ground3.UpdateLabel(Ground)
@@ -313,7 +313,7 @@ func main() {
 				os.Exit(0)
 			}
 
-			player.doCollision(player.State)
+			player.DoCollision(player.State)
 
 			return 0
 		}, event.Enter)
