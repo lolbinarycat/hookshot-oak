@@ -2,10 +2,15 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"image"
 	"image/color"
+	_ "image/png"
 	"os"
 	"time"
+
+	//"compress/flate"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
@@ -15,10 +20,10 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
-	"github.com/spakin/netpbm"
 )
 
 const Ground collision.Label = 1
+
 
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
@@ -27,6 +32,11 @@ const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
 const (
 	AirAccel float64 = 0.4
 	AirMaxSpeed float64 = 3
+)
+//Window constants
+const (
+	WindowWidth int = 800
+	WindowHeight int = 600
 )
 const Gravity float64 = 0.35
 const CoyoteTime time.Duration = time.Millisecond * 7
@@ -258,7 +268,50 @@ func (object *PhysObject) DoCollision(updater func()) {
 
 }
 
+func loadScreen() {
+	file, err := os.Open("level.png")
+	if err != nil {
+		fmt.Print("error when opening screen file:")
+		panic(err)
+	}
+	reader := bufio.NewReader(file)
+	conf,_, err := image.DecodeConfig(reader)
+	if err != nil {
+		fmt.Print("error when decoding screen file config:")
+		panic(err)
+	}
+	//reader.Reset(file)
+	levelImage,_, _ := image.Decode(reader)/*&netpbm.DecodeOptions{
+		Target:      netpbm.PNM, //this will allow adding more block types later
+		Exact:       false,
+		PBMMaxValue:1 ,
+	})*/
+	if err != nil {
+		fmt.Print("error when decoding screen file:")
+		panic(err)
+	}
+	var blockArrLenY int = conf.Height
+	var blockArrLenX int = conf.Width 
+	const blockSize int = 4
+	blockArr := make([][]*entities.Solid, blockArrLenX)
+	for j := 0; j < blockArrLenX; j++ {
+		blockArr[j] = make([]*entities.Solid, blockArrLenY)
+		for i := 0; i < blockArrLenY; i++ {
+			if levelImage.At(j,i) == color.Black {
+				blockArr[j][i] = entities.NewSolid(
+					float64(i*blockSize), float64(j*blockSize),
+					float64(blockSize), float64(blockSize),
+					render.NewColorBox(10, 10,
+						color.RGBA{uint8(j), 0, uint8(i), 255}),
+					nil, event.CID(j*i+3))
+				render.Draw(blockArr[j][i].R, 8+i*j)
+			}
+		}
+	}
+}
+
 func loadScene() {
+	go loadScreen()
 
 	player.Body = entities.NewMoving(100, 100, 16, 32,
 		render.NewColorBox(16, 32, color.RGBA{255, 0, 0, 255}),
@@ -278,17 +331,7 @@ func loadScene() {
 		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
 		nil, 2)
 
-	/*const blockArrLen int = 8
-	const blockSize int = 1
-	blockArr := make([][]*entities.Solid, blockArrLen)
-	for j := 0; j < blockArrLen; j++ {
-		blockArr[j] = make([]*entities.Solid, blockArrLen)
-		for i := 0; i < blockArrLen; i++ {
-			blockArr[j][i] = entities.NewSolid(float64(i*blockSize), float64(j*blockSize), float64(blockSize),float64(blockSize) ,
-				render.NewColorBox(10, 10, color.RGBA{uint8(j), 0, uint8(i), 255}), nil, event.CID(j*i+3))
-			render.Draw(blockArr[j][i].R, 8+i*j)
-		}
-	}*/
+
 	ground.UpdateLabel(Ground)
 	ground2.UpdateLabel(Ground)
 	ground3.UpdateLabel(Ground)
