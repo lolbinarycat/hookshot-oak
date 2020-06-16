@@ -30,6 +30,7 @@ const (
 	AirAccel float64 = 0.4
 	AirMaxSpeed float64 = 3
 )
+const ClimbSpeed float64 = 3
 //Window constants
 const (
 	WindowWidth int = 800
@@ -50,9 +51,6 @@ type JsonRect struct {
 	Label collision.Label //warning: label is hardcoded in json file
 }
 
-//type CollisionType int8
-//test comment
-
 type ActiveCollisions struct {
 	GroundHit    bool
 	LeftWallHit  bool
@@ -61,13 +59,16 @@ type ActiveCollisions struct {
 }
 
 type ControlConfig struct {
-	Left, Right, Jump, Quit string
+	Left, Right, Up, Down, Jump, Climb, Quit string
 }
 
 var currentControls ControlConfig = ControlConfig{
 	Left:  key.LeftArrow,
 	Right: key.RightArrow,
+	Up: key.UpArrow,
+	Down: key.DownArrow,
 	Jump:  key.Z,
+	Climb: key.LeftShift,
 	Quit:  key.Q,
 	//Jump2:       key.X,
 	//	UpwardForce: key.A,
@@ -99,6 +100,7 @@ type PhysObject struct {
 
 type PlayerModuleList struct {
 	WallJump PlayerModule
+	Climb PlayerModule
 }
 
 type PlayerModule struct {
@@ -193,6 +195,10 @@ func (p *Player) WallSlideLeftState() {
 		p.SetState(p.WallJumpLaunchState)
 		return
 	}
+	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
+		p.SetState(p.ClimbLeftState)
+		return
+	}
 	p.AirState()
 }
 
@@ -202,6 +208,10 @@ func (p *Player) WallSlideRightState() {
 		p.Body.Delta.SetX(-WallJumpWidth)
 		p.SetState(p.WallJumpLaunchState)
 		return
+	}
+	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
+		p.SetState(p.ClimbRightState)
+		return //return to stop airstate for overwriting our change
 	}
 	p.AirState()
 }
@@ -215,6 +225,37 @@ func (p *Player) WallJumpLaunchState() {
 		return
 	}
 	p.DoGravity()
+}
+
+func (p *Player) ClimbRightState() {
+	if isJumpInput() {
+		p.SetState(p.WallSlideRightState)
+		p.WallSlideRightState()
+	}
+	p.DoCliming()
+}
+
+func (p *Player) ClimbLeftState() {
+	if isJumpInput() {
+		p.SetState(p.WallSlideLeftState)
+		p.WallSlideRightState()
+	}
+	p.DoCliming()
+}
+
+//DoCliming is the function for shared procceses between
+//ClimbRightState and ClimbLeft state
+func (p *Player) DoCliming() {
+	if !oak.IsDown(currentControls.Climb) {
+		p.SetState(p.AirState)
+	}
+	if oak.IsDown(currentControls.Up) {
+		p.Body.Delta.SetY(-ClimbSpeed)
+	} else if oak.IsDown(currentControls.Down) {
+		p.Body.Delta.SetY(ClimbSpeed)
+	} else {
+		p.Body.Delta.SetY(0)
+	}
 }
 
 func isJumpInput() bool {
@@ -325,10 +366,10 @@ func loadScene() {
 	render.Draw(player.Body.R)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
 
-	ground := entities.NewSolid(-10, 400, 500, 20,
+	ground := entities.NewSolid(10, 400, 500, 20,
 		render.NewColorBox(500, 20, color.RGBA{0, 0, 255, 255}),
 		nil, 0)
-	ground2 := entities.NewSolid(-40, 200, 20, 500,
+	ground2 := entities.NewSolid(40, 200, 20, 500,
 		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
 		nil, 1)
 	ground3 := entities.NewSolid(300, 200, 20, 500,
@@ -346,7 +387,8 @@ func loadScene() {
 
 	//Give player walljump for now
 	player.Mods.WallJump.Equipped = true
-
+	//same for climbing
+	player.Mods.Climb.Equipped = true
 }
 
 func main() {
