@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"image"
 	"image/color"
-	_ "image/png"
 	"os"
 	"time"
 
@@ -23,7 +22,6 @@ import (
 
 const Ground collision.Label = 1
 
-
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
 const WallJumpWidth float64 = 3
@@ -39,6 +37,18 @@ const (
 )
 const Gravity float64 = 0.35
 const CoyoteTime time.Duration = time.Millisecond * 7
+
+//JsonScreen is a type to unmarshal the json of
+//a file with screen (i.e. one screen worth of level) data into
+type JsonScreen struct {
+	Rects []JsonRect
+}
+//type JsonRect defines a struct to
+//unmarshal json into
+type JsonRect struct {
+	X,Y,W,H float64
+	Label string
+}
 
 //type CollisionType int8
 //test comment
@@ -267,13 +277,42 @@ func (object *PhysObject) DoCollision(updater func()) {
 
 }
 //screens are to be stored as json, problebly compressed in the final game
-func loadScreen() {
-	file, err := os.Open("level.png")
+func loadJsonScreen(filename string) {
+	file, err := os.Open("level.json")
 	if err != nil {
-		fmt.Print("error when opening screen file:")
+		fmt.Print("error when opening screen file: ")
 		panic(err)
 	}
+	fileInfo, err := file.Stat()
+	if err != nil {
+		fmt.Print("error when getting file info: ")
+		panic(err)
+	}
+	fileSize := fileInfo.Size()
 	reader := bufio.NewReader(file)
+	var rawJson []byte = make([]byte,int(fileSize))
+	_,err = reader.Read(rawJson)
+	if err != nil {
+		fmt.Print("error when reading file into byte array: ")
+		panic(err)
+	}
+	var screenData JsonScreen
+	err = json.Unmarshal(rawJson, &screenData)
+	if err != nil {
+		defer fmt.Println("json:",rawJson)
+		fmt.Print("error unmarshaling screen data: ")
+		panic(err)
+	}
+
+	for i , rectData := range screenData.Rects {
+		rect := entities.NewSolid(rectData.X, rectData.Y, rectData.W, rectData.H,
+			render.NewColorBox(int(rectData.W), int(rectData.H), color.RGBA{100, 100, 100, 255}),
+			nil, event.CID(i+10) )
+		//TODO: use actual label from json file
+		rect.UpdateLabel(Ground)
+		render.Draw(rect.R)
+	}
+	/*reader := bufio.NewReader(file)
 	conf,_, err := image.DecodeConfig(reader)
 	if err != nil {
 		fmt.Print("error when decoding screen file config:")
@@ -284,7 +323,7 @@ func loadScreen() {
 		Target:      netpbm.PNM, //this will allow adding more block types later
 		Exact:       false,
 		PBMMaxValue:1 ,
-	})*/
+	})
 	if err != nil {
 		fmt.Print("error when decoding screen file:")
 		panic(err)
@@ -306,11 +345,11 @@ func loadScreen() {
 				render.Draw(blockArr[j][i].R, 8+i*j)
 			}
 		}
-	}
+	}*/
 }
 
 func loadScene() {
-	go loadScreen()
+	loadJsonScreen("level.json")
 
 	player.Body = entities.NewMoving(100, 100, 16, 32,
 		render.NewColorBox(16, 32, color.RGBA{255, 0, 0, 255}),
