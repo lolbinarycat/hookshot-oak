@@ -312,40 +312,6 @@ func loadJsonScreen(filename string) {
 		rect.UpdateLabel(Ground)
 		render.Draw(rect.R)
 	}
-	/*reader := bufio.NewReader(file)
-	conf,_, err := image.DecodeConfig(reader)
-	if err != nil {
-		fmt.Print("error when decoding screen file config:")
-		panic(err)
-	}
-	//reader.Reset(file)
-	levelImage,_, _ := image.Decode(reader)/*&netpbm.DecodeOptions{
-		Target:      netpbm.PNM, //this will allow adding more block types later
-		Exact:       false,
-		PBMMaxValue:1 ,
-	})
-	if err != nil {
-		fmt.Print("error when decoding screen file:")
-		panic(err)
-	}
-	var blockArrLenY int = conf.Height
-	var blockArrLenX int = conf.Width 
-	const blockSize int = 4
-	blockArr := make([][]*entities.Solid, blockArrLenX)
-	for j := 0; j < blockArrLenX; j++ {
-		blockArr[j] = make([]*entities.Solid, blockArrLenY)
-		for i := 0; i < blockArrLenY; i++ {
-			if levelImage.At(j,i) == color.Black {
-				blockArr[j][i] = entities.NewSolid(
-					float64(i*blockSize), float64(j*blockSize),
-					float64(blockSize), float64(blockSize),
-					render.NewColorBox(10, 10,
-						color.RGBA{uint8(j), 0, uint8(i), 255}),
-					nil, event.CID(j*i+3))
-				render.Draw(blockArr[j][i].R, 8+i*j)
-			}
-		}
-	}*/
 }
 
 func loadScene() {
