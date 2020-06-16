@@ -47,7 +47,7 @@ type JsonScreen struct {
 //unmarshal json into
 type JsonRect struct {
 	X,Y,W,H float64
-	Label string
+	Label collision.Label //warning: label is hardcoded in json file
 }
 
 //type CollisionType int8
@@ -308,8 +308,8 @@ func loadJsonScreen(filename string) {
 		rect := entities.NewSolid(rectData.X, rectData.Y, rectData.W, rectData.H,
 			render.NewColorBox(int(rectData.W), int(rectData.H), color.RGBA{100, 100, 100, 255}),
 			nil, event.CID(i+10) )
-		//TODO: use actual label from json file
-		rect.UpdateLabel(Ground)
+		
+		rect.UpdateLabel(rectData.Label)
 		render.Draw(rect.R)
 	}
 }
