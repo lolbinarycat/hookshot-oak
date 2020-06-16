@@ -1,4 +1,3 @@
-//levels are to be stored as pbm images
 package main
 
 import (
@@ -267,7 +266,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 	}
 
 }
-
+//screens are to be stored as json, problebly compressed in the final game
 func loadScreen() {
 	file, err := os.Open("level.png")
 	if err != nil {
