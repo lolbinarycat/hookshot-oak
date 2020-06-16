@@ -152,7 +152,7 @@ func (p *Player) GroundState() {
 	//print("groundstate")
 	//hitType,_,_ := howIsHittingLabel(p.Body,Ground)
 	if player.PhysObject.ActiColls.GroundHit == true {
-		if oak.IsDown(currentControls.Jump) {
+		if isJumpInput() {
 			p.Jump()
 		} 
 
@@ -180,7 +180,7 @@ func (p *Player) CoyoteState() {
 	}
 	//inherit code from AirState
 	//p.AirState()
-	if oak.IsDown(currentControls.Jump) {
+	if isJumpInput() {
 		p.Jump()
 	}
 
@@ -352,6 +352,7 @@ func loadScene() {
 func main() {
 	oak.Add("platformer", func(string, interface{}) {
 		loadScene()
+		
 
 		player.Body.Bind(func(id int, nothing interface{}) int {
 
@@ -372,6 +373,7 @@ func main() {
 	}, func() (string, *scene.Result) {
 		return "platformer", nil
 	})
-
+	oak.SetAspectRatio(8/6)
 	oak.Init("platformer")
+	oak.ChangeWindow(800,600)
 }
