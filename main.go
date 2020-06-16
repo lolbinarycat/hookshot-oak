@@ -218,7 +218,7 @@ func (p *Player) WallJumpLaunchState() {
 }
 
 func isJumpInput() bool {
-	if k, d := oak.IsHeld(currentControls.Jump); k && (d <= time.Millisecond * 30) {
+	if k, d := oak.IsHeld(currentControls.Jump); k && (d <= time.Millisecond * 100) {
 		return true
 	} else {
 		return false
@@ -325,10 +325,10 @@ func loadScene() {
 	render.Draw(player.Body.R)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
 
-	ground := entities.NewSolid(0, 400, 500, 20,
+	ground := entities.NewSolid(-10, 400, 500, 20,
 		render.NewColorBox(500, 20, color.RGBA{0, 0, 255, 255}),
 		nil, 0)
-	ground2 := entities.NewSolid(0, 200, 20, 500,
+	ground2 := entities.NewSolid(-40, 200, 20, 500,
 		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
 		nil, 1)
 	ground3 := entities.NewSolid(300, 200, 20, 500,
@@ -353,17 +353,16 @@ func main() {
 	oak.Add("platformer", func(string, interface{}) {
 		loadScene()
 		
-
+		
 		player.Body.Bind(func(id int, nothing interface{}) int {
 
-		
 			if oak.IsDown(currentControls.Quit) {
 				if oak.IsDown(key.I) {
 					fmt.Println(player)
 				}
 				os.Exit(0)
 			}
-
+			//oak.SetScreen(0,0)
 			player.DoCollision(player.State)
 
 			return 0
@@ -374,6 +373,10 @@ func main() {
 		return "platformer", nil
 	})
 	oak.SetAspectRatio(8/6)
+	oak.SetFullScreen(true)
+	oak.SetViewportBounds(0,0, 800, 600)
 	oak.Init("platformer")
+
 	oak.ChangeWindow(800,600)
+
 }
