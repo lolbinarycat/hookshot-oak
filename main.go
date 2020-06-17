@@ -221,7 +221,7 @@ func (p *Player) WallSlideRightState() {
 		p.SetState(p.ClimbRightState)
 		return //return to stop airstate for overwriting our change
 	}
-	if p.ActiColls.LeftWallHit == false {
+	if p.ActiColls.RightWallHit == false {
 		p.SetState(p.AirState)
 		return
 	}
