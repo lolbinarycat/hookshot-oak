@@ -13,13 +13,13 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
-	"github.com/oakmound/oak/dlog"
 )
 
 const Ground collision.Label = 1
@@ -373,7 +373,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 
 //level data is to be stored as json, problebly compressed in the final game
 func loadJsonLevelData(filename string) {
-	dlog.Info("loading json level data from",filename)
+	dlog.Info("loading json level data from", filename)
 	//dlog.Warn("test")
 	file, err := os.Open(filename)
 	if err != nil {
@@ -448,18 +448,25 @@ func loadScene() {
 
 func cameraLoop(tick time.Ticker) {
 	camPosX := 0
-	//camPosY := 0
+	camPosY := 0
 	for {
 		<-tick.C
 
 		//oak.SetScreen(int(player.Body.X()),int(player.Body.Y()))
 		if int(player.Body.X()) < camPosX*WindowWidth {
-			oak.SetScreen(-WindowWidth, 0)
 			camPosX--
+			//oak.SetScreen(WindowWidth*camPosX, 0)
 		} else if int(player.Body.X()) > camPosX*WindowWidth+WindowWidth {
 			camPosX++
-			oak.SetScreen(WindowWidth*camPosX, 0)
+		} else if int(player.Body.Y()) > camPosY*WindowHeight+WindowHeight {
+			camPosY++
+		} else if int(player.Body.Y()) < camPosY*WindowHeight {
+			camPosY--
+		}else {
+			continue //if no camera position change occured, don't update the screen positon
 		}
+
+		oak.SetScreen(WindowWidth*camPosX, WindowHeight*camPosY)
 	}
 }
 
@@ -482,7 +489,7 @@ func main() {
 				}
 				os.Exit(0)
 			}
-			
+
 			player.DoCollision(player.State)
 
 			return 0
@@ -499,5 +506,5 @@ func main() {
 	//oak.SetViewportBounds(0,0, WindowWidth, WindowHeight)
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
-	
+
 }
