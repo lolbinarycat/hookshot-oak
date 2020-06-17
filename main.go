@@ -75,7 +75,8 @@ type ActiveCollisions struct {
 	LeftWallHit  bool
 	RightWallHit bool
 	CeilingHit   bool
-	HLabel,VLabel collision.Label
+	HLabel,VLabel collision.Label //these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
+	LastHitV, LastHitH collision.Space
 }
 
 type ControlConfig struct {
@@ -150,7 +151,6 @@ func (p *Player) AirState() { //start in air state
 	}
 
 	p.DoAirControls()
-
 }
 
 func (p *Player) GroundState() {
@@ -271,6 +271,8 @@ func (p *Player) ClimbRightState() {
 		return
 	}
 	p.DoCliming()
+	//if p.Body.Space.Above(p.ActiColls.LastHitH)
+	//p.Body.Delta.SetX(1)
 }
 
 func (p *Player) ClimbLeftState() {
@@ -278,12 +280,19 @@ func (p *Player) ClimbLeftState() {
 		p.WallJump(Right, oak.IsDown(currentControls.Right))
 		return
 	}
+	p.Body.Delta.SetX(-1)
 	p.DoCliming()
+
+	
 }
 
 //DoCliming is the function for shared procceses between
 //ClimbRightState and ClimbLeft state
 func (p *Player) DoCliming() {
+	//this is a hack, and should problebly be fixed
+	if int(p.TimeFromStateStart())%2 == 0 && p.ActiColls.LeftWallHit == false && p.ActiColls.RightWallHit == false {
+		p.SetState(p.AirState)
+	}
 	if !oak.IsDown(currentControls.Climb) {
 		p.SetState(p.AirState)
 	}
@@ -353,7 +362,8 @@ func (object *PhysObject) DoCollision(updater func()) {
 	object.ActiColls = ActiveCollisions{} //reset the struct to be all false
 
 	object.Body.ShiftX(object.Body.Delta.X())
-	if hit := collision.HitLabel(object.Body.Space, SolidLabels...); hit != nil {
+	hit := collision.HitLabel(object.Body.Space, SolidLabels...);
+	if  hit != nil {
 		if object.Body.Delta.X() > 0 { //Right Wall
 			object.ActiColls.RightWallHit = true
 			object.Body.SetX(hit.X() - object.Body.W)
