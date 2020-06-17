@@ -23,6 +23,12 @@ import (
 )
 
 const Ground collision.Label = 1
+const NoWallJump collision.Label = 2
+
+var SolidLabels []collision.Label= []collision.Label{
+	Ground,
+	NoWallJump,
+}
 
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
@@ -69,6 +75,7 @@ type ActiveCollisions struct {
 	LeftWallHit  bool
 	RightWallHit bool
 	CeilingHit   bool
+	HLabel,VLabel collision.Label
 }
 
 type ControlConfig struct {
@@ -131,7 +138,7 @@ func (p *Player) AirState() { //start in air state
 		p.SetState(p.GroundState)
 		return
 	} else {
-		if p.Mods.WallJump.Equipped {
+		if p.Mods.WallJump.Equipped && p.ActiColls.HLabel != NoWallJump{
 			if p.PhysObject.ActiColls.LeftWallHit {
 				p.SetState(p.WallSlideLeftState)
 			} else if p.PhysObject.ActiColls.RightWallHit {
@@ -268,7 +275,7 @@ func (p *Player) ClimbRightState() {
 
 func (p *Player) ClimbLeftState() {
 	if isJumpInput() {
-		p.WallJump(Right, true)
+		p.WallJump(Right, oak.IsDown(currentControls.Right))
 		return
 	}
 	p.DoCliming()
@@ -346,7 +353,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 	object.ActiColls = ActiveCollisions{} //reset the struct to be all false
 
 	object.Body.ShiftX(object.Body.Delta.X())
-	if hit := collision.HitLabel(object.Body.Space, Ground); hit != nil {
+	if hit := collision.HitLabel(object.Body.Space, SolidLabels...); hit != nil {
 		if object.Body.Delta.X() > 0 { //Right Wall
 			object.ActiColls.RightWallHit = true
 			object.Body.SetX(hit.X() - object.Body.W)
@@ -354,10 +361,12 @@ func (object *PhysObject) DoCollision(updater func()) {
 			object.ActiColls.LeftWallHit = true
 			object.Body.SetX(hit.X() + hit.W())
 		}
+		object.Body.Delta.SetX(0)
+		object.ActiColls.HLabel = hit.Label
 	}
 
 	object.Body.ShiftY(object.Body.Delta.Y())
-	if hit := collision.HitLabel(object.Body.Space, Ground); hit != nil {
+	if hit := collision.HitLabel(object.Body.Space, SolidLabels...); hit != nil {
 		if object.Body.Delta.Y() > 0 { //Ground
 			object.ActiColls.GroundHit = true
 			object.Body.SetY(hit.Y() - object.Body.H)
@@ -367,6 +376,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 			object.Body.SetY(oldY)
 		}
 		object.Body.Delta.SetY(0)
+		object.ActiColls.VLabel = hit.Label
 	}
 
 }
@@ -434,7 +444,7 @@ func loadScene() {
 
 	ground.UpdateLabel(Ground)
 	ground2.UpdateLabel(Ground)
-	ground3.UpdateLabel(Ground)
+	ground3.UpdateLabel(NoWallJump)
 
 	render.Draw(ground.R)
 	render.Draw(ground2.R, 1)
@@ -462,10 +472,9 @@ func cameraLoop(tick time.Ticker) {
 			camPosY++
 		} else if int(player.Body.Y()) < camPosY*WindowHeight {
 			camPosY--
-		}else {
+		} else {
 			continue //if no camera position change occured, don't update the screen positon
 		}
-
 		oak.SetScreen(WindowWidth*camPosX, WindowHeight*camPosY)
 	}
 }
