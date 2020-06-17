@@ -70,12 +70,9 @@ var currentControls ControlConfig = ControlConfig{
 	Jump:  key.Z,
 	Climb: key.LeftShift,
 	Quit:  key.Q,
-	//Jump2:       key.X,
-	//	UpwardForce: key.A,
 }
 
-//type State struct {
-//}
+
 
 type Direction uint8
 
@@ -116,7 +113,6 @@ type PlayerModule struct {
 }
 
 func (p *Player) AirState() { //start in air state
-	//print("a")
 
 	if player.PhysObject.ActiColls.GroundHit {
 		p.SetState(p.GroundState)
@@ -150,20 +146,14 @@ func (p *Player) AirState() { //start in air state
 		}
 	}
 
-	//p.Body.ShiftY(p.Body.Delta.Y())
-
-	//return p.State
-	//panic("e")
 }
 
 func (p *Player) GroundState() {
-	//fallSpeed := .1
-	//print("groundstate")
-	//hitType,_,_ := howIsHittingLabel(p.Body,Ground)
+
 	if player.PhysObject.ActiColls.GroundHit == true {
 		if isJumpInput() {
 			p.Jump()
-		} 
+		}
 
 	} else {
 		p.SetState(player.CoyoteState)
@@ -175,10 +165,10 @@ func (p *Player) GroundState() {
 	} else if oak.IsDown(currentControls.Right) {
 		player.Body.Delta.SetX(player.Body.Speed.X())
 	} else {
-		player.Body.Delta.SetX(0)//player.Body.Delta.X()/2)
+		player.Body.Delta.SetX(0)
+		//player.Body.Delta.X()/2)
 	}
-	//p.Body.Delta.ShiftY(0.001)
-	//howIsHittingLabel(p.Body, Ground)
+
 }
 
 //CoyoteState implements "coyote time" a window of time after
@@ -380,7 +370,7 @@ func loadJsonScreen(filename string) {
 		rect := entities.NewSolid(rectData.X, rectData.Y, rectData.W, rectData.H,
 			render.NewColorBox(int(rectData.W), int(rectData.H), color.RGBA{100, 100, 100, 255}),
 			nil, event.CID(i+10) )
-		
+
 		rect.UpdateLabel(rectData.Label)
 		render.Draw(rect.R)
 	}
@@ -425,8 +415,7 @@ func loadScene() {
 func main() {
 	oak.Add("platformer", func(string, interface{}) {
 		loadScene()
-		
-		
+
 		player.Body.Bind(func(id int, nothing interface{}) int {
 
 			if oak.IsDown(currentControls.Quit) {
