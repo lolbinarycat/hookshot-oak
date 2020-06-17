@@ -77,6 +77,13 @@ var currentControls ControlConfig = ControlConfig{
 //type State struct {
 //}
 
+type Direction uint8
+
+const (
+	Left Direction = iota
+	Right
+)
+
 var player Player
 
 //Player is a type representing the player
@@ -188,15 +195,18 @@ func (p *Player) CoyoteState() {
 
 }
 
+
 func (p *Player) WallSlideLeftState() {
 	if isJumpInput() {
-		p.Body.Delta.SetY(-WallJumpHeight)
-		p.Body.Delta.SetX(WallJumpWidth)
-		p.SetState(p.WallJumpLaunchState)
+		p.WallJump(Right,true)
 		return
 	}
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
 		p.SetState(p.ClimbLeftState)
+		return
+	}
+	if p.ActiColls.LeftWallHit == false {
+		p.SetState(p.AirState)
 		return
 	}
 	p.AirState()
@@ -204,17 +214,20 @@ func (p *Player) WallSlideLeftState() {
 
 func (p *Player) WallSlideRightState() {
 	if isJumpInput() {
-		p.Body.Delta.SetY(-WallJumpHeight)
-		p.Body.Delta.SetX(-WallJumpWidth)
-		p.SetState(p.WallJumpLaunchState)
+		p.WallJump(Left,true)
 		return
 	}
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
 		p.SetState(p.ClimbRightState)
 		return //return to stop airstate for overwriting our change
 	}
+	if p.ActiColls.LeftWallHit == false {
+		p.SetState(p.AirState)
+		return
+	}
 	p.AirState()
 }
+
 
 //func WallJumpLaunchState is entered after you walljump,
 //temporaraly disabling your controls. This should prevent one sided
@@ -227,18 +240,36 @@ func (p *Player) WallJumpLaunchState() {
 	p.DoGravity()
 }
 
+func (p *Player) WallJump(dir Direction,EnterLaunch bool) {
+	p.Body.Delta.SetY(-WallJumpHeight)
+
+	if dir == Left {
+		p.Body.Delta.SetX(-WallJumpWidth)
+	} else if dir == Right {
+		p.Body.Delta.SetX(WallJumpWidth)
+	} else {
+		panic("invalid direction to WallJump functon")
+	}
+
+	if EnterLaunch {
+		p.SetState(p.WallJumpLaunchState)
+	} else {
+		p.SetState(p.AirState)
+	}
+}
+
 func (p *Player) ClimbRightState() {
 	if isJumpInput() {
-		p.SetState(p.WallSlideRightState)
-		p.WallSlideRightState()
+		p.WallJump(Left,oak.IsDown(currentControls.Left))
+		return
 	}
 	p.DoCliming()
 }
 
 func (p *Player) ClimbLeftState() {
 	if isJumpInput() {
-		p.SetState(p.WallSlideLeftState)
-		p.WallSlideRightState()
+		p.WallJump(Right,true)
+		return
 	}
 	p.DoCliming()
 }
@@ -414,11 +445,12 @@ func main() {
 	}, func() (string, *scene.Result) {
 		return "platformer", nil
 	})
-	oak.SetAspectRatio(8/6)
-	oak.SetFullScreen(true)
+	//oak.SetAspectRatio(8/6)
+	/*err := oak.SetBorderless(true)
+	if err != nil {
+		panic(err)
+	}*/
 	oak.SetViewportBounds(0,0, 800, 600)
 	oak.Init("platformer")
-
-	oak.ChangeWindow(800,600)
 
 }
