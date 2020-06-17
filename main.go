@@ -19,6 +19,7 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/oak/dlog"
 )
 
 const Ground collision.Label = 1
@@ -28,13 +29,14 @@ const WallJumpHeight float64 = 6
 const WallJumpWidth float64 = 3
 const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
 const (
-	AirAccel float64 = 0.4
+	AirAccel    float64 = 0.4
 	AirMaxSpeed float64 = 3
 )
 const ClimbSpeed float64 = 3
+
 //Window constants
 const (
-	WindowWidth int = 800
+	WindowWidth  int = 800
 	WindowHeight int = 600
 )
 const Gravity float64 = 0.35
@@ -54,11 +56,12 @@ const JumpHeightDecTime time.Duration = time.Millisecond * 200
 type JsonScreen struct {
 	Rects []JsonRect
 }
+
 //type JsonRect defines a struct to
 //unmarshal json into
 type JsonRect struct {
-	X,Y,W,H float64
-	Label collision.Label //warning: label is hardcoded in json file
+	X, Y, W, H float64
+	Label      collision.Label //warning: label is hardcoded in json file
 }
 
 type ActiveCollisions struct {
@@ -75,14 +78,12 @@ type ControlConfig struct {
 var currentControls ControlConfig = ControlConfig{
 	Left:  key.LeftArrow,
 	Right: key.RightArrow,
-	Up: key.UpArrow,
-	Down: key.DownArrow,
+	Up:    key.UpArrow,
+	Down:  key.DownArrow,
 	Jump:  key.Z,
 	Climb: key.LeftShift,
 	Quit:  key.Q,
 }
-
-
 
 type Direction uint8
 
@@ -100,9 +101,9 @@ type Player struct {
 	//Body           *entities.Moving
 	//ActiColls      ActiveCollisions
 	PhysObject
-	State          PlayerState//func()
+	State          PlayerState //func()
 	StateStartTime time.Time
-	Mods PlayerModuleList
+	Mods           PlayerModuleList
 }
 
 type PlayerState func()
@@ -114,13 +115,15 @@ type PhysObject struct {
 
 type PlayerModuleList struct {
 	WallJump PlayerModule
-	Climb PlayerModule
+	Climb    PlayerModule
 }
 
 type PlayerModule struct {
 	Equipped bool
 	Obtained bool
 }
+
+//var log dlog.Logger = dlog.NewLogger()
 
 func (p *Player) AirState() { //start in air state
 
@@ -153,7 +156,6 @@ func (p *Player) GroundState() {
 	} else {
 		p.SetState(player.CoyoteState)
 	}
-
 
 	if oak.IsDown(currentControls.Left) {
 		player.Body.Delta.SetX(-player.Body.Speed.X())
@@ -195,10 +197,9 @@ func (p *Player) CoyoteState() {
 
 }
 
-
 func (p *Player) WallSlideLeftState() {
 	if isJumpInput() {
-		p.WallJump(Right,true)
+		p.WallJump(Right, true)
 		return
 	}
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
@@ -214,7 +215,7 @@ func (p *Player) WallSlideLeftState() {
 
 func (p *Player) WallSlideRightState() {
 	if isJumpInput() {
-		p.WallJump(Left,true)
+		p.WallJump(Left, true)
 		return
 	}
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
@@ -228,7 +229,6 @@ func (p *Player) WallSlideRightState() {
 	p.AirState()
 }
 
-
 //func WallJumpLaunchState is entered after you walljump,
 //temporaraly disabling your controls. This should prevent one sided
 //walljumps
@@ -240,7 +240,7 @@ func (p *Player) WallJumpLaunchState() {
 	p.DoGravity()
 }
 
-func (p *Player) WallJump(dir Direction,EnterLaunch bool) {
+func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
 	p.Body.Delta.SetY(-WallJumpHeight)
 
 	if dir == Left {
@@ -260,7 +260,7 @@ func (p *Player) WallJump(dir Direction,EnterLaunch bool) {
 
 func (p *Player) ClimbRightState() {
 	if isJumpInput() {
-		p.WallJump(Left,oak.IsDown(currentControls.Left))
+		p.WallJump(Left, oak.IsDown(currentControls.Left))
 		return
 	}
 	p.DoCliming()
@@ -268,7 +268,7 @@ func (p *Player) ClimbRightState() {
 
 func (p *Player) ClimbLeftState() {
 	if isJumpInput() {
-		p.WallJump(Right,true)
+		p.WallJump(Right, true)
 		return
 	}
 	p.DoCliming()
@@ -309,17 +309,17 @@ func (p *Player) SetState(state PlayerState) {
 }
 
 func (p *Player) DoAirControls() {
-	if oak.IsDown(currentControls.Left)  && p.Body.Delta.X() > -AirMaxSpeed {
+	if oak.IsDown(currentControls.Left) && p.Body.Delta.X() > -AirMaxSpeed {
 		// check to prevent inconsistant top speeds
 		//(e.g. if you are half a AirAccel away from AirMaxSpeed)
-		if p.Body.Delta.X() - AirAccel > -AirMaxSpeed {
+		if p.Body.Delta.X()-AirAccel > -AirMaxSpeed {
 			player.Body.Delta.ShiftX(-AirAccel)
 		} else {
 			p.Body.Delta.SetX(-AirMaxSpeed)
 		}
 	} else if oak.IsDown(currentControls.Right) && p.Body.Delta.X() < AirMaxSpeed {
 		//second verse, same as the first
-		if p.Body.Delta.X() + AirAccel < AirMaxSpeed {
+		if p.Body.Delta.X()+AirAccel < AirMaxSpeed {
 			player.Body.Delta.ShiftX(AirAccel)
 		} else {
 			p.Body.Delta.SetX(AirMaxSpeed)
@@ -370,9 +370,12 @@ func (object *PhysObject) DoCollision(updater func()) {
 	}
 
 }
+
 //level data is to be stored as json, problebly compressed in the final game
 func loadJsonLevelData(filename string) {
-	file, err := os.Open("level.json")
+	dlog.Info("loading json level data from",filename)
+	//dlog.Warn("test")
+	file, err := os.Open(filename)
 	if err != nil {
 		fmt.Print("error when opening screen file: ")
 		panic(err)
@@ -384,8 +387,8 @@ func loadJsonLevelData(filename string) {
 	}
 	fileSize := fileInfo.Size()
 	reader := bufio.NewReader(file)
-	var rawJson []byte = make([]byte,int(fileSize))
-	_,err = reader.Read(rawJson)
+	var rawJson []byte = make([]byte, int(fileSize))
+	_, err = reader.Read(rawJson)
 	if err != nil {
 		fmt.Print("error when reading file into byte array: ")
 		panic(err)
@@ -393,15 +396,15 @@ func loadJsonLevelData(filename string) {
 	var screenData JsonScreen
 	err = json.Unmarshal(rawJson, &screenData)
 	if err != nil {
-		defer fmt.Println("json:",rawJson)
+		defer fmt.Println("json:", rawJson)
 		fmt.Print("error unmarshaling screen data: ")
 		panic(err)
 	}
 
-	for i , rectData := range screenData.Rects {
+	for i, rectData := range screenData.Rects {
 		rect := entities.NewSolid(rectData.X, rectData.Y, rectData.W, rectData.H,
 			render.NewColorBox(int(rectData.W), int(rectData.H), color.RGBA{100, 100, 100, 255}),
-			nil, event.CID(i+10) )
+			nil, event.CID(i+10))
 
 		rect.UpdateLabel(rectData.Label)
 		render.Draw(rect.R)
@@ -429,7 +432,6 @@ func loadScene() {
 		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
 		nil, 2)
 
-
 	ground.UpdateLabel(Ground)
 	ground2.UpdateLabel(Ground)
 	ground3.UpdateLabel(Ground)
@@ -444,23 +446,43 @@ func loadScene() {
 	player.Mods.Climb.Equipped = true
 }
 
+func cameraLoop(tick time.Ticker) {
+	camPosX := 0
+	//camPosY := 0
+	for {
+		<-tick.C
+
+		//oak.SetScreen(int(player.Body.X()),int(player.Body.Y()))
+		if int(player.Body.X()) < camPosX*WindowWidth {
+			oak.SetScreen(-WindowWidth, 0)
+			camPosX--
+		} else if int(player.Body.X()) > camPosX*WindowWidth+WindowWidth {
+			camPosX++
+			oak.SetScreen(WindowWidth*camPosX, 0)
+		}
+	}
+}
+
 func main() {
+	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
+		dlog.SetDebugLevel(dlog.INFO)
 		loadScene()
-
+		oak.ScreenWidth = 800
+		oak.ScreenHeight = 600
+		camTicker := time.NewTicker(time.Millisecond * 100)
+		go cameraLoop(*camTicker)
+		//fmt.Println("screenWidth",oak.ScreenWidth)
+		//fmt.Println("screenHeight",oak.ScreenHeight)
 		player.Body.Bind(func(id int, nothing interface{}) int {
-
+			//xdlog.SetDebugLevel(dlog.VERBOSE)
 			if oak.IsDown(currentControls.Quit) {
 				if oak.IsDown(key.I) {
 					fmt.Println(player)
 				}
 				os.Exit(0)
 			}
-			//oak.SetScreen(0,0)
-			if player.Body.X() < 0 {
-				oak.SetScreen(-WindowWidth,0)
-			}
-
+			
 			player.DoCollision(player.State)
 
 			return 0
@@ -475,6 +497,7 @@ func main() {
 		panic(err)
 	}*/
 	//oak.SetViewportBounds(0,0, WindowWidth, WindowHeight)
+	//dlog.SetLogLevel()
 	oak.Init("platformer")
-
+	
 }
