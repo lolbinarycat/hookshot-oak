@@ -370,8 +370,8 @@ func (object *PhysObject) DoCollision(updater func()) {
 	}
 
 }
-//screens are to be stored as json, problebly compressed in the final game
-func loadJsonScreen(filename string) {
+//level data is to be stored as json, problebly compressed in the final game
+func loadJsonLevelData(filename string) {
 	file, err := os.Open("level.json")
 	if err != nil {
 		fmt.Print("error when opening screen file: ")
@@ -409,7 +409,7 @@ func loadJsonScreen(filename string) {
 }
 
 func loadScene() {
-	loadJsonScreen("level.json")
+	loadJsonLevelData("level.json")
 
 	player.Body = entities.NewMoving(100, 100, 16, 32,
 		render.NewColorBox(16, 32, color.RGBA{255, 0, 0, 255}),
@@ -457,6 +457,10 @@ func main() {
 				os.Exit(0)
 			}
 			//oak.SetScreen(0,0)
+			if player.Body.X() < 0 {
+				oak.SetScreen(-WindowWidth,0)
+			}
+
 			player.DoCollision(player.State)
 
 			return 0
@@ -466,12 +470,11 @@ func main() {
 	}, func() (string, *scene.Result) {
 		return "platformer", nil
 	})
-	//oak.SetAspectRatio(8/6)
 	/*err := oak.SetBorderless(true)
 	if err != nil {
 		panic(err)
 	}*/
-	oak.SetViewportBounds(0,0, 800, 600)
+	//oak.SetViewportBounds(0,0, WindowWidth, WindowHeight)
 	oak.Init("platformer")
 
 }
