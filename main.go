@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	//"math"
 	"os"
 	"time"
 
@@ -37,7 +38,16 @@ const (
 	WindowHeight int = 600
 )
 const Gravity float64 = 0.35
+
+//CoyoteTime is how long CoyoteState lasts
 const CoyoteTime time.Duration = time.Millisecond * 7
+
+//JumpInputTime describes the length of time after the jump button is pressed in which it will count as the player jumping.
+//Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
+const JumpInputTime time.Duration = time.Millisecond * 90
+
+//JumpHeightDecTime is how long JumpHeightDecState lasts
+const JumpHeightDecTime time.Duration = time.Millisecond * 200
 
 //JsonScreen is a type to unmarshal the json of
 //a file with screen (i.e. one screen worth of level) data into
@@ -129,22 +139,7 @@ func (p *Player) AirState() { //start in air state
 		p.DoGravity()
 	}
 
-	if oak.IsDown(currentControls.Left)  && p.Body.Delta.X() > -AirMaxSpeed {
-		// check to prevent inconsistant top speeds
-		//(e.g. if you are half a AirAccel away from AirMaxSpeed)
-		if p.Body.Delta.X() - AirAccel > -AirMaxSpeed {
-			player.Body.Delta.ShiftX(-AirAccel)
-		} else {
-			p.Body.Delta.SetX(-AirMaxSpeed)
-		}
-	} else if oak.IsDown(currentControls.Right) && p.Body.Delta.X() < AirMaxSpeed {
-		//second verse, same as the first
-		if p.Body.Delta.X() + AirAccel < AirMaxSpeed {
-			player.Body.Delta.ShiftX(AirAccel)
-		} else {
-			p.Body.Delta.SetX(AirMaxSpeed)
-		}
-	}
+	p.DoAirControls()
 
 }
 
@@ -169,6 +164,21 @@ func (p *Player) GroundState() {
 		//player.Body.Delta.X()/2)
 	}
 
+}
+
+//the function JumpHeightDecState is the state that decides the height of the players jump.
+//it does this by decreasing the gravity temporaraly when jump is held.
+func (p *Player) JumpHeightDecState() {
+	if p.TimeFromStateStart() > JumpHeightDecTime {
+		p.SetState(p.AirState)
+		return
+	}
+	if oak.IsDown(currentControls.Jump) {
+		//p.DoCustomGravity(Gravity/5)
+	} else {
+		p.DoGravity()
+	}
+	p.DoAirControls()
 }
 
 //CoyoteState implements "coyote time" a window of time after
@@ -280,7 +290,7 @@ func (p *Player) DoCliming() {
 }
 
 func isJumpInput() bool {
-	if k, d := oak.IsHeld(currentControls.Jump); k && (d <= time.Millisecond * 100) {
+	if k, d := oak.IsHeld(currentControls.Jump); k && (d <= JumpInputTime) {
 		return true
 	} else {
 		return false
@@ -290,12 +300,31 @@ func isJumpInput() bool {
 func (p *Player) Jump() {
 	p.Body.Delta.ShiftY(-p.Body.Speed.Y())
 	p.Body.ShiftY(p.Body.Delta.Y())
-	player.SetState(p.AirState)
+	player.SetState(p.JumpHeightDecState)
 }
 
 func (p *Player) SetState(state PlayerState) {
 	p.StateStartTime = time.Now()
 	p.State = state
+}
+
+func (p *Player) DoAirControls() {
+	if oak.IsDown(currentControls.Left)  && p.Body.Delta.X() > -AirMaxSpeed {
+		// check to prevent inconsistant top speeds
+		//(e.g. if you are half a AirAccel away from AirMaxSpeed)
+		if p.Body.Delta.X() - AirAccel > -AirMaxSpeed {
+			player.Body.Delta.ShiftX(-AirAccel)
+		} else {
+			p.Body.Delta.SetX(-AirMaxSpeed)
+		}
+	} else if oak.IsDown(currentControls.Right) && p.Body.Delta.X() < AirMaxSpeed {
+		//second verse, same as the first
+		if p.Body.Delta.X() + AirAccel < AirMaxSpeed {
+			player.Body.Delta.ShiftX(AirAccel)
+		} else {
+			p.Body.Delta.SetX(AirMaxSpeed)
+		}
+	}
 }
 
 //TimeFromStateStart gets how long it has been since the last state transition
@@ -304,8 +333,11 @@ func (p *Player) TimeFromStateStart() time.Duration {
 }
 
 func (o *PhysObject) DoGravity() {
-
 	o.Body.Delta.ShiftY(Gravity)
+}
+
+func (o *PhysObject) DoCustomGravity(grav float64) {
+	o.Body.Delta.ShiftY(grav)
 }
 
 func (object *PhysObject) DoCollision(updater func()) {
