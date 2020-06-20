@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+
 	//"math"
 	"os"
 	"time"
 
 	//"compress/flate"
+	//"gopkg.in/yaml.v2"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
@@ -22,13 +24,23 @@ import (
 	"github.com/oakmound/oak/scene"
 )
 
-const Ground collision.Label = 1
-const NoWallJump collision.Label = 2
+const (
+	Ground collision.Label = iota
+	NoWallJump
+	Death
+	Checkpoint
+)
 
 var SolidLabels []collision.Label= []collision.Label{
 	Ground,
 	NoWallJump,
 }
+
+//color constants
+var (
+	Gray color.RGBA = color.RGBA{100, 100, 100, 255}
+	DullRed color.RGBA = color.RGBA{100,10,10,255}
+)
 
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
@@ -100,6 +112,11 @@ const (
 	Right
 )
 
+type Pos struct {
+	X float64
+	Y float64
+}
+
 var player Player
 
 //Player is a type representing the player
@@ -112,6 +129,7 @@ type Player struct {
 	State          PlayerState //func()
 	StateStartTime time.Time
 	Mods           PlayerModuleList
+	RespawnPos Pos
 }
 
 type PlayerState func()
@@ -131,6 +149,8 @@ type PlayerModule struct {
 	Obtained bool
 }
 
+//this is the default level for debugLevel, value will be set in loadYamlConfigData()
+var debugLevel dlog.Level = dlog.WARN
 //var log dlog.Logger = dlog.NewLogger()
 
 func (p *Player) AirState() { //start in air state
@@ -282,8 +302,6 @@ func (p *Player) ClimbLeftState() {
 	}
 	p.Body.Delta.SetX(-1)
 	p.DoCliming()
-
-	
 }
 
 //DoCliming is the function for shared procceses between
@@ -312,6 +330,7 @@ func isJumpInput() bool {
 		return false
 	}
 }
+
 
 func (p *Player) Jump() {
 	p.Body.Delta.ShiftY(-p.Body.Speed.Y())
@@ -346,6 +365,16 @@ func (p *Player) DoAirControls() {
 //TimeFromStateStart gets how long it has been since the last state transition
 func (p *Player) TimeFromStateStart() time.Duration {
 	return time.Now().Sub(p.StateStartTime)
+}
+
+func (p *Player) Die() {
+	//TODO: death animation
+	p.Respawn()
+}
+
+func (p *Player) Respawn() {
+	p.Body.Delta.SetPos(0,0)
+	p.Body.SetPos(player.RespawnPos.X,player.RespawnPos.Y)
 }
 
 func (o *PhysObject) DoGravity() {
@@ -390,10 +419,57 @@ func (object *PhysObject) DoCollision(updater func()) {
 	}
 
 }
+func openFileAsBytes(filename string) ([]byte,error) {
+	dlog.Info("opening file",filename)
+	file, err := os.Open(filename)
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	fileSize := fileInfo.Size()
+
+	reader := bufio.NewReader(file)
+	var byteArr []byte = make([]byte, int(fileSize))
+	_, err = reader.Read(byteArr)
+	if err != nil {
+		return byteArr, err
+	}
+
+	return byteArr, nil
+}
+
+//TODO: complete this function
+func loadYamlConfigData(filename string) {
+	dlog.Info("loading yaml config data from",filename)
+
+	rawYaml, err := openFileAsBytes(filename)
+	dlog.ErrorCheck(err)
+	if err != nil {
+		return
+	}
+	dlog.Verb(rawYaml)
+
+	dlog.Error("function incomplete")
+
+	/*fileInfo, err := file.Stat()
+	dlog.ErrorCheck(err)
+
+	if err != nil {
+		dlog.Error("unable to get yaml config, using defaults")
+		return
+	}
+
+	fileSize := fileInfo.Size()
+	reader*/
+}
 
 //level data is to be stored as json, problebly compressed in the final game
 func loadJsonLevelData(filename string) {
-	dlog.Info("loading json level data from", filename)
+	dlog.Info("loading json level data frxom", filename)
 	//dlog.Warn("test")
 	file, err := os.Open(filename)
 	if err != nil {
@@ -438,27 +514,33 @@ func loadScene() {
 		render.NewColorBox(16, 32, color.RGBA{255, 0, 0, 255}),
 		nil, 0, 0)
 	player.State = player.AirState
+	player.RespawnPos = Pos{X : player.Body.X(),Y : player.Body.Y()}
 
 	render.Draw(player.Body.R)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
 
 	ground := entities.NewSolid(10, 400, 500, 20,
-		render.NewColorBox(500, 20, color.RGBA{0, 0, 255, 255}),
+		render.NewColorBox(500, 20, Gray),
 		nil, 0)
 	ground2 := entities.NewSolid(40, 200, 20, 500,
-		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
+		render.NewColorBox(20, 500, Gray),
 		nil, 1)
 	ground3 := entities.NewSolid(300, 200, 20, 500,
-		render.NewColorBox(20, 500, color.RGBA{0, 255, 255, 255}),
+		render.NewColorBox(20, 500, DullRed),
 		nil, 2)
+	checkpoint := entities.NewSolid(200,350, 10,10,
+		render.NewColorBox(10,10,color.RGBA{0,0,255,255}),
+		nil,3)
 
 	ground.UpdateLabel(Ground)
 	ground2.UpdateLabel(Ground)
-	ground3.UpdateLabel(NoWallJump)
+	ground3.UpdateLabel(Death)
+	checkpoint.UpdateLabel(Checkpoint)
 
 	render.Draw(ground.R)
 	render.Draw(ground2.R, 1)
 	render.Draw(ground3.R, 1)
+	render.Draw(checkpoint.R, 1)
 
 	//Give player walljump for now
 	player.Mods.WallJump.Equipped = true
@@ -492,7 +574,7 @@ func cameraLoop(tick time.Ticker) {
 func main() {
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
-		dlog.SetDebugLevel(dlog.INFO)
+		dlog.SetDebugLevel(debugLevel)
 		loadScene()
 		oak.ScreenWidth = 800
 		oak.ScreenHeight = 600
@@ -500,6 +582,7 @@ func main() {
 		go cameraLoop(*camTicker)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
 		//fmt.Println("screenHeight",oak.ScreenHeight)
+
 		player.Body.Bind(func(id int, nothing interface{}) int {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
 			if oak.IsDown(currentControls.Quit) {
@@ -507,6 +590,12 @@ func main() {
 					fmt.Println(player)
 				}
 				os.Exit(0)
+			}
+			if player.Body.HitLabel(Checkpoint) != nil {
+				player.RespawnPos = Pos{X : player.Body.X(),Y : player.Body.Y()}
+			}
+			if player.Body.HitLabel(Death) != nil {
+				player.Die()
 			}
 
 			player.DoCollision(player.State)
