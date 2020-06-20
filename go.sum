@@ -22,9 +22,11 @@ github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGw
 github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gopherjs/gopherwasm v0.1.1/go.mod h1:kx4n9a+MzHH0BJJhvlsQ65hqLFXDO/m256AsaDPQ+/4=
 github.com/hajimehoshi/go-mp3 v0.1.1/go.mod h1:4i+c5pDNKDrxl1iu9iG90/+fhP37lio6gNhjCx9WBJw=
+github.com/hajimehoshi/go-mp3 v0.2.1/go.mod h1:Rr+2P46iH6PwTPVgSsEwBkon0CK5DxCAeX/Rp65DCTE=
 github.com/hajimehoshi/go-mp3 v0.3.0 h1:fTM5DXjp/DL2G74HHAs/aBGiS9Tg7wnp+jkU38bHy4g=
 github.com/hajimehoshi/go-mp3 v0.3.0/go.mod h1:qMJj/CSDxx6CGHiZeCgbiq2DSUkbK0UbtXShQcnfyMM=
 github.com/hajimehoshi/oto v0.1.1/go.mod h1:hUiLWeBQnbDu4pZsAhOnGqMI1ZGibS6e2qhQdfpwz04=
+github.com/hajimehoshi/oto v0.3.4/go.mod h1:PgjqsBJff0efqL2nlMJidJgVJywLn6M4y8PI4TfeWfA=
 github.com/hajimehoshi/oto v0.6.1/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2hrh6raOI=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
@@ -35,9 +37,13 @@ github.com/oakmound/libudev v0.2.1 h1:gaXuw7Pbt3RSRxbUakAjl0dSW6Wo3TZWpwS5aMq8+E
 github.com/oakmound/libudev v0.2.1/go.mod h1:zYF5CkHY+UP6lzWbPR+XoVAscl/s+OncWA//qWjMLUs=
 github.com/oakmound/oak v1.5.2-0.20191119030332-90a3e010b5d4 h1:nofT8FDjlHsQbryVCnaiNdcj/DiIg0YsuJ2PLYItP9o=
 github.com/oakmound/oak v1.5.2-0.20191119030332-90a3e010b5d4/go.mod h1:bGzUAxkZa9jFLn5VtwrMkjHi0C63YyBLqW8LMgiHmQA=
+github.com/oakmound/oak/v2 v2.3.4-0.20200616000027-dadf989955e9 h1:CirxrHwM0tdidUWtjEeIudCOuB25yXr00tULB+ur6UU=
+github.com/oakmound/oak/v2 v2.3.4-0.20200616000027-dadf989955e9/go.mod h1:npDkRjZ7b/M4ZT19O49kHfa+OI+IOFuBQqBf7+6KjNg=
 github.com/oakmound/shiny v0.4.1-0.20191119013337-fdd972eb9250/go.mod h1:cJDeJQ/6Ovs2IiM4xTXjIC8zGJnECKvj8BOpTJ4qrhI=
 github.com/oakmound/shiny v0.4.2-0.20191207185806-0c20eb569c82 h1:meySgQvfPosDCuO0uqEXrCC0Gc4lvMM++XM/59CB0cE=
 github.com/oakmound/shiny v0.4.2-0.20191207185806-0c20eb569c82/go.mod h1:fEGagtAluRRrVkMQyzyL+G3j+TdsyOjrIajWunGmy3M=
+github.com/oakmound/shiny v0.4.2-beta h1:EDRP9/mEa3ndLX4aXCfjj9b8afDgx081mO0N+YYzuvw=
+github.com/oakmound/shiny v0.4.2-beta/go.mod h1:fEGagtAluRRrVkMQyzyL+G3j+TdsyOjrIajWunGmy3M=
 github.com/oakmound/w32 v2.0.0+incompatible/go.mod h1:lzloWlclSXIU4cDr67WF8qjFFDO8gHHBIk4Qqe90enQ=
 github.com/oakmound/w32 v2.1.0+incompatible h1:vIkC6eJVOaAnwTTOyiVCGh24GoryPRmcvWq3cekkG2U=
 github.com/oakmound/w32 v2.1.0+incompatible/go.mod h1:lzloWlclSXIU4cDr67WF8qjFFDO8gHHBIk4Qqe90enQ=

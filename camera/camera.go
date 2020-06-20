@@ -3,8 +3,8 @@ package camera
 import (
 	"time"
 
-	"github.com/oakmound/oak"
-	"github.com/oakmound/oak/entities"
+	"github.com/oakmound/oak/v2"
+	"github.com/oakmound/oak/v2/entities"
 )
 
 const (

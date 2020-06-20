@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/oakmound/oak"
+	oak "github.com/oakmound/oak/v2"
 )
 
 
@@ -25,6 +25,14 @@ func (p *Player) AirState() { //start in air state
 	}
 
 	p.DoAirControls()
+}
+
+func (p *Player) RespawnFallState() {
+	if player.PhysObject.ActiColls.GroundHit {
+		p.SetState(p.GroundState)
+		return
+	}
+	p.DoGravity()
 }
 
 func (p *Player) GroundState() {
@@ -79,12 +87,12 @@ func (p *Player) CoyoteState() {
 }
 
 func (p *Player) WallSlideLeftState() {
-	if isJumpInput() {
-		p.WallJump(Right, true)
-		return
-	}
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
 		p.SetState(p.ClimbLeftState)
+		return
+	}
+	if isJumpInput() {
+		p.WallJump(Right, true)
 		return
 	}
 	if p.ActiColls.LeftWallHit == false {
@@ -95,13 +103,13 @@ func (p *Player) WallSlideLeftState() {
 }
 
 func (p *Player) WallSlideRightState() {
-	if isJumpInput() {
-		p.WallJump(Left, true)
-		return
-	}
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
 		p.SetState(p.ClimbRightState)
 		return //return to stop airstate for overwriting our change
+	}
+	if isJumpInput() {
+		p.WallJump(Left, true)
+		return
 	}
 	if p.ActiColls.RightWallHit == false {
 		p.SetState(p.AirState)

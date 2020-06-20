@@ -13,15 +13,16 @@ import (
 	//"compress/flate"
 	//"gopkg.in/yaml.v2"
 
-	"github.com/oakmound/oak"
-	"github.com/oakmound/oak/collision"
-	"github.com/oakmound/oak/dlog"
-	"github.com/oakmound/oak/entities"
-	"github.com/oakmound/oak/event"
-	"github.com/oakmound/oak/key"
-	"github.com/oakmound/oak/physics"
-	"github.com/oakmound/oak/render"
-	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/oak/v2"
+
+	"github.com/oakmound/oak/v2/collision"
+	"github.com/oakmound/oak/v2/dlog"
+	"github.com/oakmound/oak/v2/entities"
+	"github.com/oakmound/oak/v2/event"
+	"github.com/oakmound/oak/v2/key"
+	"github.com/oakmound/oak/v2/physics"
+	"github.com/oakmound/oak/v2/render"
+	"github.com/oakmound/oak/v2/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/camera"
@@ -48,7 +49,7 @@ const (
 	AirMaxSpeed float64 = 3
 )
 const ClimbSpeed float64 = 3
-
+const RunSpeed float64  = 2.8
 //Window constants
 const (
 	WindowWidth  int = 800
@@ -240,6 +241,7 @@ func (p *Player) Die() {
 }
 
 func (p *Player) Respawn() {
+	p.SetState(p.RespawnFallState)
 	p.Body.Delta.SetPos(0,0)
 	p.Body.SetPos(player.RespawnPos.X,player.RespawnPos.Y)
 }
@@ -377,7 +379,7 @@ func loadJsonLevelData(filename string) {
 }
 
 func loadScene() {
-	loadJsonLevelData("level.json")
+	//loadJsonLevelData("level.json")
 
 	player.Body = entities.NewMoving(100, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
@@ -441,5 +443,6 @@ func main() {
 	//oak.SetViewportBounds(0,0, WindowWidth, WindowHeight)
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
-
+	oak.UseAspectRatio = true
+	oak.SetAspectRatio(8/6)
 }
