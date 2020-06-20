@@ -379,8 +379,8 @@ func loadJsonLevelData(filename string) {
 func loadScene() {
 	loadJsonLevelData("level.json")
 
-	player.Body = entities.NewMoving(100, 100, 16, 32,
-		render.NewColorBox(16, 32, color.RGBA{255, 0, 0, 255}),
+	player.Body = entities.NewMoving(100, 100, 16, 16,
+		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
 		nil, 0, 0)
 	player.State = player.AirState
 	player.RespawnPos = Pos{X : player.Body.X(),Y : player.Body.Y()}
