@@ -24,7 +24,7 @@ import (
 	"github.com/oakmound/oak/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/level"
-	//"main/level"
+	"github.com/lolbinarycat/hookshot-oak/camera"
 )
 
 const (
@@ -38,9 +38,6 @@ var SolidLabels []collision.Label= []collision.Label{
 	Ground,
 	NoWallJump,
 }
-
-
-
 
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
@@ -527,28 +524,7 @@ func loadScene() {
 	player.Mods.Climb.Equipped = true
 }
 
-func cameraLoop(tick time.Ticker) {
-	camPosX := 0
-	camPosY := 0
-	for {
-		<-tick.C
 
-		//oak.SetScreen(int(player.Body.X()),int(player.Body.Y()))
-		if int(player.Body.X()) < camPosX*WindowWidth {
-			camPosX--
-			//oak.SetScreen(WindowWidth*camPosX, 0)
-		} else if int(player.Body.X()) > camPosX*WindowWidth+WindowWidth {
-			camPosX++
-		} else if int(player.Body.Y()) > camPosY*WindowHeight+WindowHeight {
-			camPosY++
-		} else if int(player.Body.Y()) < camPosY*WindowHeight {
-			camPosY--
-		} else {
-			continue //if no camera position change occured, don't update the screen positon
-		}
-		oak.SetScreen(WindowWidth*camPosX, WindowHeight*camPosY)
-	}
-}
 
 func main() {
 	//dlog.SetLogger(log)
@@ -557,8 +533,8 @@ func main() {
 		loadScene()
 		oak.ScreenWidth = 800
 		oak.ScreenHeight = 600
-		camTicker := time.NewTicker(time.Millisecond * 100)
-		go cameraLoop(*camTicker)
+
+		camera.StartCameraLoop(player.Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
 		//fmt.Println("screenHeight",oak.ScreenHeight)
 
