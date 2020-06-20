@@ -470,8 +470,10 @@ func loadJsonLevelData(filename string) {
 	//dlog.Warn("test")
 	file, err := os.Open(filename)
 	if err != nil {
-		fmt.Print("error when opening screen file: ")
-		panic(err)
+		//t.Print("error when opening screen file: ")
+		//panic(err)
+		dlog.Error("error when opening screen file",err)
+		return
 	}
 	fileInfo, err := file.Stat()
 	if err != nil {
