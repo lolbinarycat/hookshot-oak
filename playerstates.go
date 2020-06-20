@@ -120,3 +120,22 @@ func (p *Player) WallJumpLaunchState() {
 	}
 	p.DoGravity()
 }
+
+func (p *Player) ClimbRightState() {
+	if isJumpInput() {
+		p.WallJump(Left, oak.IsDown(currentControls.Left))
+		return
+	}
+	p.DoCliming()
+	//if p.Body.Space.Above(p.ActiColls.LastHitH)
+	//p.Body.Delta.SetX(1)
+}
+
+func (p *Player) ClimbLeftState() {
+	if isJumpInput() {
+		p.WallJump(Right, oak.IsDown(currentControls.Right))
+		return
+	}
+	p.Body.Delta.SetX(-1)
+	p.DoCliming()
+}
