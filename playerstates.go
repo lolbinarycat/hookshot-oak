@@ -166,13 +166,21 @@ func (p *Player) HsStartState() {
 
 func (p *Player) HsExtendRightState() {
 	if p.TimeFromStateStart() > HsExtendTime {
-		p.Hs.Active = false
-		p.Hs.X = 0
-		p.Hs.Y = 0
-		p.SetState(p.AirState)
+		p.SetState(p.HsRetractRightState)
+	} else if p.Hs.ActiColls.RightWallHit {
+		p.SetState(p.HsRetractRightState)
+	} else {
+		p.Hs.Active = true
+		p.Body.Delta.SetPos(0,0)
+		p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
+	}
+}
+
+func (p *Player) HsRetractRightState() {
+	if p.Hs.X <= 0 {
+		p.EndHs()
 		return
 	}
-	p.Hs.Active = true
-	p.Body.Delta.SetPos(0,0)
-	p.Hs.Body.Delta.SetX(1)
+	p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	//p.Hs.X -= p.Hs.Body.Speed.X()
 }

@@ -419,6 +419,8 @@ func loadScene() {
 		render.NewColorBox(4, 4, color.RGBA{0, 0, 255, 255}),
 		nil, 1, 0)
 
+	player.Hs.Body.Speed = physics.NewVector(3,3)
+
 	//player.Hs.Body = entities.NewInteractive(100, 10, 4, 4,
 	//	render.NewColorBox(16, 16, color.RGBA{0, 0, 255, 255}),
 	//	nil, 1, 0)
@@ -509,4 +511,11 @@ func HsUpdater() {
 	//set hookshot's relitive position to be accurate
 	player.Hs.X = player.Hs.Body.X() - player.Body.X() - hsOffX
 	player.Hs.Y = player.Hs.Body.Y() - player.Body.Y() - hsOffY
+}
+
+func (p *Player) EndHs() {
+	p.Hs.Active = false
+	p.Hs.X = 0
+	p.Hs.Y = 0
+	p.SetState(p.AirState)
 }
