@@ -67,6 +67,8 @@ const JumpInputTime time.Duration = time.Millisecond * 90
 //JumpHeightDecTime is how long JumpHeightDecState lasts
 const JumpHeightDecTime time.Duration = time.Millisecond * 200
 
+const HsExtendTime time.Duration = time.Second * 2
+
 //JsonScreen is a type to unmarshal the json of
 //a file with screen (i.e. one screen worth of level) data into
 type JsonScreen struct {
@@ -90,7 +92,7 @@ type ActiveCollisions struct {
 }
 
 type ControlConfig struct {
-	Left, Right, Up, Down, Jump, Climb, Quit string
+	Left, Right, Up, Down, Jump, Hs,Climb, Quit string
 }
 
 var currentControls ControlConfig = ControlConfig{
@@ -99,6 +101,7 @@ var currentControls ControlConfig = ControlConfig{
 	Up:    key.UpArrow,
 	Down:  key.DownArrow,
 	Jump:  key.Z,
+	Hs:    key.X,
 	Climb: key.LeftShift,
 	Quit:  key.Q,
 }
@@ -128,6 +131,13 @@ type Player struct {
 	StateStartTime time.Time
 	Mods           PlayerModuleList
 	RespawnPos Pos
+	Hs Hookshot
+}
+
+type Hookshot struct {
+	PhysObject
+	X, Y float64
+	Active bool
 }
 
 type PlayerState func()
@@ -140,6 +150,7 @@ type PhysObject struct {
 type PlayerModuleList struct {
 	WallJump PlayerModule
 	Climb    PlayerModule
+	Hookshot PlayerModule
 }
 
 type PlayerModule struct {
@@ -189,16 +200,31 @@ func (p *Player) DoCliming() {
 	} else {
 		p.Body.Delta.SetY(0)
 	}
+
+	p.ifHsPressedStartHs()
 }
 
 func isJumpInput() bool {
-	if k, d := oak.IsHeld(currentControls.Jump); k && (d <= JumpInputTime) {
+	return isButtonPressedWithin(currentControls.Jump,JumpInputTime)
+}
+
+func isButtonPressedWithin(button string,dur time.Duration) bool {
+	if k, d := oak.IsHeld(button); k && (d <= dur) {
 		return true
 	} else {
 		return false
 	}
 }
 
+func isHsInput() bool {
+	return isButtonPressedWithin(currentControls.Hs,JumpInputTime)
+}
+
+func (p *Player)ifHsPressedStartHs() {
+	if isHsInput() {
+		p.SetState(p.HsStartState)
+	}
+}
 
 func (p *Player) Jump() {
 	p.Body.Delta.ShiftY(-p.Body.Speed.Y())
@@ -384,11 +410,22 @@ func loadScene() {
 	player.Body = entities.NewMoving(100, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
 		nil, 0, 0)
-	player.State = player.AirState
+	player.State = player.RespawnFallState
 	player.RespawnPos = Pos{X : player.Body.X(),Y : player.Body.Y()}
-
 	render.Draw(player.Body.R)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
+
+	player.Hs.Body = entities.NewMoving(100,100, 4, 4,
+		render.NewColorBox(4, 4, color.RGBA{0, 0, 255, 255}),
+		nil, 1, 0)
+
+	//player.Hs.Body = entities.NewInteractive(100, 10, 4, 4,
+	//	render.NewColorBox(16, 16, color.RGBA{0, 0, 255, 255}),
+	//	nil, 1, 0)
+
+	//player.Body.Doodad.Point.Attach(player.Hs.Body)
+	//player.Body.AttachX(player.Hs.Body,0)
+	render.Draw(player.Hs.Body.R)
 
 	level.LoadDevRoom()
 
@@ -396,6 +433,8 @@ func loadScene() {
 	player.Mods.WallJump.Equipped = true
 	//same for climbing
 	player.Mods.Climb.Equipped = true
+	// " "
+	player.Mods.Hookshot.Equipped = true
 }
 
 
@@ -412,6 +451,9 @@ func main() {
 		//fmt.Println("screenWidth",oak.ScreenWidth)
 		//fmt.Println("screenHeight",oak.ScreenHeight)
 
+		hsOffX := player.Body.W/2 - player.Hs.Body.H/2
+		hsOffY := player.Body.H/2 - player.Hs.Body.H/2
+
 		player.Body.Bind(func(id int, nothing interface{}) int {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
 			if oak.IsDown(currentControls.Quit) {
@@ -427,7 +469,20 @@ func main() {
 				player.Die()
 			}
 
+
 			player.DoCollision(player.State)
+
+			if !player.Hs.Active {
+				player.Hs.Body.SetPos(player.Body.X()+hsOffX,//+player.Hs.X,
+					player.Body.Y()+hsOffY)//+player.Hs.Y)
+			}
+
+			player.Hs.DoCollision(HsUpdater)
+
+			
+			
+
+			
 
 			return 0
 		}, event.Enter)
@@ -445,4 +500,13 @@ func main() {
 	oak.Init("platformer")
 	oak.UseAspectRatio = true
 	oak.SetAspectRatio(8/6)
+}
+
+func HsUpdater() {
+	hsOffX := player.Body.W/2 - player.Hs.Body.H/2
+	hsOffY := player.Body.H/2 - player.Hs.Body.H/2
+
+	//set hookshot's relitive position to be accurate
+	player.Hs.X = player.Hs.Body.X() - player.Body.X() - hsOffX
+	player.Hs.Y = player.Hs.Body.Y() - player.Body.Y() - hsOffY
 }

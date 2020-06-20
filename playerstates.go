@@ -25,6 +25,7 @@ func (p *Player) AirState() { //start in air state
 	}
 
 	p.DoAirControls()
+	p.ifHsPressedStartHs()
 }
 
 func (p *Player) RespawnFallState() {
@@ -146,4 +147,32 @@ func (p *Player) ClimbLeftState() {
 	}
 	p.Body.Delta.SetX(-1)
 	p.DoCliming()
+}
+
+const HsStartTime time.Duration = time.Millisecond * 60
+func (p *Player) HsStartState() {
+	if player.Mods.Hookshot.Equipped == false {
+		p.SetState(p.AirState)
+		return
+	}
+	if p.TimeFromStateStart() > HsStartTime {
+		if oak.IsDown(currentControls.Right) {
+			p.SetState(p.HsExtendRightState)
+		} else {
+			p.SetState(p.AirState)
+		}
+	}
+}
+
+func (p *Player) HsExtendRightState() {
+	if p.TimeFromStateStart() > HsExtendTime {
+		p.Hs.Active = false
+		p.Hs.X = 0
+		p.Hs.Y = 0
+		p.SetState(p.AirState)
+		return
+	}
+	p.Hs.Active = true
+	p.Body.Delta.SetPos(0,0)
+	p.Hs.Body.Delta.SetX(1)
 }
