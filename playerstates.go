@@ -158,6 +158,8 @@ func (p *Player) HsStartState() {
 	if p.TimeFromStateStart() > HsStartTime {
 		if oak.IsDown(currentControls.Right) {
 			p.SetState(p.HsExtendRightState)
+		} else if oak.IsDown(currentControls.Left) {
+			p.SetState(p.HsExtendLeftState)
 		} else {
 			p.SetState(p.AirState)
 		}
@@ -182,12 +184,39 @@ func (p *Player) HsExtendRightState() {
 	}
 }
 
+func (p *Player) HsExtendLeftState() {
+	p.Hs.Active = true
+	if p.TimeFromStateStart() > HsExtendTime {
+		p.SetState(p.HsRetractLeftState)
+
+	} else if p.Hs.ActiColls.LeftWallHit {
+		p.SetState(p.HsPullLeftState)
+
+	} else {
+		if p.TimeFromStateStart() > HsInputTime && isHsInput() {
+			p.SetState(p.HsRetractLeftState)
+			return
+		}
+		p.Body.Delta.SetPos(0,0)
+		p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	}
+}
+
 func (p *Player) HsRetractRightState() {
 	if p.Hs.X <= 0 {
 		p.EndHs()
 		return
 	}
 	p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	//p.Hs.X -= p.Hs.Body.Speed.X()
+}
+
+func (p *Player) HsRetractLeftState() {
+	if p.Hs.X >= 0 {
+		p.EndHs()
+		return
+	}
+	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
 	//p.Hs.X -= p.Hs.Body.Speed.X()
 }
 
@@ -202,3 +231,14 @@ func (p *Player) HsPullRightState() {
 	p.Body.Delta.SetX(p.Hs.Body.Speed.X())
 	//p.PullPlayer()
 }
+
+func (p *Player) HsPullLeftState() {
+	if p.ActiColls.LeftWallHit {
+		p.EndHs()
+		return
+	}
+	//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	p.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	//p.PullPlayer()
+}
+
