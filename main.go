@@ -518,7 +518,4 @@ func (p *Player) EndHs() {
 	p.SetState(p.AirState)
 }
 
-func (p *Player) PullPlayer() {
-	p.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-	p.Body.Delta.SetY(-p.Hs.Body.Delta.Y())
-}
+
