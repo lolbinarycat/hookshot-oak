@@ -394,8 +394,7 @@ func main() {
 	oak.Add("platformer", func(string, interface{}) {
 		dlog.SetDebugLevel(debugLevel)
 		loadScene()
-		//oak.ScreenWidth = 800
-		//oak.ScreenHeight = 600
+		
 
 		camera.StartCameraLoop(player.Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
@@ -406,6 +405,14 @@ func main() {
 
 		player.Body.Bind(func(id int, nothing interface{}) int {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
+			if oak.IsDown(key.L) {
+				//oak.ScreenWidth = 800
+				//oak.ScreenHeight = 600
+				//oak.ChangeWindow(800,600)
+				oak.MoveWindow(20,20,800,600)
+				oak.SetAspectRatio(16/9)
+				
+			}
 			if oak.IsDown(currentControls.Quit) {
 				if oak.IsDown(key.I) {
 					fmt.Println(player)
@@ -440,11 +447,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}*/
-	//oak.SetViewportBounds(0,0, WindowWidth, WindowHeight)
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
 	oak.UseAspectRatio = true
-	oak.SetAspectRatio(8/6)
+	
 }
 
 func HsUpdater() {
