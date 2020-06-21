@@ -165,12 +165,18 @@ func (p *Player) HsStartState() {
 }
 
 func (p *Player) HsExtendRightState() {
+	p.Hs.Active = true
 	if p.TimeFromStateStart() > HsExtendTime {
 		p.SetState(p.HsRetractRightState)
+
 	} else if p.Hs.ActiColls.RightWallHit {
-		p.SetState(p.HsRetractRightState)
+		p.SetState(p.HsPullRightState)
+
 	} else {
-		p.Hs.Active = true
+		if p.TimeFromStateStart() > HsInputTime && isHsInput() {
+			p.SetState(p.HsRetractRightState)
+			return
+		}
 		p.Body.Delta.SetPos(0,0)
 		p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
 	}
@@ -183,4 +189,16 @@ func (p *Player) HsRetractRightState() {
 	}
 	p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
 	//p.Hs.X -= p.Hs.Body.Speed.X()
+}
+
+//HsPullRightState is the state for when the hookshot is
+//pulling the player after having hit an object
+func (p *Player) HsPullRightState() {
+	if p.ActiColls.RightWallHit {
+		p.EndHs()
+		return
+	}
+	//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	p.Body.Delta.SetX(p.Hs.Body.Speed.X())
+	//p.PullPlayer()
 }

@@ -64,6 +64,8 @@ const CoyoteTime time.Duration = time.Millisecond * 7
 //Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
 const JumpInputTime time.Duration = time.Millisecond * 90
 
+const HsInputTime time.Duration = time.Millisecond * 70
+
 //JumpHeightDecTime is how long JumpHeightDecState lasts
 const JumpHeightDecTime time.Duration = time.Millisecond * 200
 
@@ -217,7 +219,7 @@ func isButtonPressedWithin(button string,dur time.Duration) bool {
 }
 
 func isHsInput() bool {
-	return isButtonPressedWithin(currentControls.Hs,JumpInputTime)
+	return isButtonPressedWithin(currentControls.Hs,HsInputTime)
 }
 
 func (p *Player)ifHsPressedStartHs() {
@@ -446,8 +448,8 @@ func main() {
 	oak.Add("platformer", func(string, interface{}) {
 		dlog.SetDebugLevel(debugLevel)
 		loadScene()
-		oak.ScreenWidth = 800
-		oak.ScreenHeight = 600
+		//oak.ScreenWidth = 800
+		//oak.ScreenHeight = 600
 
 		camera.StartCameraLoop(player.Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
@@ -481,11 +483,6 @@ func main() {
 
 			player.Hs.DoCollision(HsUpdater)
 
-			
-			
-
-			
-
 			return 0
 		}, event.Enter)
 	}, func() bool {
@@ -513,9 +510,15 @@ func HsUpdater() {
 	player.Hs.Y = player.Hs.Body.Y() - player.Body.Y() - hsOffY
 }
 
+
 func (p *Player) EndHs() {
 	p.Hs.Active = false
 	p.Hs.X = 0
 	p.Hs.Y = 0
 	p.SetState(p.AirState)
+}
+
+func (p *Player) PullPlayer() {
+	p.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+	p.Body.Delta.SetY(-p.Hs.Body.Delta.Y())
 }
