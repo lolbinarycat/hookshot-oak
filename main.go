@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"image/color"
 
@@ -24,8 +23,8 @@ import (
 	"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/scene"
 
-	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/camera"
+	"github.com/lolbinarycat/hookshot-oak/level"
 )
 
 const (
@@ -71,18 +70,7 @@ const JumpHeightDecTime time.Duration = time.Millisecond * 200
 
 const HsExtendTime time.Duration = time.Second * 2
 
-//JsonScreen is a type to unmarshal the json of
-//a file with screen (i.e. one screen worth of level) data into
-type JsonScreen struct {
-	Rects []JsonRect
-}
 
-//type JsonRect defines a struct to
-//unmarshal json into
-type JsonRect struct {
-	X, Y, W, H float64
-	Label      collision.Label //warning: label is hardcoded in json file
-}
 
 type ActiveCollisions struct {
 	GroundHit    bool
@@ -362,48 +350,6 @@ func loadYamlConfigData(filename string) {
 
 	fileSize := fileInfo.Size()
 	reader*/
-}
-
-//level data is to be stored as json, problebly compressed in the final game
-func loadJsonLevelData(filename string) {
-	dlog.Info("loading json level data frxom", filename)
-	//dlog.Warn("test")
-	file, err := os.Open(filename)
-	if err != nil {
-		//t.Print("error when opening screen file: ")
-		//panic(err)
-		dlog.Error("error when opening screen file",err)
-		return
-	}
-	fileInfo, err := file.Stat()
-	if err != nil {
-		fmt.Print("error when getting file info: ")
-		panic(err)
-	}
-	fileSize := fileInfo.Size()
-	reader := bufio.NewReader(file)
-	var rawJson []byte = make([]byte, int(fileSize))
-	_, err = reader.Read(rawJson)
-	if err != nil {
-		fmt.Print("error when reading file into byte array: ")
-		panic(err)
-	}
-	var screenData JsonScreen
-	err = json.Unmarshal(rawJson, &screenData)
-	if err != nil {
-		defer fmt.Println("json:", rawJson)
-		fmt.Print("error unmarshaling screen data: ")
-		panic(err)
-	}
-
-	for i, rectData := range screenData.Rects {
-		rect := entities.NewSolid(rectData.X, rectData.Y, rectData.W, rectData.H,
-			render.NewColorBox(int(rectData.W), int(rectData.H), color.RGBA{100, 100, 100, 255}),
-			nil, event.CID(i+10))
-
-		rect.UpdateLabel(rectData.Label)
-		render.Draw(rect.R)
-	}
 }
 
 func loadScene() {
