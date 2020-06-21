@@ -137,7 +137,7 @@ func (p *Player) ClimbRightState() {
 	}
 	p.DoCliming()
 	//if p.Body.Space.Above(p.ActiColls.LastHitH)
-	//p.Body.Delta.SetX(1)
+	p.Body.Delta.SetX(1)
 }
 
 func (p *Player) ClimbLeftState() {
