@@ -39,14 +39,14 @@ func LoadDevRoom() {
 		nil, n())
 	wall1 := entities.NewSolid(40, 200, 20, 500,
 		render.NewColorBox(20, 500, Gray),
-		nil, 1)
+		nil, n())
 	wall2 := entities.NewSolid(300, 200, 20, 500,
 		render.NewColorBox(20, 500, Gray),
-		nil, 2)
+		nil, n())
 	checkpoint := entities.NewSolid(200,350, 10,10,
 		render.NewColorBox(10,10,color.RGBA{0,0,255,255}),
-		nil,3)
-	death := entities.NewSolid(300, 200, 50,50,
+		nil,n())
+	death := entities.NewSolid(340, 240, 50,50,
 		render.NewColorBox(50,50,DullRed),
 		nil, n())
 
