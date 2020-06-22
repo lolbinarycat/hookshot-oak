@@ -191,7 +191,7 @@ func (p *Player) DoCliming() {
 		p.Body.Delta.SetY(0)
 	}
 
-	p.ifHsPressedStartHs()
+	p.StateCommon()
 }
 
 func isJumpInput() bool {

@@ -6,6 +6,12 @@ import (
 	oak "github.com/oakmound/oak/v2"
 )
 
+//StateCommon is the function for commands that should be run in most
+//states, like activating the hookshot if the hookshot button is pressed.
+//It is not a state, and should not be used as one 
+func (p *Player) StateCommon() {
+	p.ifHsPressedStartHs()
+}
 
 func (p *Player) AirState() { //start in air state
 
@@ -25,7 +31,7 @@ func (p *Player) AirState() { //start in air state
 	}
 
 	p.DoAirControls()
-	p.ifHsPressedStartHs()
+	p.StateCommon()
 }
 
 func (p *Player) RespawnFallState() {
@@ -55,7 +61,8 @@ func (p *Player) GroundState() {
 		player.Body.Delta.SetX(0)
 		//player.Body.Delta.X()/2)
 	}
-
+	p.DoGravity()
+	p.StateCommon()
 }
 
 //the function JumpHeightDecState is the state that decides the height of the players jump.
@@ -71,6 +78,7 @@ func (p *Player) JumpHeightDecState() {
 		p.DoGravity()
 	}
 	p.DoAirControls()
+	p.StateCommon()
 }
 
 //CoyoteState implements "coyote time" a window of time after
@@ -85,6 +93,7 @@ func (p *Player) CoyoteState() {
 		p.Jump()
 	}
 
+	p.StateCommon()
 }
 
 func (p *Player) WallSlideLeftState() {
@@ -128,6 +137,7 @@ func (p *Player) WallJumpLaunchState() {
 		return
 	}
 	p.DoGravity()
+	p.StateCommon()
 }
 
 func (p *Player) ClimbRightState() {
@@ -136,8 +146,8 @@ func (p *Player) ClimbRightState() {
 		return
 	}
 	p.DoCliming()
-	//if p.Body.Space.Above(p.ActiColls.LastHitH)
 	p.Body.Delta.SetX(1)
+	//don't call StateCommon() here because it is called in DoCliming
 }
 
 func (p *Player) ClimbLeftState() {
@@ -147,6 +157,7 @@ func (p *Player) ClimbLeftState() {
 	}
 	p.Body.Delta.SetX(-1)
 	p.DoCliming()
+	//don't call StateCommon() because ... (see ClimbRightState)
 }
 
 const HsStartTime time.Duration = time.Millisecond * 60
