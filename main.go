@@ -362,7 +362,7 @@ func loadScene() {
 
 	player.Hs.Body.Speed = physics.NewVector(3, 3)
 	player.Body.UpdateLabel(labels.Player)
-	player.ExtraSolids = []collision.Label{}
+	player.ExtraSolids = []collision.Label{labels.Block}
 	//player.Hs.Body = entities.NewInteractive(100, 10, 4, 4,
 	//	render.NewColorBox(16, 16, color.RGBA{0, 0, 255, 255}),
 	//	nil, 1, 0)
@@ -375,7 +375,7 @@ func loadScene() {
 
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
-		nil, 780, 0)
+		nil, 780, 1)
 	render.Draw(block.Body.R)
 	block.ExtraSolids = []collision.Label{labels.Player}
 	block.Body.UpdateLabel(labels.Block)
@@ -388,7 +388,9 @@ func loadScene() {
 	player.Mods.Hookshot.Equipped = true
 }
 
+//var progStartTime time.Time
 func main() {
+	//progStartTime = time.Now()
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
 		dlog.SetDebugLevel(debugLevel)
@@ -450,7 +452,6 @@ func main() {
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
 	oak.UseAspectRatio = true
-
 }
 
 func HsUpdater() {
@@ -470,21 +471,7 @@ func (p *Player) EndHs() {
 }
 
 func (b *PhysObject) BlockUpdater() {
-	hit := collision.HitLabel(b.Body.Space, labels.Player)
-
-	if hit != nil {
-		xover, _ := b.Body.Space.Overlap(hit)
-		// xover < 8 {
-		b.Body.Delta.SetX(xover)
-		//
-
-	} 
-
-	/*if (b.ActiColls.LeftWallHit || b.ActiColls.RightWallHit) ||
-		(b.ActiColls.HLabel == labels.Player) {
-		b.Body.Delta.SetX(player.Body.Delta.X())
-	}*/
-	if b.ActiColls.GroundHit == false {
-		b.DoGravity()
-	}
+	//b.Body.ApplyFriction(1)
+	//b.Body.Delta.
+	b.DoGravity()
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	oak "github.com/oakmound/oak/v2"
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	oak "github.com/oakmound/oak/v2"
 )
 
 //StateCommon is the function for commands that should be run in most
@@ -54,6 +54,12 @@ func (p *Player) GroundState() {
 		p.SetState(player.CoyoteState)
 	}
 
+	if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
+		p.SetState(p.BlockPushRightState)
+	} else if p.ActiColls.LeftWallHit && p.ActiColls.HLabel == labels.Block {
+		p.SetState(p.BlockPushLeftState)
+	}
+
 	if oak.IsDown(currentControls.Left) {
 		player.Body.Delta.SetX(-player.Body.Speed.X())
 	} else if oak.IsDown(currentControls.Right) {
@@ -64,6 +70,32 @@ func (p *Player) GroundState() {
 	}
 	p.DoGravity()
 	p.StateCommon()
+}
+
+const BlockPushSpeed float64 = 1
+func (p *Player) BlockPushRightState() {
+	if oak.IsDown(currentControls.Right) == false {
+		block.Body.Delta.SetX(0)
+		p.SetState(p.GroundState)
+		return
+	}
+	p.Body.Delta.SetX(BlockPushSpeed)
+	//hitBlock := p.Body.HitLabel(labels.Block)
+	block.Body.Delta.SetX(BlockPushSpeed)
+	//if hitBlock != nil {
+	//}
+}
+
+func (p *Player) BlockPushLeftState() {
+	if oak.IsDown(currentControls.Left) == false {
+		block.Body.Delta.SetX(0)
+		p.SetState(p.GroundState)
+		return
+	}
+	p.Body.Delta.SetX(-BlockPushSpeed)
+	//hitBlock := p.Body.HitLabel(labels.Block)
+	block.Body.Delta.SetX(-BlockPushSpeed)
+
 }
 
 //the function JumpHeightDecState is the state that decides the height of the players jump.
@@ -90,6 +122,13 @@ func (p *Player) CoyoteState() {
 	}
 	//inherit code from AirState
 	//p.AirState()
+
+	if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
+		p.SetState(p.BlockPushRightState)
+	} else if p.ActiColls.LeftWallHit && p.ActiColls.HLabel == labels.Block {
+		p.SetState(p.BlockPushLeftState)
+	}
+
 	if isJumpInput() {
 		p.Jump()
 	}
