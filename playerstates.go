@@ -4,6 +4,7 @@ import (
 	"time"
 
 	oak "github.com/oakmound/oak/v2"
+	"github.com/lolbinarycat/hookshot-oak/labels"
 )
 
 //StateCommon is the function for commands that should be run in most
@@ -19,7 +20,7 @@ func (p *Player) AirState() { //start in air state
 		p.SetState(p.GroundState)
 		return
 	} else {
-		if p.Mods.WallJump.Equipped && p.ActiColls.HLabel != NoWallJump{
+		if p.Mods.WallJump.Equipped && p.ActiColls.HLabel != labels.NoWallJump {
 			if p.PhysObject.ActiColls.LeftWallHit {
 				p.SetState(p.WallSlideLeftState)
 			} else if p.PhysObject.ActiColls.RightWallHit {

@@ -24,20 +24,9 @@ import (
 	"github.com/oakmound/oak/v2/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
+	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 )
-
-const (
-	Ground collision.Label = iota
-	NoWallJump
-	Death
-	Checkpoint
-)
-
-var SolidLabels []collision.Label= []collision.Label{
-	Ground,
-	NoWallJump,
-}
 
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
@@ -48,7 +37,8 @@ const (
 	AirMaxSpeed float64 = 3
 )
 const ClimbSpeed float64 = 3
-const RunSpeed float64  = 2.8
+const RunSpeed float64 = 2.8
+
 //Window constants
 const (
 	WindowWidth  int = 800
@@ -70,19 +60,17 @@ const JumpHeightDecTime time.Duration = time.Millisecond * 200
 
 const HsExtendTime time.Duration = time.Second * 2
 
-
-
 type ActiveCollisions struct {
-	GroundHit    bool
-	LeftWallHit  bool
-	RightWallHit bool
-	CeilingHit   bool
-	HLabel,VLabel collision.Label //these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
+	GroundHit          bool
+	LeftWallHit        bool
+	RightWallHit       bool
+	CeilingHit         bool
+	HLabel, VLabel     collision.Label //these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
 	LastHitV, LastHitH collision.Space
 }
 
 type ControlConfig struct {
-	Left, Right, Up, Down, Jump, Hs,Climb, Quit string
+	Left, Right, Up, Down, Jump, Hs, Climb, Quit string
 }
 
 var currentControls ControlConfig = ControlConfig{
@@ -108,6 +96,8 @@ type Pos struct {
 	Y float64
 }
 
+var block PhysObject //this is global temporaraly
+
 var player Player
 
 //Player is a type representing the player
@@ -120,13 +110,13 @@ type Player struct {
 	State          PlayerState //func()
 	StateStartTime time.Time
 	Mods           PlayerModuleList
-	RespawnPos Pos
-	Hs Hookshot
+	RespawnPos     Pos
+	Hs             Hookshot
 }
 
 type Hookshot struct {
 	PhysObject
-	X, Y float64
+	X, Y   float64
 	Active bool
 }
 
@@ -135,6 +125,8 @@ type PlayerState func()
 type PhysObject struct {
 	Body      *entities.Moving
 	ActiColls ActiveCollisions
+	//ExtraSolids defines labels that should be solid only for this object.
+	ExtraSolids []collision.Label
 }
 
 type PlayerModuleList struct {
@@ -148,10 +140,11 @@ type PlayerModule struct {
 	Obtained bool
 }
 
-//this is the default level for debugLevel, value will be set in loadYamlConfigData()
+//this is the default level for debugLevel,
+//value will be set in loadYamlConfigData()
 var debugLevel dlog.Level = dlog.WARN
-//var log dlog.Logger = dlog.NewLogger()
 
+//var log dlog.Logger = dlog.NewLogger()
 
 func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
 	p.Body.Delta.SetY(-WallJumpHeight)
@@ -170,8 +163,6 @@ func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
 		p.SetState(p.AirState)
 	}
 }
-
-
 
 //DoCliming is the function for shared procceses between
 //ClimbRightState and ClimbLeft state
@@ -195,10 +186,10 @@ func (p *Player) DoCliming() {
 }
 
 func isJumpInput() bool {
-	return isButtonPressedWithin(currentControls.Jump,JumpInputTime)
+	return isButtonPressedWithin(currentControls.Jump, JumpInputTime)
 }
 
-func isButtonPressedWithin(button string,dur time.Duration) bool {
+func isButtonPressedWithin(button string, dur time.Duration) bool {
 	if k, d := oak.IsHeld(button); k && (d <= dur) {
 		return true
 	} else {
@@ -207,10 +198,10 @@ func isButtonPressedWithin(button string,dur time.Duration) bool {
 }
 
 func isHsInput() bool {
-	return isButtonPressedWithin(currentControls.Hs,HsInputTime)
+	return isButtonPressedWithin(currentControls.Hs, HsInputTime)
 }
 
-func (p *Player)ifHsPressedStartHs() {
+func (p *Player) ifHsPressedStartHs() {
 	if isHsInput() {
 		p.SetState(p.HsStartState)
 	}
@@ -258,8 +249,8 @@ func (p *Player) Die() {
 
 func (p *Player) Respawn() {
 	p.SetState(p.RespawnFallState)
-	p.Body.Delta.SetPos(0,0)
-	p.Body.SetPos(player.RespawnPos.X,player.RespawnPos.Y)
+	p.Body.Delta.SetPos(0, 0)
+	p.Body.SetPos(player.RespawnPos.X, player.RespawnPos.Y)
 }
 
 func (o *PhysObject) DoGravity() {
@@ -276,8 +267,9 @@ func (object *PhysObject) DoCollision(updater func()) {
 	object.ActiColls = ActiveCollisions{} //reset the struct to be all false
 
 	object.Body.ShiftX(object.Body.Delta.X())
-	hit := collision.HitLabel(object.Body.Space, SolidLabels...);
-	if  hit != nil {
+	hit := collision.HitLabel(object.Body.Space,
+		append(labels.Solids, object.ExtraSolids...)...)
+	if hit != nil {
 		if object.Body.Delta.X() > 0 { //Right Wall
 			object.ActiColls.RightWallHit = true
 			object.Body.SetX(hit.X() - object.Body.W)
@@ -290,7 +282,8 @@ func (object *PhysObject) DoCollision(updater func()) {
 	}
 
 	object.Body.ShiftY(object.Body.Delta.Y())
-	if hit := collision.HitLabel(object.Body.Space, SolidLabels...); hit != nil {
+	if hit := collision.HitLabel(object.Body.Space,
+		append(object.ExtraSolids, labels.Solids...)...); hit != nil {
 		if object.Body.Delta.Y() > 0 { //Ground
 			object.ActiColls.GroundHit = true
 			object.Body.SetY(hit.Y() - object.Body.H)
@@ -304,8 +297,8 @@ func (object *PhysObject) DoCollision(updater func()) {
 	}
 
 }
-func openFileAsBytes(filename string) ([]byte,error) {
-	dlog.Info("opening file",filename)
+func openFileAsBytes(filename string) ([]byte, error) {
+	dlog.Info("opening file", filename)
 	file, err := os.Open(filename)
 	defer file.Close()
 	if err != nil {
@@ -329,7 +322,7 @@ func openFileAsBytes(filename string) ([]byte,error) {
 
 //TODO: complete this function
 func loadYamlConfigData(filename string) {
-	dlog.Info("loading yaml config data from",filename)
+	dlog.Info("loading yaml config data from", filename)
 
 	rawYaml, err := openFileAsBytes(filename)
 	dlog.ErrorCheck(err)
@@ -359,16 +352,17 @@ func loadScene() {
 		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
 		nil, 0, 0)
 	player.State = player.RespawnFallState
-	player.RespawnPos = Pos{X : player.Body.X(),Y : player.Body.Y()}
+	player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
 	render.Draw(player.Body.R)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
 
-	player.Hs.Body = entities.NewMoving(100,100, 4, 4,
+	player.Hs.Body = entities.NewMoving(100, 100, 4, 4,
 		render.NewColorBox(4, 4, color.RGBA{0, 0, 255, 255}),
 		nil, 1, 0)
 
-	player.Hs.Body.Speed = physics.NewVector(3,3)
-
+	player.Hs.Body.Speed = physics.NewVector(3, 3)
+	player.Body.UpdateLabel(labels.Player)
+	player.ExtraSolids = []collision.Label{}
 	//player.Hs.Body = entities.NewInteractive(100, 10, 4, 4,
 	//	render.NewColorBox(16, 16, color.RGBA{0, 0, 255, 255}),
 	//	nil, 1, 0)
@@ -379,6 +373,13 @@ func loadScene() {
 
 	level.LoadDevRoom()
 
+	block.Body = entities.NewMoving(150, 100, 16, 16,
+		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
+		nil, 780, 0)
+	render.Draw(block.Body.R)
+	block.ExtraSolids = []collision.Label{labels.Player}
+	block.Body.UpdateLabel(labels.Block)
+
 	//Give player walljump for now
 	player.Mods.WallJump.Equipped = true
 	//same for climbing
@@ -387,14 +388,11 @@ func loadScene() {
 	player.Mods.Hookshot.Equipped = true
 }
 
-
-
 func main() {
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
 		dlog.SetDebugLevel(debugLevel)
 		loadScene()
-		
 
 		camera.StartCameraLoop(player.Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
@@ -409,29 +407,31 @@ func main() {
 				//oak.ScreenWidth = 800
 				//oak.ScreenHeight = 600
 				//oak.ChangeWindow(800,600)
-				oak.MoveWindow(20,20,800,600)
-				oak.SetAspectRatio(16/9)
-				
+				oak.MoveWindow(20, 20, 800, 600)
+				oak.SetAspectRatio(16 / 9)
+
 			}
 			if oak.IsDown(currentControls.Quit) {
 				if oak.IsDown(key.I) {
 					fmt.Println(player)
+					fmt.Println("block:\n", block)
 				}
 				os.Exit(0)
 			}
-			if player.Body.HitLabel(Checkpoint) != nil {
-				player.RespawnPos = Pos{X : player.Body.X(),Y : player.Body.Y()}
+			if player.Body.HitLabel(labels.Checkpoint) != nil {
+				player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
 			}
-			if player.Body.HitLabel(Death) != nil {
+			if player.Body.HitLabel(labels.Death) != nil {
 				player.Die()
 			}
 
+			block.DoCollision(block.BlockUpdater)
 
 			player.DoCollision(player.State)
 
 			if !player.Hs.Active {
-				player.Hs.Body.SetPos(player.Body.X()+hsOffX,//+player.Hs.X,
-					player.Body.Y()+hsOffY)//+player.Hs.Y)
+				player.Hs.Body.SetPos(player.Body.X()+hsOffX, //+player.Hs.X,
+					player.Body.Y()+hsOffY) //+player.Hs.Y)
 			}
 
 			player.Hs.DoCollision(HsUpdater)
@@ -450,7 +450,7 @@ func main() {
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
 	oak.UseAspectRatio = true
-	
+
 }
 
 func HsUpdater() {
@@ -462,7 +462,6 @@ func HsUpdater() {
 	player.Hs.Y = player.Hs.Body.Y() - player.Body.Y() - hsOffY
 }
 
-
 func (p *Player) EndHs() {
 	p.Hs.Active = false
 	p.Hs.X = 0
@@ -470,4 +469,22 @@ func (p *Player) EndHs() {
 	p.SetState(p.AirState)
 }
 
+func (b *PhysObject) BlockUpdater() {
+	hit := collision.HitLabel(b.Body.Space, labels.Player)
 
+	if hit != nil {
+		xover, _ := b.Body.Space.Overlap(hit)
+		// xover < 8 {
+		b.Body.Delta.SetX(xover)
+		//
+
+	} 
+
+	/*if (b.ActiColls.LeftWallHit || b.ActiColls.RightWallHit) ||
+		(b.ActiColls.HLabel == labels.Player) {
+		b.Body.Delta.SetX(player.Body.Delta.X())
+	}*/
+	if b.ActiColls.GroundHit == false {
+		b.DoGravity()
+	}
+}

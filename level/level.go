@@ -15,6 +15,7 @@ import (
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/render"
 	//"github.com/rustyoz/svg"
+	"github.com/lolbinarycat/hookshot-oak/labels"
 )
 
 /*type Rect struct {
@@ -26,12 +27,7 @@ import (
 }*/
 
 
-const (
-	Ground collision.Label = iota
-	NoWallJump
-	Death
-	Checkpoint
-)
+
 
 //color constants
 var (
@@ -102,11 +98,11 @@ func LoadDevRoom() {
 		render.NewColorBox(50, 50, DullRed),
 		nil, n())
 
-	ground.UpdateLabel(Ground)
-	wall1.UpdateLabel(Ground)
-	wall2.UpdateLabel(Ground)
-	checkpoint.UpdateLabel(Checkpoint)
-	death.UpdateLabel(Death)
+	ground.UpdateLabel(labels.Ground)
+	wall1.UpdateLabel(labels.Ground)
+	wall2.UpdateLabel(labels.Ground)
+	checkpoint.UpdateLabel(labels.Checkpoint)
+	death.UpdateLabel(labels.Death)
 
 	render.Draw(ground.R)
 	render.Draw(wall1.R, 1)

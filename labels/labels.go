@@ -9,4 +9,11 @@ const (
 	NoWallJump
 	Death
 	Checkpoint
+	Block
+	Player
 )
+
+var Solids []collision.Label= []collision.Label{
+	Ground,
+	NoWallJump,
+}
