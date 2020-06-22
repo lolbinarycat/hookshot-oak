@@ -448,8 +448,9 @@ func main() {
 		panic(err)
 	}*/
 	//dlog.SetLogLevel()
+	oak.SetAspectRatio(6/8)
 	oak.Init("platformer")
-	oak.UseAspectRatio = true
+	//oak.UseAspectRatio = true
 	
 }
 
@@ -469,5 +470,4 @@ func (p *Player) EndHs() {
 	p.Hs.Y = 0
 	p.SetState(p.AirState)
 }
-
 
