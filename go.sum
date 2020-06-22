@@ -43,6 +43,8 @@ github.com/oakmound/oak/v2 v2.3.4-0.20200616000027-dadf989955e9 h1:CirxrHwM0tdid
 github.com/oakmound/oak/v2 v2.3.4-0.20200616000027-dadf989955e9/go.mod h1:npDkRjZ7b/M4ZT19O49kHfa+OI+IOFuBQqBf7+6KjNg=
 github.com/oakmound/oak/v2 v2.3.4-0.20200620233005-b6fddb9ad217 h1:LSJC7lXZVXDSUzrv4SAqeJjKUaBHxUUMFNyoScsVm4Y=
 github.com/oakmound/oak/v2 v2.3.4-0.20200620233005-b6fddb9ad217/go.mod h1:IeLz/IxfiVKdrPFw45yebPmiBJMYyLHlHQOLWdmC76I=
+github.com/oakmound/oak/v2 v2.3.4-0.20200621224215-b3d311642784 h1:VYyOXUjpHJP2ltL5UHY2q3ZO44GyVHSCgiQCsau1SkY=
+github.com/oakmound/oak/v2 v2.3.4-0.20200621224215-b3d311642784/go.mod h1:IeLz/IxfiVKdrPFw45yebPmiBJMYyLHlHQOLWdmC76I=
 github.com/oakmound/shiny v0.4.1-0.20191119013337-fdd972eb9250/go.mod h1:cJDeJQ/6Ovs2IiM4xTXjIC8zGJnECKvj8BOpTJ4qrhI=
 github.com/oakmound/shiny v0.4.2-0.20191207185806-0c20eb569c82 h1:meySgQvfPosDCuO0uqEXrCC0Gc4lvMM++XM/59CB0cE=
 github.com/oakmound/shiny v0.4.2-0.20191207185806-0c20eb569c82/go.mod h1:fEGagtAluRRrVkMQyzyL+G3j+TdsyOjrIajWunGmy3M=

@@ -8,7 +8,7 @@ require (
 	github.com/hajimehoshi/go-mp3 v0.3.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oakmound/oak v1.5.2-0.20191119030332-90a3e010b5d4
-	github.com/oakmound/oak/v2 v2.3.4-0.20200620233005-b6fddb9ad217
+	github.com/oakmound/oak/v2 v2.3.4-0.20200621224215-b3d311642784
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rustyoz/Mtransform v0.0.0-20190224104252-60c8c35a3681 // indirect
 	github.com/rustyoz/genericlexer v0.0.0-20190224115003-eb82fd2987bd // indirect
