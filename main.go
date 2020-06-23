@@ -133,12 +133,17 @@ type PlayerModuleList struct {
 	WallJump PlayerModule
 	Climb    PlayerModule
 	Hookshot PlayerModule
+	BlockPush PlayerModule
+	BlockPull
 }
 
 type PlayerModule struct {
 	Equipped bool
 	Obtained bool
 }
+
+//whether modules should be automaticaly equipped when recived
+var autoEquipMods bool = true 
 
 //this is the default level for debugLevel,
 //value will be set in loadYamlConfigData()
@@ -386,6 +391,15 @@ func loadScene() {
 	player.Mods.Climb.Equipped = true
 	// " "
 	player.Mods.Hookshot.Equipped = true
+	player.Mods.BlockPush.Equipped = true
+	{
+		m := &player.Mods
+		GiveMods(&m.BlockPush,
+			&m.Climb,
+			&m.Hookshot,
+			&m.WallJump,
+			&m.BlockPull)
+	}
 }
 
 //var progStartTime time.Time
@@ -420,6 +434,7 @@ func main() {
 				}
 				os.Exit(0)
 			}
+
 			if player.Body.HitLabel(labels.Checkpoint) != nil {
 				player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
 			}
@@ -468,6 +483,15 @@ func (p *Player) EndHs() {
 	p.Hs.X = 0
 	p.Hs.Y = 0
 	p.SetState(p.AirState)
+}
+
+func GiveMods(mods... *PlayerModule) {
+	for _, m := range mods {
+		m.Obtained = true
+		if autoEquipMods {
+			m.Equipped = true
+		}
+	}
 }
 
 func (b *PhysObject) BlockUpdater() {
