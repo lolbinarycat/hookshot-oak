@@ -16,6 +16,8 @@ func (s PlayerState) denil() PlayerState {
 	return s
 }
 
+// initStates is called at the start of main().
+// this is to stop an initialization error.
 func initStates() {
 	AirState = PlayerState{
 		Loop:AirStateLoop,
