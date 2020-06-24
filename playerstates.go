@@ -54,10 +54,15 @@ func (p *Player) GroundState() {
 		p.SetState(player.CoyoteState)
 	}
 
-	if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
-		p.SetState(p.BlockPushRightState)
-	} else if p.ActiColls.LeftWallHit && p.ActiColls.HLabel == labels.Block {
-		p.SetState(p.BlockPushLeftState)
+	if  p.ActiColls.HLabel == labels.Block {
+		if p.Mods.BlockPush.Equipped {
+			if p.ActiColls.RightWallHit  {
+				p.GrabObj(labels.Block) //temporay, until state overhaul
+				p.SetState(p.BlockPushRightState)
+			} else if p.ActiColls.LeftWallHit {
+				p.SetState(p.BlockPushLeftState)
+			}
+		}
 	}
 
 	if oak.IsDown(currentControls.Left) {
@@ -80,8 +85,25 @@ func (p *Player) BlockPushRightState() {
 		return
 	}
 	p.Body.Delta.SetX(BlockPushSpeed)
+	
+	//if id > 0 {
+		//id.E().(*entities.Moving).Delta.SetX(BlockPushSpeed)
+		p.HeldObj.Delta.SetX(BlockPushSpeed)
+	//}
+	
+
+	//p.HeldObj.Delta.ShiftX(BlockPushSpeed)
 	//hitBlock := p.Body.HitLabel(labels.Block)
-	block.Body.Delta.SetX(BlockPushSpeed)
+	//block.Body.Delta.SetX(BlockPushSpeed)
+
+	
+	/*if blk, ok := event.GetEntity(2).(*entities.Moving); ok && blk == block.Body {
+		blk.Delta.SetX(BlockPushSpeed)
+
+	} else {
+		dlog.Error("type assertion failed")
+	}*/
+	
 	//if hitBlock != nil {
 	//}
 }
@@ -96,6 +118,18 @@ func (p *Player) BlockPushLeftState() {
 	//hitBlock := p.Body.HitLabel(labels.Block)
 	block.Body.Delta.SetX(-BlockPushSpeed)
 
+}
+
+const BlockPullSpeed float64 = BlockPushSpeed
+func (p *Player) BlockPullRightState() {
+	//if either button isn't pushed
+	if (oak.IsDown(currentControls.Climb) && oak.IsDown(currentControls.Right)) == false {
+		p.SetState(p.GroundState)
+		return
+	}
+
+	p.Body.Delta.SetX(BlockPullSpeed)
+	block.Body.Delta.SetX(BlockPullSpeed)
 }
 
 //the function JumpHeightDecState is the state that decides the height of the players jump.

@@ -112,6 +112,7 @@ type Player struct {
 	Mods           PlayerModuleList
 	RespawnPos     Pos
 	Hs             Hookshot
+	HeldObj        *entities.Moving
 }
 
 type Hookshot struct {
@@ -134,7 +135,7 @@ type PlayerModuleList struct {
 	Climb    PlayerModule
 	Hookshot PlayerModule
 	BlockPush PlayerModule
-	BlockPull
+	BlockPull PlayerModule
 }
 
 type PlayerModule struct {
@@ -147,7 +148,7 @@ var autoEquipMods bool = true
 
 //this is the default level for debugLevel,
 //value will be set in loadYamlConfigData()
-var debugLevel dlog.Level = dlog.WARN
+var debugLevel dlog.Level = /**dlog.VERBOSE/*/ dlog.ERROR/**/
 
 //var log dlog.Logger = dlog.NewLogger()
 
@@ -356,6 +357,7 @@ func loadScene() {
 	player.Body = entities.NewMoving(100, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
 		nil, 0, 0)
+	player.Body.Init()
 	player.State = player.RespawnFallState
 	player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
 	render.Draw(player.Body.R)
@@ -364,6 +366,7 @@ func loadScene() {
 	player.Hs.Body = entities.NewMoving(100, 100, 4, 4,
 		render.NewColorBox(4, 4, color.RGBA{0, 0, 255, 255}),
 		nil, 1, 0)
+	player.Hs.Body.Init()
 
 	player.Hs.Body.Speed = physics.NewVector(3, 3)
 	player.Body.UpdateLabel(labels.Player)
@@ -376,22 +379,26 @@ func loadScene() {
 	//player.Body.AttachX(player.Hs.Body,0)
 	render.Draw(player.Hs.Body.R)
 
-	level.LoadDevRoom()
-
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
-		nil, 780, 1)
+		nil, 2, 1)
 	render.Draw(block.Body.R)
+	block.Body.Init()
 	block.ExtraSolids = []collision.Label{labels.Player}
 	block.Body.UpdateLabel(labels.Block)
 
+	level.LoadDevRoom()
+
+	
+	
+
 	//Give player walljump for now
-	player.Mods.WallJump.Equipped = true
+	//player.Mods.WallJump.Equipped = true
 	//same for climbing
-	player.Mods.Climb.Equipped = true
+	//player.Mods.Climb.Equipped = true
 	// " "
-	player.Mods.Hookshot.Equipped = true
-	player.Mods.BlockPush.Equipped = true
+	//player.Mods.Hookshot.Equipped = true
+	//player.Mods.BlockPush.Equipped = true
 	{
 		m := &player.Mods
 		GiveMods(&m.BlockPush,
@@ -416,6 +423,8 @@ func main() {
 
 		hsOffX := player.Body.W/2 - player.Hs.Body.H/2
 		hsOffY := player.Body.H/2 - player.Hs.Body.H/2
+
+		
 
 		player.Body.Bind(func(id int, nothing interface{}) int {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
@@ -467,6 +476,8 @@ func main() {
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
 	oak.UseAspectRatio = true
+	block.Body.Init()
+	player.Body.Init()
 }
 
 func HsUpdater() {
@@ -498,4 +509,52 @@ func (b *PhysObject) BlockUpdater() {
 	//b.Body.ApplyFriction(1)
 	//b.Body.Delta.
 	b.DoGravity()
+}
+
+func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision.Label) (bool, event.CID) {
+	if len(targetLabels) > 1 {
+		dlog.Error("muliple labels not implemented yet")
+	}
+
+	id, ent  := event.ScanForEntity(func (e interface{}) bool {
+		if ent, ok := e.(*entities.Moving); ok {
+			if ent.Space.Label != targetLabels[0] {
+				dlog.Verb( "label check failed")
+				return false
+			}
+			if  ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <= maxDist {
+				dlog.Verb("distance condition fufilled")
+				// if the entity has the correct label, and is within the max distance:
+				return true
+			}
+			//dlog.Verb("d ==",d)
+		} else {
+			// if the entity is not a entities.Solid, we cannot grab it
+			dlog.Verb("type check failed")
+			return false
+		}
+		//this is just to stop "missing return at end of function"
+		return false
+	})
+
+	// if id is equal to -1, it means ScanForEntity was unable
+	// to find an entity within the given paramaters
+	if id == -1 {
+		dlog.Verb("ScanForEntity Failed")
+		return false, -1
+	}
+	//p.HeldObjId = event.CID(id)
+	if mov, ok := ent.(*entities.Moving); ok {
+		p.HeldObj = &*mov
+		dlog.Verb("HeldObj set")
+	} else {
+		dlog.Verb("ent exists, but is not *entities.Moving")
+		return false, -1
+	}
+
+	return true, event.CID(id)
+}
+
+func (p *Player) GrabObj(targetLabels... collision.Label) (bool, event.CID) {
+	return p.GrabObject(p.Body.W/2, p.Body.H/2,p.Body.W, targetLabels...)
 }
