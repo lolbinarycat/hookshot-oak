@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
@@ -272,6 +273,10 @@ var HsExtendRightState = PlayerState{
 			p.SetState(HsRetractRightState)
 
 		} else if p.Hs.ActiColls.RightWallHit {
+			if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
+				p.SetState(HsItemGrabRightState)
+				return
+			}
 			p.SetState(HsPullRightState)
 
 		} else {
@@ -292,7 +297,12 @@ var HsExtendLeftState = PlayerState{
 			p.SetState(HsRetractLeftState)
 
 		} else if p.Hs.ActiColls.LeftWallHit {
-			p.SetState(HsPullLeftState)
+			if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
+				p.SetState(HsItemGrabLeftState)
+			} else {
+				p.SetState(HsPullLeftState)
+			}
+
 
 		} else {
 			if p.TimeFromStateStart() > HsInputTime && isHsInput() {
@@ -350,5 +360,29 @@ var HsPullLeftState = PlayerState{
 		//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
 		p.Body.Delta.SetX(-p.Hs.Body.Speed.X())
 		//p.PullPlayer()
+	},
+}.denil()
+
+var HsItemGrabRightState = PlayerState{
+	Start: func(p *Player) {
+		fmt.Println(p.GrabObject(p.Hs.X, p.Hs.Y,16,labels.Block))
+	},
+	Loop: func(p *Player) {
+		p.HsItemGrabLoop(Right)
+	},
+	End: func(p *Player) {
+		p.HeldObj = nil
+	},
+}.denil()
+
+var HsItemGrabLeftState = PlayerState{
+	Start: func(p *Player) {
+		fmt.Println(p.GrabObject(p.Hs.X, p.Hs.Y,16,labels.Block))
+	},
+	Loop: func(p *Player) {
+		p.HsItemGrabLoop(Left)
+	},
+	End: func(p *Player) {
+		p.HeldObj = nil
 	},
 }.denil()

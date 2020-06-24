@@ -141,7 +141,8 @@ type PlayerModuleList struct {
 	Climb    PlayerModule
 	Hookshot PlayerModule
 	BlockPush PlayerModule
-	BlockPull PlayerModule
+	BlockPull,
+	HsItemGrab PlayerModule
 }
 
 type PlayerModule struct {
@@ -405,8 +406,8 @@ func loadScene() {
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
 		nil, 2, 1)
-	block2.Body = entities.NewMoving(200,130,10,20,
-		render.NewColorBox(10,20,color.RGBA{0,255,0,255}),
+	block2.Body = entities.NewMoving(200,130,16,32,
+		render.NewColorBox(16,32,color.RGBA{0,255,0,255}),
 		nil, 3,0)
 	block2.Body.Init()
 	block2.Body.UpdateLabel(labels.Block)
@@ -438,7 +439,8 @@ func loadScene() {
 			&m.Climb,
 			&m.Hookshot,
 			&m.WallJump,
-			&m.BlockPull)
+			&m.BlockPull,
+			&m.HsItemGrab)
 	}
 }
 
@@ -529,6 +531,7 @@ func (p *Player) EndHs() {
 	p.Hs.Active = false
 	p.Hs.X = 0
 	p.Hs.Y = 0
+	p.Hs.Body.Delta.SetPos(0,0)
 	p.SetState(AirState)
 }
 
@@ -592,11 +595,11 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 }
 
 func (p *Player) GrabObjRight(targetLabels... collision.Label) (bool, event.CID) {
-	return p.GrabObject(p.Body.W/2, p.Body.H/2,p.Body.W, targetLabels...)
+	return p.GrabObject(p.Body.W/2, p.Body.H/2,p.Body.W*2, targetLabels...)
 }
 
 func (p *Player) GrabObjLeft(targetLabels... collision.Label) (bool, event.CID) {
-	return p.GrabObject(-p.Body.W, -p.Body.H,20, targetLabels...)
+	return p.GrabObject(-p.Body.W, -p.Body.H,p.Body.W*2, targetLabels...)
 }
 
 // defines a playerstate with only a loop function
@@ -609,4 +612,44 @@ func (p *Player) GrabObjLeft(targetLabels... collision.Label) (bool, event.CID) 
 
 func (p *Player) DoStateLoop() {
 	p.State.Loop(p)
+}
+
+func (o *PhysObject) IsWallHit() bool {
+	if o.ActiColls.LeftWallHit || o.ActiColls.RightWallHit {
+		return true
+	}
+	return false
+}
+
+func (p *Player) IsHsInPlayer() bool {
+	xover, yover := p.Hs.Body.Space.Overlap(p.Body.Space)
+	if xover >= p.Hs.Body.W || yover >= p.Hs.Body.H {
+		return true
+	}
+	return false
+}
+
+func (p *Player) DoHsCheck() bool {
+	if p.IsHsInPlayer() || p.IsWallHit() || p.Hs.X <= 0 {
+		p.EndHs()
+		return true
+	}
+	return false
+}
+
+func (p *Player)HsItemGrabLoop(dir Direction) {
+	if (dir == Right && p.Hs.X <= 0)||(dir == Left && p.Hs.X >= 0) {
+		p.EndHs()
+		return
+	}
+
+	var coeff float64
+	if dir == Right {
+		coeff = -1
+	} else if dir == Left {
+		coeff = 1
+	}
+
+	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X()*coeff)
+	p.HeldObj.Delta.SetX(p.Hs.Body.Delta.X())
 }

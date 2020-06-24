@@ -16,6 +16,7 @@ const (
 var Solids []collision.Label= []collision.Label{
 	Ground,
 	NoWallJump,
+	Block,
 }
 
 var GravityAffected = []collision.Label{
