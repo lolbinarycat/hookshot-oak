@@ -103,6 +103,7 @@ func LoadDevRoom() {
 		nil, n())
 	death.Init()
 
+
 	ground.UpdateLabel(labels.Ground)
 	wall1.UpdateLabel(labels.Ground)
 	wall2.UpdateLabel(labels.Ground)

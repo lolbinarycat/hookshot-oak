@@ -46,7 +46,7 @@ var RespawnFallState = PlayerState{
 		}
 		p.DoGravity()
 	},
-}
+}.denil()
 
 var GroundState PlayerState
 
@@ -87,10 +87,10 @@ func GroundStateLoop(p *Player) {
 const BlockPushSpeed float64 = 1
 
 var BlockPushRightState = PlayerState{
-	Start: func(p *Player) { p.GrabObj(labels.Block) },
+	Start: func(p *Player) { p.GrabObjRight(labels.Block) },
 	Loop: func(p *Player) {
 		if oak.IsDown(currentControls.Right) == false {
-			block.Body.Delta.SetX(0)
+			p.HeldObj.Delta.SetX(0)
 			p.SetState(GroundState)
 			return
 		}
@@ -98,21 +98,22 @@ var BlockPushRightState = PlayerState{
 
 		p.HeldObj.Delta.SetX(BlockPushSpeed)
 	},
+	//End: func(p *Player) { p.HeldObj = nil},
 }.denil()
 
 var BlockPushLeftState = PlayerState{
+	Start: func(p *Player) { p.GrabObjLeft(labels.Block) },
 	Loop: func(p *Player) {
 		if oak.IsDown(currentControls.Left) == false {
-			block.Body.Delta.SetX(0)
+			p.HeldObj.Delta.SetX(0)
 			p.SetState(GroundState)
 			return
 		}
 		p.Body.Delta.SetX(-BlockPushSpeed)
 		//hitBlock := p.Body.HitLabel(labels.Block)
-		block.Body.Delta.SetX(-BlockPushSpeed)
-
+		p.HeldObj.Delta.SetX(-BlockPushSpeed)
 	},
-}
+}.denil()
 
 const BlockPullSpeed float64 = BlockPushSpeed
 
@@ -125,7 +126,7 @@ var BlockPullRightState = PlayerState{
 		}
 
 		p.Body.Delta.SetX(BlockPullSpeed)
-		block.Body.Delta.SetX(BlockPullSpeed)
+		p.HeldObj.Delta.SetX(BlockPullSpeed)
 	},
 }.denil()
 

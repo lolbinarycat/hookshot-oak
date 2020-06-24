@@ -96,7 +96,7 @@ type Pos struct {
 	Y float64
 }
 
-var block PhysObject //this is global temporaraly
+//var block PhysObject //this is global temporaraly
 
 var player Player
 
@@ -134,6 +134,8 @@ type PhysObject struct {
 	ExtraSolids []collision.Label
 }
 
+//type Body *entities.Moving
+
 type PlayerModuleList struct {
 	WallJump PlayerModule
 	Climb    PlayerModule
@@ -154,6 +156,9 @@ var autoEquipMods bool = true
 //value will be set in loadYamlConfigData()
 var debugLevel dlog.Level = /**dlog.VERBOSE/*/ dlog.ERROR/**/
 
+
+//temporary global
+var blocks []*PhysObject 
 //var log dlog.Logger = dlog.NewLogger()
 
 func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
@@ -365,6 +370,8 @@ func loadYamlConfigData(filename string) {
 	reader*/
 }
 
+var screenSpace *collision.Space
+
 func loadScene() {
 	//loadJsonLevelData("level.json")
 
@@ -393,13 +400,25 @@ func loadScene() {
 	//player.Body.AttachX(player.Hs.Body,0)
 	render.Draw(player.Hs.Body.R)
 
+	var block PhysObject
+	var block2 PhysObject
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
 		nil, 2, 1)
+	block2.Body = entities.NewMoving(200,130,10,20,
+		render.NewColorBox(10,20,color.RGBA{0,255,0,255}),
+		nil, 3,0)
+	block2.Body.Init()
+	block2.Body.UpdateLabel(labels.Block)
+	render.Draw(block2.Body.R)
+
 	render.Draw(block.Body.R)
 	block.Body.Init()
 	block.ExtraSolids = []collision.Label{labels.Player}
 	block.Body.UpdateLabel(labels.Block)
+	blocks = append(blocks,&block,&block2)
+
+	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
 	level.LoadDevRoom()
 
@@ -453,7 +472,6 @@ func main() {
 			if oak.IsDown(currentControls.Quit) {
 				if oak.IsDown(key.I) {
 					fmt.Println(player)
-					fmt.Println("block:\n", block)
 				}
 				os.Exit(0)
 			}
@@ -465,7 +483,12 @@ func main() {
 				player.Die()
 			}
 
-			block.DoCollision(block.BlockUpdater)
+			//blocks := collision.WithLabels(labels.Block)
+			for _, block := range blocks {
+				block.DoCollision(block.BlockUpdater)
+			//	block.CID.E().(PhysObject).DoCollision(block.BlockUpdater)
+			}
+			
 
 			player.DoCollision(player.DoStateLoop)
 
@@ -490,7 +513,6 @@ func main() {
 	//dlog.SetLogLevel()
 	oak.Init("platformer")
 	oak.UseAspectRatio = true
-	block.Body.Init()
 	player.Body.Init()
 }
 
@@ -569,8 +591,12 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 	return true, event.CID(id)
 }
 
-func (p *Player) GrabObj(targetLabels... collision.Label) (bool, event.CID) {
+func (p *Player) GrabObjRight(targetLabels... collision.Label) (bool, event.CID) {
 	return p.GrabObject(p.Body.W/2, p.Body.H/2,p.Body.W, targetLabels...)
+}
+
+func (p *Player) GrabObjLeft(targetLabels... collision.Label) (bool, event.CID) {
+	return p.GrabObject(-p.Body.W, -p.Body.H,20, targetLabels...)
 }
 
 // defines a playerstate with only a loop function
@@ -582,5 +608,5 @@ func (p *Player) GrabObj(targetLabels... collision.Label) (bool, event.CID) {
 }*/
 
 func (p *Player) DoStateLoop() {
-p.State.Loop(p)
+	p.State.Loop(p)
 }
