@@ -121,7 +121,11 @@ type Hookshot struct {
 	Active bool
 }
 
-type PlayerState func()
+type PlayerState struct {
+	Start, Loop, End PlayerStateFunc
+}
+
+type PlayerStateFunc func(*Player)
 
 type PhysObject struct {
 	Body      *entities.Moving
@@ -164,9 +168,9 @@ func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
 	}
 
 	if EnterLaunch {
-		p.SetState(p.WallJumpLaunchState)
+		p.SetState(WallJumpLaunchState)
 	} else {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 	}
 }
 
@@ -175,10 +179,10 @@ func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
 func (p *Player) DoCliming() {
 	//this is a hack, and should problebly be fixed
 	if int(p.TimeFromStateStart())%2 == 0 && p.ActiColls.LeftWallHit == false && p.ActiColls.RightWallHit == false {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 	}
 	if !oak.IsDown(currentControls.Climb) {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 	}
 	if oak.IsDown(currentControls.Up) {
 		p.Body.Delta.SetY(-ClimbSpeed)
@@ -209,19 +213,29 @@ func isHsInput() bool {
 
 func (p *Player) ifHsPressedStartHs() {
 	if isHsInput() {
-		p.SetState(p.HsStartState)
+		p.SetState(HsStartState)
 	}
 }
 
 func (p *Player) Jump() {
 	p.Body.Delta.ShiftY(-p.Body.Speed.Y())
 	p.Body.ShiftY(p.Body.Delta.Y())
-	player.SetState(p.JumpHeightDecState)
+	player.SetState(JumpHeightDecState)
 }
 
 func (p *Player) SetState(state PlayerState) {
+	defer func() {
+		if r := recover(); r != nil {
+			dlog.Error("error while setting state",r)
+			p.State = state
+		}
+	}()
+
+	p.State.End(p)
 	p.StateStartTime = time.Now()
+
 	p.State = state
+	p.State.Start(p)
 }
 
 func (p *Player) DoAirControls() {
@@ -254,7 +268,7 @@ func (p *Player) Die() {
 }
 
 func (p *Player) Respawn() {
-	p.SetState(p.RespawnFallState)
+	p.SetState(RespawnFallState)
 	p.Body.Delta.SetPos(0, 0)
 	p.Body.SetPos(player.RespawnPos.X, player.RespawnPos.Y)
 }
@@ -358,7 +372,7 @@ func loadScene() {
 		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
 		nil, 0, 0)
 	player.Body.Init()
-	player.State = player.RespawnFallState
+	player.State = RespawnFallState
 	player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
 	render.Draw(player.Body.R)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
@@ -411,6 +425,7 @@ func loadScene() {
 
 //var progStartTime time.Time
 func main() {
+	initStates()
 	//progStartTime = time.Now()
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
@@ -424,7 +439,6 @@ func main() {
 		hsOffX := player.Body.W/2 - player.Hs.Body.H/2
 		hsOffY := player.Body.H/2 - player.Hs.Body.H/2
 
-		
 
 		player.Body.Bind(func(id int, nothing interface{}) int {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
@@ -453,7 +467,7 @@ func main() {
 
 			block.DoCollision(block.BlockUpdater)
 
-			player.DoCollision(player.State)
+			player.DoCollision(player.DoStateLoop)
 
 			if !player.Hs.Active {
 				player.Hs.Body.SetPos(player.Body.X()+hsOffX, //+player.Hs.X,
@@ -493,7 +507,7 @@ func (p *Player) EndHs() {
 	p.Hs.Active = false
 	p.Hs.X = 0
 	p.Hs.Y = 0
-	p.SetState(p.AirState)
+	p.SetState(AirState)
 }
 
 func GiveMods(mods... *PlayerModule) {
@@ -557,4 +571,16 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 
 func (p *Player) GrabObj(targetLabels... collision.Label) (bool, event.CID) {
 	return p.GrabObject(p.Body.W/2, p.Body.H/2,p.Body.W, targetLabels...)
+}
+
+// defines a playerstate with only a loop function
+/*func (p *Player) NewJustLoopState(loopFunc PlayerStateFunc) PlayerState {
+	PlayerState{
+		Loop:loopFunc,
+		
+	}
+}*/
+
+func (p *Player) DoStateLoop() {
+p.State.Loop(p)
 }

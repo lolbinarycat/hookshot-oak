@@ -15,30 +15,30 @@ func (p *Player) StateCommon() {
 }
 
 
-var AirState = PlayerState{
-	Loop:func(p *Player) { //start in air state
+var AirState PlayerState
 
-	if player.PhysObject.ActiColls.GroundHit {
-		p.SetState(GroundState)
-		return
-	} else {
-		if p.Mods.WallJump.Equipped && p.ActiColls.HLabel != labels.NoWallJump {
-			if p.PhysObject.ActiColls.LeftWallHit {
-				p.SetState(WallSlideLeftState)
-			} else if p.PhysObject.ActiColls.RightWallHit {
-				p.SetState(WallSlideRightState)
+func AirStateLoop (p *Player) {
+
+		if player.PhysObject.ActiColls.GroundHit {
+			p.SetState(GroundState)
+			return
+		} else {
+			if p.Mods.WallJump.Equipped && p.ActiColls.HLabel != labels.NoWallJump {
+				if p.PhysObject.ActiColls.LeftWallHit {
+					p.SetState(WallSlideLeftState)
+				} else if p.PhysObject.ActiColls.RightWallHit {
+					p.SetState(WallSlideRightState)
+				}
 			}
+
+			p.DoGravity()
 		}
 
-		p.DoGravity()
-	}
+		p.DoAirControls()
+		p.StateCommon()
 
-	p.DoAirControls()
-	p.StateCommon()
-	},
-	Start:func(p *Player) {},
-	End:func(p *Player) {},
 }
+
 
 var RespawnFallState = PlayerState{
 	Loop:func (p *Player)  {
@@ -50,40 +50,41 @@ var RespawnFallState = PlayerState{
 	},
 }
 
-var  GroundState = PlayerState{
-	Loop:func(p *Player) {
+var GroundState PlayerState
+
+func GroundStateLoop(p *Player) {
 
 	if player.PhysObject.ActiColls.GroundHit == true {
-		if isJumpInput() {
-			p.Jump()
-		}
-
-	} else {
-		p.SetState(CoyoteState)
+	if isJumpInput() {
+		p.Jump()
 	}
+
+} else {
+	p.SetState(CoyoteState)
+}
 
 	if  p.ActiColls.HLabel == labels.Block {
-		if p.Mods.BlockPush.Equipped {
-			if p.ActiColls.RightWallHit  {
-				p.GrabObj(labels.Block) //temporay, until state overhaul
-				p.SetState(BlockPushRightState)
-			} else if p.ActiColls.LeftWallHit {
-				p.SetState(BlockPushLeftState)
-			}
+	if p.Mods.BlockPush.Equipped {
+		if p.ActiColls.RightWallHit  {
+			p.GrabObj(labels.Block) //temporay, until state overhaul
+			p.SetState(BlockPushRightState)
+		} else if p.ActiColls.LeftWallHit {
+			p.SetState(BlockPushLeftState)
 		}
 	}
+}
 
 	if oak.IsDown(currentControls.Left) {
-		player.Body.Delta.SetX(-player.Body.Speed.X())
-	} else if oak.IsDown(currentControls.Right) {
-		player.Body.Delta.SetX(player.Body.Speed.X())
-	} else {
-		player.Body.Delta.SetX(0)
-		//player.Body.Delta.X()/2)
-	}
+	player.Body.Delta.SetX(-player.Body.Speed.X())
+} else if oak.IsDown(currentControls.Right) {
+	player.Body.Delta.SetX(player.Body.Speed.X())
+} else {
+	player.Body.Delta.SetX(0)
+	//player.Body.Delta.X()/2)
+}
 	p.DoGravity()
 	p.StateCommon()
-},
+
 }
 
 const BlockPushSpeed float64 = 1
@@ -91,7 +92,7 @@ var BlockPushRightState = PlayerState{
 	Loop:func (p *Player)  {
 	if oak.IsDown(currentControls.Right) == false {
 		block.Body.Delta.SetX(0)
-		p.SetState(p.GroundState)
+		p.SetState(GroundState)
 		return
 	}
 	p.Body.Delta.SetX(BlockPushSpeed)
@@ -117,13 +118,13 @@ var BlockPushRightState = PlayerState{
 	//if hitBlock != nil {
 	//}
 },
-}
+}.denil()
 
 var BlockPushLeftState = PlayerState{
 	Loop: func (p *Player)  {
 	if oak.IsDown(currentControls.Left) == false {
 		block.Body.Delta.SetX(0)
-		p.SetState(p.GroundState)
+		p.SetState(GroundState)
 		return
 	}
 	p.Body.Delta.SetX(-BlockPushSpeed)
@@ -138,21 +139,21 @@ var BlockPullRightState = PlayerState{
 Loop:func (p *Player)  {
 	//if either button isn't pushed
 	if (oak.IsDown(currentControls.Climb) && oak.IsDown(currentControls.Right)) == false {
-		p.SetState(p.GroundState)
+		p.SetState(GroundState)
 		return
 	}
 
 	p.Body.Delta.SetX(BlockPullSpeed)
 	block.Body.Delta.SetX(BlockPullSpeed)
-}
-}
+},
+}.denil()
 
 //the function JumpHeightDecState is the state that decides the height of the players jump.
 //it does this by decreasing the gravity temporaraly when jump is held.
 var JumpHeightDecState = PlayerState{
 Loop:func (p *Player)  {
 	if p.TimeFromStateStart() > JumpHeightDecTime {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 		return
 	}
 	if oak.IsDown(currentControls.Jump) {
@@ -163,22 +164,22 @@ Loop:func (p *Player)  {
 	p.DoAirControls()
 	p.StateCommon()
 },
-}
+}.denil()
 
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var  CoyoteState = PlayerState{
 Loop:func (p *Player) {
 	if p.StateStartTime.Add(CoyoteTime).Before(time.Now()) {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 	}
 	//inherit code from AirState
 	//p.AirState()
 
 	if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
-		p.SetState(p.BlockPushRightState)
+		p.SetState(BlockPushRightState)
 	} else if p.ActiColls.LeftWallHit && p.ActiColls.HLabel == labels.Block {
-		p.SetState(p.BlockPushLeftState)
+		p.SetState(BlockPushLeftState)
 	}
 
 	if isJumpInput() {
@@ -187,12 +188,12 @@ Loop:func (p *Player) {
 
 	p.StateCommon()
 },
-}
+}.denil()
 
 var WallSlideLeftState = PlayerState{
 	Loop:func (p *Player)  {
 	if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
-		p.SetState(p.ClimbLeftState)
+		p.SetState(ClimbLeftState)
 		return
 	}
 	if isJumpInput() {
@@ -200,12 +201,12 @@ var WallSlideLeftState = PlayerState{
 		return
 	}
 	if p.ActiColls.LeftWallHit == false {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 		return
 	}
-	p.AirState()
+	AirState.Loop(p)
 	},
-}
+}.denil()
 
 var  WallSlideRightState = PlayerState{
 	Loop:func (p *Player) {
@@ -221,9 +222,9 @@ var  WallSlideRightState = PlayerState{
 		p.SetState(AirState)
 		return
 	}
-	p.AirState()
+	AirState.Loop(p)
 },
-}
+}.denil()
 
 //func WallJumpLaunchState is entered after you walljump,
 //temporaraly disabling your controls. This should prevent one sided
@@ -231,13 +232,13 @@ var  WallSlideRightState = PlayerState{
 var WallJumpLaunchState = PlayerState{
 	Loop:func (p *Player)  {
 	if p.TimeFromStateStart() >= WallJumpLaunchDuration {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 		return
 	}
 	p.DoGravity()
 	p.StateCommon()
 },
-}
+}.denil()
 
 var  ClimbRightState = PlayerState{
 Loop:func (p *Player) {
@@ -249,10 +250,10 @@ Loop:func (p *Player) {
 	p.Body.Delta.SetX(1)
 	//don't call StateCommon() here because it is called in DoCliming
 },
-}
+}.denil()
 
 var ClimbLeftState = PlayerState{
-func (p *Player) {
+	Loop:func (p *Player) {
 	if isJumpInput() {
 		p.WallJump(Right, oak.IsDown(currentControls.Right))
 		return
@@ -260,65 +261,66 @@ func (p *Player) {
 	p.Body.Delta.SetX(-1)
 	p.DoCliming()
 	//don't call StateCommon() because ... (see ClimbRightState)
-}
-}
+},
+}.denil()
+
 const HsStartTime time.Duration = time.Millisecond * 60
 var HsStartState = PlayerState{
 	Loop:func (p *Player)  {
 	if player.Mods.Hookshot.Equipped == false {
-		p.SetState(p.AirState)
+		p.SetState(AirState)
 		return
 	}
 	if p.TimeFromStateStart() > HsStartTime {
 		if oak.IsDown(currentControls.Right) {
-			p.SetState(p.HsExtendRightState)
+			p.SetState(HsExtendRightState)
 		} else if oak.IsDown(currentControls.Left) {
-			p.SetState(p.HsExtendLeftState)
+			p.SetState(HsExtendLeftState)
 		} else {
-			p.SetState(p.AirState)
+			p.SetState(AirState)
 		}
 	}
-}}
+}}.denil()
 
 var HsExtendRightState = PlayerState{
 	Loop:func (p *Player)  {
 	p.Hs.Active = true
 	if p.TimeFromStateStart() > HsExtendTime {
-		p.SetState(p.HsRetractRightState)
+		p.SetState(HsRetractRightState)
 
 	} else if p.Hs.ActiColls.RightWallHit {
-		p.SetState(p.HsPullRightState)
+		p.SetState(HsPullRightState)
 
 	} else {
 		if p.TimeFromStateStart() > HsInputTime && isHsInput() {
-			p.SetState(p.HsRetractRightState)
+			p.SetState(HsRetractRightState)
 			return
 		}
 		p.Body.Delta.SetPos(0,0)
 		p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
 	}
 	},
-}
+}.denil()
 
 var  HsExtendLeftState = PlayerState{
 	Loop:func (p *Player) {
 	p.Hs.Active = true
 	if p.TimeFromStateStart() > HsExtendTime {
-		p.SetState(p.HsRetractLeftState)
+		p.SetState(HsRetractLeftState)
 
 	} else if p.Hs.ActiColls.LeftWallHit {
-		p.SetState(p.HsPullLeftState)
+		p.SetState(HsPullLeftState)
 
 	} else {
 		if p.TimeFromStateStart() > HsInputTime && isHsInput() {
-			p.SetState(p.HsRetractLeftState)
+			p.SetState(HsRetractLeftState)
 			return
 		}
 		p.Body.Delta.SetPos(0,0)
 		p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
 	}
 	},
-}
+}.denil()
 
 var HsRetractRightState = PlayerState{
 	Loop:func (p *Player)  {
@@ -328,8 +330,8 @@ var HsRetractRightState = PlayerState{
 	}
 	p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
 	//p.Hs.X -= p.Hs.Body.Speed.X()
-}
-}
+},
+}.denil()
 
 var HsRetractLeftState = PlayerState{
 	Loop:func (p *Player)  {
@@ -340,7 +342,7 @@ var HsRetractLeftState = PlayerState{
 	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
 	//p.Hs.X -= p.Hs.Body.Speed.X()
 },
-}
+}.denil()
 
 //HsPullRightState is the state for when the hookshot is
 //pulling the player after having hit an object
@@ -366,5 +368,5 @@ var  HsPullLeftState = PlayerState{
 	p.Body.Delta.SetX(-p.Hs.Body.Speed.X())
 	//p.PullPlayer()
 	},
-}
+}.denil()
 
