@@ -138,9 +138,9 @@ type PhysObject struct {
 //type Body *entities.Moving
 
 type PlayerModuleList struct {
-	WallJump PlayerModule
-	Climb    PlayerModule
-	Hookshot PlayerModule
+	WallJump  PlayerModule
+	Climb     PlayerModule
+	Hookshot  PlayerModule
 	BlockPush PlayerModule
 	BlockPull,
 	HsItemGrab PlayerModule
@@ -152,15 +152,15 @@ type PlayerModule struct {
 }
 
 //whether modules should be automaticaly equipped when recived
-var autoEquipMods bool = true 
+var autoEquipMods bool = true
 
 //this is the default level for debugLevel,
 //value will be set in loadYamlConfigData()
-var debugLevel dlog.Level = /**/dlog.VERBOSE/*/ dlog.ERROR/**/
-
+var debugLevel dlog.Level = /** dlog.VERBOSE /*/ dlog.ERROR/**/
 
 //temporary global
-var blocks []*PhysObject 
+var blocks []*PhysObject
+
 //var log dlog.Logger = dlog.NewLogger()
 
 func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
@@ -233,7 +233,7 @@ func (p *Player) Jump() {
 func (p *Player) SetState(state PlayerState) {
 	defer func() {
 		if r := recover(); r != nil {
-			dlog.Error("error while setting state",r)
+			dlog.Error("error while setting state", r)
 			p.State = state
 		}
 	}()
@@ -409,9 +409,9 @@ func loadScene() {
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
 		nil, 2, 1)
-	block2.Body = entities.NewMoving(200,130,16,32,
-		render.NewColorBox(16,32,color.RGBA{0,255,0,255}),
-		nil, 3,0)
+	block2.Body = entities.NewMoving(200, 130, 16, 32,
+		render.NewColorBox(16, 32, color.RGBA{0, 255, 0, 255}),
+		nil, 3, 0)
 	block2.Body.Init()
 	block2.Body.UpdateLabel(labels.Block)
 	render.Draw(block2.Body.R)
@@ -420,14 +420,11 @@ func loadScene() {
 	block.Body.Init()
 	block.ExtraSolids = []collision.Label{labels.Player}
 	block.Body.UpdateLabel(labels.Block)
-	blocks = append(blocks,&block,&block2)
+	blocks = append(blocks, &block, &block2)
 
 	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
 	level.LoadDevRoom()
-
-	
-	
 
 	//Give player walljump for now
 	//player.Mods.WallJump.Equipped = true
@@ -463,7 +460,6 @@ func main() {
 		hsOffX := player.Body.W/2 - player.Hs.Body.H/2
 		hsOffY := player.Body.H/2 - player.Hs.Body.H/2
 
-
 		player.Body.Bind(func(id int, nothing interface{}) int {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
 			if oak.IsDown(key.L) {
@@ -491,9 +487,8 @@ func main() {
 			//blocks := collision.WithLabels(labels.Block)
 			for _, block := range blocks {
 				block.DoCollision(block.BlockUpdater)
-			//	block.CID.E().(PhysObject).DoCollision(block.BlockUpdater)
+				//	block.CID.E().(PhysObject).DoCollision(block.BlockUpdater)
 			}
-			
 
 			player.DoCollision(player.DoStateLoop)
 
@@ -534,11 +529,11 @@ func (p *Player) EndHs() {
 	p.Hs.Active = false
 	p.Hs.X = 0
 	p.Hs.Y = 0
-	p.Hs.Body.Delta.SetPos(0,0)
+	p.Hs.Body.Delta.SetPos(0, 0)
 	p.SetState(AirState)
 }
 
-func GiveMods(mods... *PlayerModule) {
+func GiveMods(mods ...*PlayerModule) {
 	for _, m := range mods {
 		m.Obtained = true
 		if autoEquipMods {
@@ -553,41 +548,31 @@ func (b *PhysObject) BlockUpdater() {
 	b.DoGravity()
 }
 
-func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision.Label) (bool, event.CID) {
+func (p *Player) GrabObject(xOff, yOff, maxDist float64, targetLabels ...collision.Label) (bool, event.CID) {
 	if len(targetLabels) > 1 {
 		dlog.Error("muliple labels not implemented yet")
 	}
 
-	//make the 
-	var id int
-	var ent interface{}
-
-	//we are going to start by checking for things close to the player,
-	//and then spread out
-	const cycles int = 1
-	for i := 0; i <= cycles;i++ {
-		divisor := math.Pow(2,float64(cycles - i))
-		dist := maxDist / divisor
-	id, ent  = event.ScanForEntity(func (e interface{}) bool {
+	id, ent := event.ScanForEntity(func(e interface{}) bool {
 		if ent, ok := e.(*entities.Moving); ok {
-			
+
 			if ent.Space.Label != targetLabels[0] {
-				dlog.Verb( "label check failed")
+				dlog.Verb("label check failed")
 				return false
 			}
 			if !(ent.Space.CID == p.ActiColls.LastHitH) {
-				dlog.Verb("id is equal. id:",ent.CID)
+				dlog.Verb("id is equal. id:", ent.CID)
 				return false
 			}
 
-			if  ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <=
-				dist + (math.Max(ent.W,ent.H)/divisor) {
+			if ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <=
+				maxDist+(math.Max(ent.W, ent.H)) {
 
-					dlog.Verb("distance condition fufilled")
-					// if the entity has the correct label, and is within the max distance:
-					return true
-				}
-			
+				dlog.Verb("distance condition fufilled")
+				// if the entity has the correct label, and is within the max distance:
+				return true
+			}
+
 			//dlog.Verb("d ==",d)
 		} else {
 			// if the entity is not a entities.Solid, we cannot grab it
@@ -597,9 +582,6 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 		//this is just to stop "missing return at end of function"
 		return false
 	})
-	}
-
-
 
 	// if id is equal to -1, it means ScanForEntity was unable
 	// to find an entity within the given paramaters
@@ -619,19 +601,39 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 	return true, event.CID(id)
 }
 
-func (p *Player) GrabObjRight(targetLabels... collision.Label) (bool, event.CID) {
-	return p.GrabObject(p.Body.W, p.Body.H,p.Body.W, targetLabels...)
+func (p *Player) GrabObjRight(targetLabels ...collision.Label) (bool, event.CID) {
+	return p.GrabObject(p.Body.W, p.Body.H, p.Body.W, targetLabels...)
 }
 
-func (p *Player) GrabObjLeft(targetLabels... collision.Label) (bool, event.CID) {
-	return p.GrabObject(-p.Body.W, -p.Body.H,p.Body.W, targetLabels...)
+func (p *Player) GrabObjLeft(targetLabels ...collision.Label) (bool, event.CID) {
+	return p.GrabObject(-p.Body.W, -p.Body.H, p.Body.W, targetLabels...)
+}
+
+// GetLastHitObj attempts to get an entity from a PhysObject's
+// ActiColls.LastHit* attribute. .LastHitH if Horis == true,
+// and .LastHitV if false.
+// it will return nil if unsucssesful.
+
+func (o *PhysObject) GetLastHitObj(Horis bool) *entities.Moving {
+	_, iface := event.ScanForEntity(func(ent interface{}) bool {
+		mov, ok := ent.(*entities.Moving)
+		if !ok {
+			return false
+		}
+		if (Horis && mov.Space.CID == o.ActiColls.LastHitH) ||
+			(!Horis && mov.Space.CID == o.ActiColls.LastHitV) {
+			return true
+		}
+		return false
+	})
+	return iface.(*entities.Moving)
 }
 
 // defines a playerstate with only a loop function
 /*func (p *Player) NewJustLoopState(loopFunc PlayerStateFunc) PlayerState {
 	PlayerState{
 		Loop:loopFunc,
-		
+
 	}
 }*/
 
@@ -662,8 +664,8 @@ func (p *Player) DoHsCheck() bool {
 	return false
 }
 
-func (p *Player)HsItemGrabLoop(dir Direction) {
-	if (dir == Right && p.Hs.X <= 0)||(dir == Left && p.Hs.X >= 0) {
+func (p *Player) HsItemGrabLoop(dir Direction) {
+	if (dir == Right && p.Hs.X <= 0) || (dir == Left && p.Hs.X >= 0) {
 		p.EndHs()
 		return
 	}
@@ -675,6 +677,6 @@ func (p *Player)HsItemGrabLoop(dir Direction) {
 		coeff = 1
 	}
 
-	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X()*coeff)
+	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X() * coeff)
 	p.HeldObj.Delta.SetX(p.Hs.Body.Delta.X())
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
@@ -374,7 +373,7 @@ var HsPullLeftState = PlayerState{
 
 var HsItemGrabRightState = PlayerState{
 	Start: func(p *Player) {
-		fmt.Println(p.GrabObject(p.Hs.X, p.Hs.Y,16,labels.Block))
+		p.HeldObj = p.Hs.GetLastHitObj(true)
 	},
 	Loop: func(p *Player) {
 		p.HsItemGrabLoop(Right)
@@ -386,7 +385,7 @@ var HsItemGrabRightState = PlayerState{
 
 var HsItemGrabLeftState = PlayerState{
 	Start: func(p *Player) {
-		fmt.Println(p.GrabObject(p.Hs.X, p.Hs.Y,16,labels.Block))
+		p.HeldObj = p.Hs.GetLastHitObj(true)
 	},
 	Loop: func(p *Player) {
 		p.HsItemGrabLoop(Left)
