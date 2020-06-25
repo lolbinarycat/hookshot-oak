@@ -15,6 +15,7 @@ import (
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/render"
 	//"github.com/rustyoz/svg"
+	"github.com/lolbinarycat/hookshot-oak/labels"
 )
 
 /*type Rect struct {
@@ -26,12 +27,7 @@ import (
 }*/
 
 
-const (
-	Ground collision.Label = iota
-	NoWallJump
-	Death
-	Checkpoint
-)
+
 
 //color constants
 var (
@@ -53,7 +49,7 @@ type JsonRect struct {
 }
 
 func newCounter(n int) func() event.CID {
-	var num = n
+	var num = n - 1
 	return func() event.CID {
 		num++
 		return event.CID(num)
@@ -84,29 +80,35 @@ func OpenFileAsBytes(filename string) ([]byte, error) {
 }
 
 func LoadDevRoom() {
-	n := newCounter(100)
+	n := newCounter(3)
 	fmt.Println(n())
 	ground := entities.NewSolid(10, 400, 500, 20,
 		render.NewColorBox(500, 20, Gray),
 		nil, n())
+	ground.Init()
 	wall1 := entities.NewSolid(40, 200, 20, 500,
 		render.NewColorBox(20, 500, Gray),
 		nil, n())
+	wall1.Init()
 	wall2 := entities.NewSolid(300, 200, 20, 500,
 		render.NewColorBox(20, 500, Gray),
 		nil, n())
+	wall2.Init()
 	checkpoint := entities.NewSolid(200, 350, 10, 10,
 		render.NewColorBox(10, 10, color.RGBA{0, 0, 255, 255}),
 		nil, n())
+	checkpoint.Init()
 	death := entities.NewSolid(340, 240, 50, 50,
 		render.NewColorBox(50, 50, DullRed),
 		nil, n())
+	death.Init()
 
-	ground.UpdateLabel(Ground)
-	wall1.UpdateLabel(Ground)
-	wall2.UpdateLabel(Ground)
-	checkpoint.UpdateLabel(Checkpoint)
-	death.UpdateLabel(Death)
+
+	ground.UpdateLabel(labels.Ground)
+	wall1.UpdateLabel(labels.Ground)
+	wall2.UpdateLabel(labels.Ground)
+	checkpoint.UpdateLabel(labels.Checkpoint)
+	death.UpdateLabel(labels.Death)
 
 	render.Draw(ground.R)
 	render.Draw(wall1.R, 1)
@@ -199,6 +201,7 @@ func LoadJsonLevelData(filename string,offsetX,offsetY float64) {
 			render.NewColorBox(int(rectData.W), int(rectData.H), color.RGBA{100, 100, 100, 255}),
 			nil, event.CID(i+10))
 
+		rect.Init()
 		rect.UpdateLabel(rectData.Label)
 		render.Draw(rect.R)
 	}
