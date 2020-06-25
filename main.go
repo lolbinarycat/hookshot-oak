@@ -156,7 +156,7 @@ var autoEquipMods bool = true
 
 //this is the default level for debugLevel,
 //value will be set in loadYamlConfigData()
-var debugLevel dlog.Level = /** dlog.VERBOSE /*/ dlog.ERROR/**/
+var debugLevel dlog.Level = /** dlog.VERBOSE /*/ dlog.INFO/**/ 
 
 //temporary global
 var blocks []*PhysObject
@@ -514,6 +514,13 @@ func main() {
 	}*/
 	//dlog.SetLogLevel()
 	//oak.SetAspectRatio(6/8)
+	//oak.ScreenWidth = 800
+	//oak.ScreenHeight = 600
+	oak.SetupConfig.Screen = oak.Screen{Height:600,Width:800}
+	go func () {
+		time.Sleep(10 * time.Second)
+		fmt.Println("W:",oak.ScreenWidth,"H:",oak.ScreenHeight)
+	}()
 	oak.Init("platformer")
 	//oak.UseAspectRatio = true
 
