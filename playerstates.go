@@ -380,6 +380,7 @@ var HsItemGrabRightState = PlayerState{
 	},
 	End: func(p *Player) {
 		p.HeldObj = nil
+		p.HeldObj.Delta.SetPos(0,0)
 	},
 }.denil()
 
@@ -391,6 +392,7 @@ var HsItemGrabLeftState = PlayerState{
 		p.HsItemGrabLoop(Left)
 	},
 	End: func(p *Player) {
+		p.HeldObj.Delta.SetPos(0,0)
 		p.HeldObj = nil
 	},
 }.denil()

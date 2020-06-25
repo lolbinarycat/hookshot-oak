@@ -484,6 +484,8 @@ func main() {
 				player.Die()
 			}
 
+			
+
 			//blocks := collision.WithLabels(labels.Block)
 			for _, block := range blocks {
 				block.DoCollision(block.BlockUpdater)
@@ -665,10 +667,12 @@ func (p *Player) DoHsCheck() bool {
 }
 
 func (p *Player) HsItemGrabLoop(dir Direction) {
-	if (dir == Right && p.Hs.X <= 0) || (dir == Left && p.Hs.X >= 0) {
+	if (dir == Right && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
+		(dir == Left && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) {
 		p.EndHs()
 		return
 	}
+
 
 	var coeff float64
 	if dir == Right {
