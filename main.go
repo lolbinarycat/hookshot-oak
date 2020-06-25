@@ -516,11 +516,11 @@ func main() {
 	//oak.SetAspectRatio(6/8)
 	//oak.ScreenWidth = 800
 	//oak.ScreenHeight = 600
+	err := oak.LoadConf("config.json")
+	if err != nil {
+		dlog.Error("failed to load config.json, error:",err)
+	}
 	oak.SetupConfig.Screen = oak.Screen{Height:600,Width:800}
-	go func () {
-		time.Sleep(10 * time.Second)
-		fmt.Println("W:",oak.ScreenWidth,"H:",oak.ScreenHeight)
-	}()
 	oak.Init("platformer")
 	//oak.UseAspectRatio = true
 
