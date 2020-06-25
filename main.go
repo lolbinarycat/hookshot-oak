@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"image/color"
+	"math"
 
 	//"math"
 	"os"
@@ -66,7 +67,7 @@ type ActiveCollisions struct {
 	RightWallHit       bool
 	CeilingHit         bool
 	HLabel, VLabel     collision.Label //these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
-	LastHitV, LastHitH collision.Space
+	LastHitV, LastHitH event.CID
 }
 
 type ControlConfig struct {
@@ -155,7 +156,7 @@ var autoEquipMods bool = true
 
 //this is the default level for debugLevel,
 //value will be set in loadYamlConfigData()
-var debugLevel dlog.Level = /**dlog.VERBOSE/*/ dlog.ERROR/**/
+var debugLevel dlog.Level = /**/dlog.VERBOSE/*/ dlog.ERROR/**/
 
 
 //temporary global
@@ -305,6 +306,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 		}
 		object.Body.Delta.SetX(0)
 		object.ActiColls.HLabel = hit.Label
+		object.ActiColls.LastHitH = hit.CID
 	}
 
 	object.Body.ShiftY(object.Body.Delta.Y())
@@ -320,6 +322,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 		}
 		object.Body.Delta.SetY(0)
 		object.ActiColls.VLabel = hit.Label
+		object.ActiColls.LastHitV = hit.CID
 	}
 
 }
@@ -555,17 +558,36 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 		dlog.Error("muliple labels not implemented yet")
 	}
 
-	id, ent  := event.ScanForEntity(func (e interface{}) bool {
+	//make the 
+	var id int
+	var ent interface{}
+
+	//we are going to start by checking for things close to the player,
+	//and then spread out
+	const cycles int = 1
+	for i := 0; i <= cycles;i++ {
+		divisor := math.Pow(2,float64(cycles - i))
+		dist := maxDist / divisor
+	id, ent  = event.ScanForEntity(func (e interface{}) bool {
 		if ent, ok := e.(*entities.Moving); ok {
+			
 			if ent.Space.Label != targetLabels[0] {
 				dlog.Verb( "label check failed")
 				return false
 			}
-			if  ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <= maxDist {
-				dlog.Verb("distance condition fufilled")
-				// if the entity has the correct label, and is within the max distance:
-				return true
+			if !(ent.Space.CID == p.ActiColls.LastHitH) {
+				dlog.Verb("id is equal. id:",ent.CID)
+				return false
 			}
+
+			if  ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <=
+				dist + (math.Max(ent.W,ent.H)/divisor) {
+
+					dlog.Verb("distance condition fufilled")
+					// if the entity has the correct label, and is within the max distance:
+					return true
+				}
+			
 			//dlog.Verb("d ==",d)
 		} else {
 			// if the entity is not a entities.Solid, we cannot grab it
@@ -575,6 +597,9 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 		//this is just to stop "missing return at end of function"
 		return false
 	})
+	}
+
+
 
 	// if id is equal to -1, it means ScanForEntity was unable
 	// to find an entity within the given paramaters
@@ -595,11 +620,11 @@ func (p *Player) GrabObject(xOff,yOff,maxDist float64, targetLabels... collision
 }
 
 func (p *Player) GrabObjRight(targetLabels... collision.Label) (bool, event.CID) {
-	return p.GrabObject(p.Body.W/2, p.Body.H/2,p.Body.W*2, targetLabels...)
+	return p.GrabObject(p.Body.W, p.Body.H,p.Body.W, targetLabels...)
 }
 
 func (p *Player) GrabObjLeft(targetLabels... collision.Label) (bool, event.CID) {
-	return p.GrabObject(-p.Body.W, -p.Body.H,p.Body.W*2, targetLabels...)
+	return p.GrabObject(-p.Body.W, -p.Body.H,p.Body.W, targetLabels...)
 }
 
 // defines a playerstate with only a loop function

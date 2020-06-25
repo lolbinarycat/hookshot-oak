@@ -88,7 +88,16 @@ func GroundStateLoop(p *Player) {
 const BlockPushSpeed float64 = 1
 
 var BlockPushRightState = PlayerState{
-	Start: func(p *Player) { p.GrabObjRight(labels.Block) },
+	Start: func(p *Player) {
+		p.GrabObjRight(labels.Block)
+		//var ok bool
+		// obj, ok := p.ActiColls.LastHitH.E().(*entities.Moving)
+		// if !ok  {
+		// 	dlog.Warn("unable to grab entity")
+		// } else {
+		// 	p.HeldObj = &*obj
+		// }
+	},
 	Loop: func(p *Player) {
 		if oak.IsDown(currentControls.Right) == false {
 			p.HeldObj.Delta.SetX(0)
