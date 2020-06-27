@@ -126,7 +126,7 @@ func LoadDevRoom() {
 
 	LoadJsonLevelData("level.json",-800,0)
 
-	err := LoadTmx("assets/level.tmx",0,0)
+	err := LoadTmx("assets/level.tmx")
 	if err != nil {
 		panic(err)
 	}
@@ -220,7 +220,7 @@ func LoadJsonLevelData(filename string,offsetX,offsetY float64) {
 	}
 }
 
-func LoadTmx(mapPath string,xOff int,yOff int) error {
+func LoadTmx(mapPath string) error {
 	/*mapReader, err := fileutil.Open(mapPath)
 	if err != nil {
 		return err
@@ -235,7 +235,7 @@ func LoadTmx(mapPath string,xOff int,yOff int) error {
 		return err
 	}
 	fmt.Println(levelMap)
-	
+
 
 	fmt.Println(levelMap.TileHeight,levelMap.TileWidth)
 	// for each _Loop, the contents of the loop are ran once for every _
@@ -250,8 +250,9 @@ func LoadTmx(mapPath string,xOff int,yOff int) error {
 				if tile.Nil == true {
 					continue BlockLoop
 				} else {
-					e := entities.NewSolid(float64(j*levelMap.TileWidth),
-						float64(i*levelMap.TileHeight),
+					e := entities.NewSolid(
+						float64(j*levelMap.TileWidth+layer.OffsetX),
+						float64(i*levelMap.TileHeight+layer.OffsetY),
 						float64(levelMap.TileWidth),
 						float64(levelMap.TileHeight),
 						render.NewColorBox(levelMap.TileWidth,levelMap.TileHeight,
