@@ -2,12 +2,13 @@ package camera
 
 import (
 	//"math"
+	"math"
 	"time"
 
 	oak "github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/alg/intgeom"
 	"github.com/oakmound/oak/v2/entities"
-	//"github.com/oakmound/oak/v2/key"
+	"github.com/oakmound/oak/v2/key"
 )
 
 const (
@@ -23,41 +24,42 @@ func StartCameraLoop(playerBody *entities.Moving) {
 }
 
 func cameraLoop(tick time.Ticker, playerBody *entities.Moving) {
-	//camPosX := 0
-	//camPosY := 0
-	//playerWidth := playerBody.W
-	//playerHeight := playerBody.H
+	camPosX := 0
+	camPosY := 0
+	playerWidth := playerBody.W
+	playerHeight := playerBody.H
 
-	var transitioning bool
+	/*var transitioning bool
 	var totalTransitionDelta intgeom.Point2
-	var transitionDelta intgeom.Point2
+	var transitionDelta intgeom.Point2*/
 
 	for {
-		//<-tick.C
+		<-tick.C
 
-		//camPosX = int(math.Floor((playerBody.X()+playerWidth/2)/float64(WindowWidth)))
-		//oak.SetScreen(int(player.Body.X()),int(player.Body.Y()))
-		// if int(playerBody.X())/WindowWidth < camPosX+1 {
-		// 	camPosX--
-		// 	//oak.SetScreen(WindowWidth*camPosX, 0)
-		// } else if int(playerBody.X())/WindowWidth > camPosX+1 {
-		// 	camPosX++
-		// } else if false && int(playerBody.Y()) > camPosY*WindowHeight+WindowHeight {
-		// 	camPosY++
-		// } else if false && int(playerBody.Y()) < camPosY*WindowHeight {
-		// 	camPosY--
-		// } else {
-		//	continue //if no camera position change occured, don't update the screen positon
-		//}
-		/*oak.SetScreen(WindowWidth*camPosX, WindowHeight*camPosY)
+		camPosX = int(math.Floor((playerBody.X()+playerWidth/2)/float64(WindowWidth)))
+		camPosY = int(math.Floor((playerBody.Y()+playerHeight/2)/float64(WindowHeight)))
+		
+		/*if int(playerBody.X())/WindowWidth < camPosX+1 {
+		 	camPosX--
+		 	//oak.SetScreen(WindowWidth*camPosX, 0)
+		 } else if int(playerBody.X())/WindowWidth > camPosX+1 {
+		 	camPosX++
+		 } else if false && int(playerBody.Y()) > camPosY*WindowHeight+WindowHeight {
+		 	camPosY++
+		 } else if false && int(playerBody.Y()) < camPosY*WindowHeight {
+		 	camPosY--
+		 } else {
+			continue //if no camera position change occured, don't update the screen positon
+		}*/
+		oak.SetScreen(WindowWidth*camPosX, WindowHeight*camPosY)
 
 		oak.SetViewportBounds(camPosX*WindowWidth,camPosX*WindowHeight,
 			camPosX*WindowWidth+WindowHeight,camPosX*WindowHeight+WindowHeight )
 		if oak.IsDown(key.RightShift) {
 			oak.SetScreen(int(playerBody.X())-WindowWidth/2,0)
-		}*/
+		}
 
-		dir, ok := isOffScreen(playerBody)
+		/*dir, ok := isOffScreen(playerBody)
 		if !transitioning && ok {
 			transitioning = true
 			totalTransitionDelta = intgeom.Point2{oak.ScreenWidth, oak.ScreenHeight}.Mul(intgeom.Point2{dir.X(), dir.Y()})
@@ -73,7 +75,7 @@ func cameraLoop(tick time.Ticker, playerBody *entities.Moving) {
 				transitioning = false
 			}
 
-		}
+		}*/
 
 	}
 }

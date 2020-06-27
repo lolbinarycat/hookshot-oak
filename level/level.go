@@ -14,7 +14,9 @@ import (
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/render"
+
 	//"github.com/rustyoz/svg"
+	"github.com/lafriks/go-tiled"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 )
 
@@ -86,6 +88,12 @@ func LoadDevRoom() {
 		render.NewColorBox(500, 20, Gray),
 		nil, n())
 	ground.Init()
+
+	//wallSprite, err := render.LoadSprite("assets/images","wall.png")
+
+	//dlog.ErrorCheck(err)
+	//wallSprite.Modify(mod.Scale(2,2))
+
 	wall1 := entities.NewSolid(40, 200, 20, 500,
 		render.NewColorBox(20, 500, Gray),
 		nil, n())
@@ -117,6 +125,11 @@ func LoadDevRoom() {
 	render.Draw(death.R)
 
 	LoadJsonLevelData("level.json",-800,0)
+
+	err := LoadTmx("assets/level3.tmx",0,0)
+	if err != nil {
+		panic(err)
+	}
 
 	//err := loadSvg("level.svg", -800, 0)
 	//dlog.ErrorCheck(err)
@@ -207,3 +220,20 @@ func LoadJsonLevelData(filename string,offsetX,offsetY float64) {
 	}
 }
 
+func LoadTmx(mapPath string,xOff int,yOff int) error {
+	/*mapReader, err := fileutil.Open(mapPath)
+	if err != nil {
+		return err
+	}
+
+	gameMap, err := tiled.LoadFromReader("assets",mapReader)
+	if err != nil {
+		return err
+	}*/
+	gameMap, err := tiled.LoadFromFile(mapPath)
+	if err != nil {
+		return err
+	}
+	fmt.Println(gameMap)
+	return nil
+}

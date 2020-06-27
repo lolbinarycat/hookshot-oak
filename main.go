@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 
 	//"math"
 	"os"
@@ -13,7 +14,8 @@ import (
 	//"compress/flate"
 	//"gopkg.in/yaml.v2"
 
-	"github.com/oakmound/oak/v2"
+	//"github.com/disintegration/gift"
+	oak "github.com/oakmound/oak/v2"
 
 	"github.com/oakmound/oak/v2/collision"
 	"github.com/oakmound/oak/v2/dlog"
@@ -66,8 +68,8 @@ type ActiveCollisions struct {
 	LeftWallHit        bool
 	RightWallHit       bool
 	CeilingHit         bool
-	HLabel, VLabel     collision.Label //these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
-	LastHitV, LastHitH event.CID
+	HLabel, VLabel     collision.Label // these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
+	LastHitV, LastHitH event.CID // cid of the last collision space that was hit
 }
 
 type ControlConfig struct {
@@ -406,6 +408,10 @@ func loadScene() {
 
 	var block PhysObject
 	var block2 PhysObject
+	//(mod.ResizeToFit(16*2,16*2, gift.NearestNeighborResampling))//.(*render.Sprite)
+	//if err != nil {
+	//	panic(err)
+	//}
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
 		nil, 2, 1)
@@ -421,6 +427,7 @@ func loadScene() {
 	block.ExtraSolids = []collision.Label{labels.Player}
 	block.Body.UpdateLabel(labels.Block)
 	blocks = append(blocks, &block, &block2)
+
 
 	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
@@ -446,11 +453,12 @@ func loadScene() {
 
 //var progStartTime time.Time
 func main() {
+	dlog.SetDebugLevel(debugLevel)
 	initStates()
 	//progStartTime = time.Now()
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
-		dlog.SetDebugLevel(debugLevel)
+		
 		loadScene()
 
 		camera.StartCameraLoop(player.Body)
@@ -466,8 +474,8 @@ func main() {
 				//oak.ScreenWidth = 800
 				//oak.ScreenHeight = 600
 				//oak.ChangeWindow(800,600)
-				oak.MoveWindow(20, 20, 800, 600)
-				oak.SetAspectRatio(16 / 9)
+				//oak.MoveWindow(20, 20, 800, 600)
+				//oak.SetAspectRatio(16 / 9)
 
 			}
 			if oak.IsDown(currentControls.Quit) {
@@ -483,8 +491,6 @@ func main() {
 			if player.Body.HitLabel(labels.Death) != nil {
 				player.Die()
 			}
-
-			
 
 			//blocks := collision.WithLabels(labels.Block)
 			for _, block := range blocks {
@@ -508,12 +514,27 @@ func main() {
 	}, func() (string, *scene.Result) {
 		return "platformer", nil
 	})
+
+	oak.AddCommand("kill", func(args []string) {
+		player.Die()
+	})
+	oak.AddCommand("setAspectRatio", func(args []string) {
+		if len(args) != 1 {
+			fmt.Println("Usage: setAspectRatio .75")
+		}
+		xToY, err := strconv.ParseFloat(args[0], 64)
+		if err != nil {
+			fmt.Println("failed to parse floating point ratio")
+		}
+		oak.SetAspectRatio(xToY)
+		oak.ChangeWindow(oak.ScreenWidth, oak.ScreenHeight)
+	})
 	/*err := oak.SetBorderless(true)
 	if err != nil {
 		panic(err)
 	}*/
 	//dlog.SetLogLevel()
-	//oak.SetAspectRatio(6/8)
+	//oak.SetAspectRatio(float64(6/8))
 	//oak.ScreenWidth = 800
 	//oak.ScreenHeight = 600
 	err := oak.LoadConf("config.json")
@@ -521,8 +542,10 @@ func main() {
 		dlog.Error("failed to load config.json, error:",err)
 	}
 	oak.SetupConfig.Screen = oak.Screen{Height:600,Width:800}
+	oak.SetAspectRatio(1.333)
 	oak.Init("platformer")
-	//oak.UseAspectRatio = true
+
+
 
 }
 
