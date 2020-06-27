@@ -36,8 +36,12 @@ func cameraLoop(tick time.Ticker, playerBody *entities.Moving) {
 	for {
 		<-tick.C
 
-		camPosX = int(math.Floor((playerBody.X()+playerWidth/2)/float64(WindowWidth)))
-		camPosY = int(math.Floor((playerBody.Y()+playerHeight/2)/float64(WindowHeight)))
+		camPosX = int(math.Floor(
+			(playerBody.X()+playerWidth/2)/float64(WindowWidth),
+		))
+		camPosY = int(math.Floor(
+			(playerBody.Y()+playerHeight/2)/float64(WindowHeight),
+		))
 		
 		/*if int(playerBody.X())/WindowWidth < camPosX+1 {
 		 	camPosX--
@@ -53,8 +57,8 @@ func cameraLoop(tick time.Ticker, playerBody *entities.Moving) {
 		}*/
 		oak.SetScreen(WindowWidth*camPosX, WindowHeight*camPosY)
 
-		oak.SetViewportBounds(camPosX*WindowWidth,camPosX*WindowHeight,
-			camPosX*WindowWidth+WindowHeight,camPosX*WindowHeight+WindowHeight )
+		//oak.SetViewportBounds(camPosX*WindowWidth,camPosX*WindowHeight,
+		//	camPosX*WindowWidth+WindowHeight,camPosX*WindowHeight+WindowHeight )
 		if oak.IsDown(key.RightShift) {
 			oak.SetScreen(int(playerBody.X())-WindowWidth/2,0)
 		}

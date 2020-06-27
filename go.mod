@@ -6,6 +6,7 @@ replace github.com/lolbinarycat/utils => /home/binarycat/go/src/github.com/lolbi
 
 require (
 	github.com/disintegration/gift v1.2.1 // indirect
+	github.com/fyne-io/mobile v0.0.2
 	github.com/hajimehoshi/go-mp3 v0.3.0 // indirect
 	github.com/lafriks/go-tiled v0.1.0
 	github.com/lolbinarycat/utils v0.0.0-00010101000000-000000000000

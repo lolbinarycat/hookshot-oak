@@ -84,24 +84,24 @@ func OpenFileAsBytes(filename string) ([]byte, error) {
 func LoadDevRoom() {
 	n := newCounter(3)
 	fmt.Println(n())
-	ground := entities.NewSolid(10, 400, 500, 20,
-		render.NewColorBox(500, 20, Gray),
-		nil, n())
-	ground.Init()
+	// ground := entities.NewSolid(10, 400, 500, 20,
+	// 	render.NewColorBox(500, 20, Gray),
+	// 	nil, n())
+	// ground.Init()
 
 	//wallSprite, err := render.LoadSprite("assets/images","wall.png")
 
 	//dlog.ErrorCheck(err)
 	//wallSprite.Modify(mod.Scale(2,2))
 
-	wall1 := entities.NewSolid(40, 200, 20, 500,
-		render.NewColorBox(20, 500, Gray),
-		nil, n())
-	wall1.Init()
-	wall2 := entities.NewSolid(300, 200, 20, 500,
-		render.NewColorBox(20, 500, Gray),
-		nil, n())
-	wall2.Init()
+	// wall1 := entities.NewSolid(40, 200, 20, 500,
+	// 	render.NewColorBox(20, 500, Gray),
+	// 	nil, n())
+	// wall1.Init()
+	// wall2 := entities.NewSolid(300, 200, 20, 500,
+	// 	render.NewColorBox(20, 500, Gray),
+	// 	nil, n())
+	// wall2.Init()
 	checkpoint := entities.NewSolid(200, 350, 10, 10,
 		render.NewColorBox(10, 10, color.RGBA{0, 0, 255, 255}),
 		nil, n())
@@ -112,19 +112,19 @@ func LoadDevRoom() {
 	death.Init()
 
 
-	ground.UpdateLabel(labels.Ground)
-	wall1.UpdateLabel(labels.Ground)
-	wall2.UpdateLabel(labels.Ground)
+	//ground.UpdateLabel(labels.Ground)
+	//wall1.UpdateLabel(labels.Ground)
+	//wall2.UpdateLabel(labels.Ground)
 	checkpoint.UpdateLabel(labels.Checkpoint)
 	death.UpdateLabel(labels.Death)
 
-	render.Draw(ground.R)
-	render.Draw(wall1.R, 1)
-	render.Draw(wall2.R, 1)
+	//render.Draw(ground.R)
+	//render.Draw(wall1.R, 1)
+	//render.Draw(wall2.R, 1)
 	render.Draw(checkpoint.R, 1)
 	render.Draw(death.R)
 
-	LoadJsonLevelData("level.json",-800,0)
+	//LoadJsonLevelData("level.json",-800,0)
 
 	err := LoadTmx("assets/level.tmx")
 	if err != nil {
@@ -178,7 +178,8 @@ func LoadDevRoom() {
 // 	return nil
 // }
 
-//level data is to be stored as json, problebly compressed in the final game
+// ~~level data is to be stored as json, problebly compressed in the final game~~
+// obsolete, do not use
 func LoadJsonLevelData(filename string,offsetX,offsetY float64) {
 	dlog.Info("loading json level data from", filename)
 	file, err := os.Open(filename)
@@ -250,17 +251,22 @@ func LoadTmx(mapPath string) error {
 				if tile.Nil == true {
 					continue BlockLoop
 				} else {
+					sprite, err := render.LoadSprite("assets/images","wall.png")
+					if err != nil {
+						return err
+					}
 					e := entities.NewSolid(
 						float64(j*levelMap.TileWidth+layer.OffsetX),
 						float64(i*levelMap.TileHeight+layer.OffsetY),
 						float64(levelMap.TileWidth),
 						float64(levelMap.TileHeight),
-						render.NewColorBox(levelMap.TileWidth,levelMap.TileHeight,
-							color.RGBA{100,100,120,255}),
+						//render.NewColorBox(levelMap.TileWidth,levelMap.TileHeight
+						//color.RGBA{100,100,120,255}),
+						sprite,
 						nil, event.CID(100+tileIndex))
 					e.Init()
 					e.UpdateLabel(labels.Ground)
-					_, err := render.Draw(e.R,1)
+					_, err = render.Draw(e.R,1)
 					if err != nil {
 						panic(err)
 					}
