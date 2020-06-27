@@ -126,7 +126,7 @@ func LoadDevRoom() {
 
 	LoadJsonLevelData("level.json",-800,0)
 
-	err := LoadTmx("assets/level3.tmx",0,0)
+	err := LoadTmx("assets/level.tmx",0,0)
 	if err != nil {
 		panic(err)
 	}
@@ -230,10 +230,51 @@ func LoadTmx(mapPath string,xOff int,yOff int) error {
 	if err != nil {
 		return err
 	}*/
-	gameMap, err := tiled.LoadFromFile(mapPath)
+	levelMap, err := tiled.LoadFromFile(mapPath)
 	if err != nil {
 		return err
 	}
-	fmt.Println(gameMap)
+	fmt.Println(levelMap)
+	
+
+	fmt.Println(levelMap.TileHeight,levelMap.TileWidth)
+	// for each _Loop, the contents of the loop are ran once for every _
+	LayerLoop: for _, layer := range levelMap.Layers {
+		/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
+			BlockLoop: for j := 0; j < levelMap.Width; j++ {
+				tileIndex := j+(i*levelMap.Width)
+				if tileIndex >= len(layer.Tiles) {
+					continue LayerLoop
+				}
+				tile := layer.Tiles[tileIndex]
+				if tile.Nil == true {
+					continue BlockLoop
+				} else {
+					e := entities.NewSolid(float64(j*levelMap.TileWidth),
+						float64(i*levelMap.Height),
+						float64(levelMap.TileWidth),
+						float64(levelMap.TileHeight),
+						render.NewColorBox(levelMap.TileWidth,levelMap.TileHeight,
+							color.RGBA{100,100,120,255}),
+						nil, event.CID(100+tileIndex))
+					e.Init()
+					e.UpdateLabel(labels.Ground)
+					_, err := render.Draw(e.R,1)
+					if err != nil {
+						panic(err)
+					}
+					
+				}
+			}
+		}
+	}
 	return nil
 }
+
+/*func LoadTmxLayer(layer *tiled.Layer,parentMap *tiled.Map) {
+	for i, tile := layer.Tiles {
+		} else {
+			entities.NewSolid((parentMap.TileWidth*i)%parentMap.Width, y float64, w float64, h float64, r render.Renderable, tree *collision.Tree, cid event.CID)
+		}
+	}
+}*/
