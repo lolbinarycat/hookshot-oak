@@ -530,6 +530,9 @@ func main() {
 		oak.SetAspectRatio(xToY)
 		oak.ChangeWindow(oak.ScreenWidth, oak.ScreenHeight)
 	})
+
+
+	/*err := oak.SetBorderless(true
 	/*err := oak.SetBorderless(true)
 	if err != nil {
 		panic(err)
@@ -543,11 +546,8 @@ func main() {
 		dlog.Error("failed to load config.json, error:",err)
 	}
 	oak.SetupConfig.Screen = oak.Screen{Height:600,Width:800}
-	oak.SetAspectRatio(1.333)
+	oak.SetAspectRatio(800/600)
 	oak.Init("platformer")
-
-
-
 }
 
 func HsUpdater() {
