@@ -546,7 +546,7 @@ func main() {
 		dlog.Error("failed to load config.json, error:",err)
 	}
 	oak.SetupConfig.Screen = oak.Screen{Height:600,Width:800}
-	oak.SetAspectRatio(800/600)
+	oak.SetAspectRatio(8.0/6.0)
 	oak.Init("platformer")
 }
 
