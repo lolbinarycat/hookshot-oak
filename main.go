@@ -449,6 +449,8 @@ func loadScene() {
 			&m.BlockPull,
 			&m.HsItemGrab)
 	}
+	render.NewDrawFPS()
+	//render.Draw(fps)
 }
 
 //var progStartTime time.Time
@@ -458,7 +460,6 @@ func main() {
 	//progStartTime = time.Now()
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
-		
 		loadScene()
 
 		camera.StartCameraLoop(player.Body)

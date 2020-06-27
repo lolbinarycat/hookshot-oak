@@ -251,7 +251,7 @@ func LoadTmx(mapPath string,xOff int,yOff int) error {
 					continue BlockLoop
 				} else {
 					e := entities.NewSolid(float64(j*levelMap.TileWidth),
-						float64(i*levelMap.Height),
+						float64(i*levelMap.TileHeight),
 						float64(levelMap.TileWidth),
 						float64(levelMap.TileHeight),
 						render.NewColorBox(levelMap.TileWidth,levelMap.TileHeight,
@@ -263,7 +263,6 @@ func LoadTmx(mapPath string,xOff int,yOff int) error {
 					if err != nil {
 						panic(err)
 					}
-					
 				}
 			}
 		}
