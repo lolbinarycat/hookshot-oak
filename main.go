@@ -29,6 +29,8 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
+
+	"github.com/lolbinarycat/utils"
 )
 
 const JumpHeight int = 6
@@ -86,6 +88,8 @@ var currentControls ControlConfig = ControlConfig{
 	Climb: key.LeftShift,
 	Quit:  key.Q,
 }
+
+var curCtrls = &currentControls
 
 type Direction uint8
 
@@ -145,6 +149,7 @@ type PlayerModuleList struct {
 	Hookshot  PlayerModule
 	BlockPush PlayerModule
 	BlockPull,
+	Fly,
 	HsItemGrab PlayerModule
 }
 
@@ -410,7 +415,8 @@ func loadScene() {
 			&m.Hookshot,
 			&m.WallJump,
 			&m.BlockPull,
-			&m.HsItemGrab)
+			&m.HsItemGrab,
+			&m.Fly)
 	}
 	render.NewDrawFPS()
 	//render.Draw(fps)
@@ -493,6 +499,17 @@ func main() {
 		oak.SetAspectRatio(xToY)
 		oak.ChangeWindow(oak.ScreenWidth, oak.ScreenHeight)
 	})
+	oak.AddCommand("fly", func(args []string) {
+		if player.Mods.Fly.Equipped {
+			if len(args) == 1 &&
+				utils.EqualsAny(args[0],"stop","end","halt") {
+
+				player.SetState(AirState)
+			} else {
+				player.SetState(FlyState)
+			}
+		}
+	})
 
 
 	/*err := oak.SetBorderless(true
@@ -545,6 +562,7 @@ func (b *PhysObject) BlockUpdater() {
 	b.DoGravity()
 }
 
+// Depreciated
 func (p *Player) GrabObject(xOff, yOff, maxDist float64, targetLabels ...collision.Label) (bool, event.CID) {
 	if len(targetLabels) > 1 {
 		dlog.Error("muliple labels not implemented yet")

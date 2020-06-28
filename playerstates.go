@@ -14,6 +14,29 @@ func (p *Player) StateCommon() {
 	p.ifHsPressedStartHs()
 }
 
+const FlySpeed = 4
+
+var FlyState = PlayerState{
+	Loop: func(p *Player) {
+		if oak.IsDown(currentControls.Up) {
+			p.Body.Delta.SetY(-FlySpeed)
+		} else if oak.IsDown(curCtrls.Down) {
+			p.Body.Delta.SetY(FlySpeed)
+		} else {
+			p.Body.Delta.SetY(0)
+		}
+
+		if oak.IsDown(curCtrls.Left) {
+			p.Body.Delta.SetX(-FlySpeed)
+		} else if oak.IsDown(curCtrls.Right) {
+			p.Body.Delta.SetX(FlySpeed)
+		} else {
+			p.Body.Delta.SetX(0)
+		}
+	},
+}.denil()
+
+
 var AirState PlayerState
 
 func AirStateLoop(p *Player) {
