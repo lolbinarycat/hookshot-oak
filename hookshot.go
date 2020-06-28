@@ -53,7 +53,7 @@ func (p *Player) HsExtendLoop(dir Direction) {
 			p.SetState(HsItemGrabLeftState)
 			return
 		} else {
-			p.SetState(HsPullRightState)
+			p.SetState(HsPullLeftState)
 			return
 		}
 	} else if p.TimeFromStateStart() > HsInputTime && isHsInput() {
@@ -144,7 +144,7 @@ var HsPullRightState = PlayerState{
 		p.Body.Delta.SetX(p.Hs.Body.Speed.X())
 		//p.PullPlayer()
 	},
-}
+}.denil()
 
 var HsPullLeftState = PlayerState{
 	Loop: func(p *Player) {
