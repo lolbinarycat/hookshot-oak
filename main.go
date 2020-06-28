@@ -349,8 +349,11 @@ var screenSpace *collision.Space
 func loadScene() {
 	//loadJsonLevelData("level.json")
 
+	playerSprite := utils.Check2(
+		render.LoadSprite("assets/images","player_new.png")).(render.Renderable)
+
 	player.Body = entities.NewMoving(100, 100, 16, 16,
-		render.NewColorBox(16, 16, color.RGBA{255, 0, 0, 255}),
+		playerSprite,
 		nil, 0, 0)
 	player.Body.Init()
 	player.State = RespawnFallState
@@ -372,7 +375,7 @@ func loadScene() {
 
 	//player.Body.Doodad.Point.Attach(player.Hs.Body)
 	//player.Body.AttachX(player.Hs.Body,0)
-	render.Draw(player.Hs.Body.R)
+	render.Draw(player.Hs.Body.R,-1)
 
 	var block PhysObject
 	var block2 PhysObject
