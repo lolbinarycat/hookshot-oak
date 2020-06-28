@@ -647,6 +647,7 @@ func (o *PhysObject) IsWallHit() bool {
 	return false
 }
 
+// Depreciated
 func (p *Player) IsHsInPlayer() bool {
 	xover, yover := p.Hs.Body.Space.Overlap(p.Body.Space)
 	if xover >= p.Hs.Body.W || yover >= p.Hs.Body.H {
@@ -663,22 +664,5 @@ func (p *Player) DoHsCheck() bool {
 	return false
 }
 
-func (p *Player) HsItemGrabLoop(dir Direction) {
-	if (dir == Right && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
-		(dir == Left && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) {
-		p.EndHs()
-		return
-	}
 
-
-	var coeff float64
-	if dir == Right {
-		coeff = -1
-	} else if dir == Left {
-		coeff = 1
-	}
-
-	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X() * coeff)
-	p.HeldObj.Delta.SetX(p.Hs.Body.Delta.X())
-}
 
