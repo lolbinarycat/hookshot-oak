@@ -67,7 +67,11 @@ func (p *Player) HsExtendLoop(dir Direction) {
 			return
 	} else {
 		p.Body.Delta.SetPos(0, 0)
-		p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
+		if dir == Right {
+			p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
+		} else if dir == Left {
+			p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+		}
 	}
 }
 
