@@ -47,7 +47,7 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 			p.SetState(HsItemGrabRightState)
 			return
 		} else {
-			p.SetState(HsPullRightState)
+			p.SetState(HsPullState(dir))
 			return
 		}
 	} else if dir.IsJustLeft() && p.Hs.ActiColls.LeftWallHit {
@@ -55,7 +55,7 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 			p.SetState(HsItemGrabLeftState)
 			return
 		} else {
-			p.SetState(HsPullLeftState)
+			p.SetState(HsPullState(dir))
 			return
 		}
 	} else if p.TimeFromStateStart() > HsInputTime && isHsInput() {
@@ -78,22 +78,30 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 }
 
 func (p *Player) HsPullLoop(dir direction.Dir) {
-	if dir.IsRight() {
-		if p.ActiColls.RightWallHit {
-			p.EndHs()
-			return
-		}
-	} else if dir.IsLeft() {
-		if p.ActiColls.LeftWallHit {
-			p.EndHs()
-			return
-		}
-	}
-	coeff := direction.ToCoeff(dir.H)
-
-	p.Body.Delta.SetX(coeff * p.Hs.Body.Speed.X())
+	panic("no longer used")
 }
 
+func HsPullState(dir direction.Dir) PlayerState {
+	return PlayerState{
+		Loop: func(p *Player) {
+			if dir.IsRight() {
+				if p.ActiColls.RightWallHit {
+					p.EndHs()
+					return
+				}
+			} else if dir.IsLeft() {
+				if p.ActiColls.LeftWallHit {
+					p.EndHs()
+					return
+				}
+			}
+			coeffX := direction.ToCoeff(dir.H)
+			coeffY := direction.ToCoeff(dir.V)
+			p.Body.Delta.SetPos(coeffX * p.Hs.Body.Speed.X(),
+				coeffY * p.Hs.Body.Speed.Y())
+		},
+	}.denil()
+}
 
 //STATES:
 
@@ -111,6 +119,8 @@ var HsStartState = PlayerState{
 				p.SetState(HsExtendRightState)
 			} else if oak.IsDown(currentControls.Left) {
 				p.SetState(HsExtendLeftState)
+			//} else if oak.IsDown(currentControls.Up) {
+			//p.SetState(HsExtendUpState)
 			} else {
 				p.SetState(AirState)
 			}
@@ -128,6 +138,7 @@ var HsExtendLeftState = PlayerState{
 		p.HsExtendLoop(direction.MaxLeft())
 	},
 }.denil()
+
 
 var HsRetractRightState = PlayerState{
 	Loop: func(p *Player) {
@@ -165,10 +176,15 @@ var HsPullLeftState = PlayerState{
 	Loop: func(p *Player) {
 		p.HsPullLoop(direction.MaxLeft())
 		//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-		
 		//p.PullPlayer()
 	},
 }.denil()
+
+var HsPullUpState = PlayerState{
+	Loop: func(p *Player) {
+		p.HsPullLoop(direction.MaxUp())
+	},
+}
 
 var HsItemGrabRightState = PlayerState{
 	Start: func(p *Player) {
