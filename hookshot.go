@@ -20,13 +20,16 @@ var HsStartState = PlayerState{
 			return
 		}
 		if p.TimeFromStateStart() > HsStartTime {
-			if oak.IsDown(currentControls.Right) {
+			switch {
+			case oak.IsDown(currentControls.Right):
 				p.SetState(HsExtendState(direction.MaxRight()))
-			} else if oak.IsDown(currentControls.Left) {
+			case oak.IsDown(currentControls.Left):
 				p.SetState(HsExtendState(direction.MaxLeft()))
-			} else if oak.IsDown(currentControls.Up){
+			case oak.IsDown(currentControls.Up):
 				p.SetState(HsExtendState(direction.MaxUp()))
-			} else {
+			case oak.IsDown(currentControls.Down):
+				p.SetState(HsExtendState(direction.MaxDown()))
+			default:
 				p.SetState(AirState)
 			}
 		}
@@ -54,7 +57,7 @@ func HsExtendState(dir direction.Dir) PlayerState {
 						} else {
 							p.SetState(HsPullState(dir))
 						}
-					}
+				}
 				p.Body.Delta.SetPos(0, 0)
 				p.Hs.Body.Delta.SetPos(p.Hs.Body.Speed.X()*coeffX,
 					p.Hs.Body.Speed.Y()*coeffY)
@@ -83,14 +86,14 @@ func HsRetractState(dir direction.Dir) PlayerState {
 }
 
 func HsPullState(dir direction.Dir) PlayerState {
+	coeffX := direction.ToCoeff(dir.H)
+	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Loop: func(p *Player) {
 			if p.HasHitInDir(dir) {
 					p.EndHs()
 					return
-			} 
-			coeffX := direction.ToCoeff(dir.H)
-			coeffY := direction.ToCoeff(dir.V)
+			}
 			p.Body.Delta.SetPos(coeffX*p.Hs.Body.Speed.X(),
 				coeffY*p.Hs.Body.Speed.Y())
 		},
@@ -102,7 +105,7 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Start: func(p *Player) {
-			p.HeldObj = p.Hs.GetLastHitObj(true)
+			p.HeldObj = p.Hs.GetLastHitObj(dir.IsHoriz())
 		},
 		Loop: func(p *Player) {
 			if (dir.IsJustRight() && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||

@@ -57,6 +57,13 @@ func (d Dir) IsJustLeft() bool {
 	return d.IsLeft() && d.V == 0
 }
 
+func (d Dir) IsVert() bool {
+	return d.V != 0
+}
+
+func (d Dir) IsHoriz() bool {
+	return d.H != 0
+}
 func (d Dir) IsOrtho() bool {
 	if d.H == 0 || d.V == 0 {
 		return true
