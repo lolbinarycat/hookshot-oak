@@ -152,6 +152,7 @@ type PlayerModuleList struct {
 	BlockPush PlayerModule
 	BlockPull,
 	Fly,
+	GroundPound, // FloorDollar
 	HsItemGrab PlayerModule
 }
 
@@ -431,6 +432,7 @@ func loadScene() {
 			&m.WallJump,
 			&m.BlockPull,
 			&m.HsItemGrab,
+			&m.GroundPound,
 			&m.Fly)
 	}
 	render.NewDrawFPS()
