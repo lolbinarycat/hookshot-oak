@@ -11,26 +11,7 @@ import (
 
 // This file contains functions that handle hookshot behavior
 
-func (p *Player) HsItemGrabLoop(dir direction.Dir) {
-	if (dir.IsJustRight() && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
-		(dir.IsJustLeft() && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) {
-		p.EndHs()
-		return
-	}
 
-
-	var coeff float64
-	if dir.IsJustRight() {
-		coeff = -1
-	} else if dir.IsJustLeft(){
-		coeff = 1
-	} else {
-		panic("unknown direction given to HsItemGrabLoop")
-	}
-
-	p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X() * coeff)
-	p.HeldObj.Delta.SetX(p.Hs.Body.Delta.X())
-}
 
 func (p *Player) HsExtendLoop(dir direction.Dir) {
 	p.Hs.Active = true
@@ -38,7 +19,7 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 		p.SetState(HsRetractState(dir))
 	} else if dir.IsJustRight() && p.Hs.ActiColls.RightWallHit {
 		if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
-			p.SetState(HsItemGrabRightState)
+			p.SetState(HsItemGrabState(dir))
 			return
 		} else {
 			p.SetState(HsPullState(dir))
@@ -46,7 +27,7 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 		}
 	} else if dir.IsJustLeft() && p.Hs.ActiColls.LeftWallHit {
 		if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
-			p.SetState(HsItemGrabLeftState)
+			p.SetState(HsItemGrabState(dir))
 			return
 		} else {
 			p.SetState(HsPullState(dir))
@@ -104,6 +85,33 @@ func HsPullState(dir direction.Dir) PlayerState {
 			coeffY := direction.ToCoeff(dir.V)
 			p.Body.Delta.SetPos(coeffX * p.Hs.Body.Speed.X(),
 				coeffY * p.Hs.Body.Speed.Y())
+		},
+	}.denil()
+}
+
+func HsItemGrabState(dir direction.Dir) PlayerState {
+	coeffX := direction.ToCoeff(dir.H)
+	coeffY := direction.ToCoeff(dir.V)
+	return PlayerState{
+		Start: func(p *Player) {
+			p.HeldObj = p.Hs.GetLastHitObj(true)
+		},
+		Loop: func(p *Player) {
+			if (dir.IsJustRight() && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
+				(dir.IsJustLeft() && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) {
+				p.EndHs()
+				return
+			}
+
+
+
+			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X() * coeffX,
+				-p.Hs.Body.Speed.X() * coeffY)
+			p.HeldObj.Delta.SetPos(p.Hs.Body.Delta.GetPos())
+		},
+		End: func(p *Player) {
+			p.HeldObj.Delta.SetPos(0,0)
+			p.HeldObj = nil
 		},
 	}.denil()
 }
@@ -182,28 +190,6 @@ var HsExtendLeftState = PlayerState{
 //	Loop: func(p *Player) {
 
 
-var HsItemGrabRightState = PlayerState{
-	Start: func(p *Player) {
-		p.HeldObj = p.Hs.GetLastHitObj(true)
-	},
-	Loop: func(p *Player) {
-		p.HsItemGrabLoop(direction.MaxRight())
-	},
-	End: func(p *Player) {
-		p.HeldObj = nil
-		p.HeldObj.Delta.SetPos(0,0)
-	},
-}.denil()
 
-var HsItemGrabLeftState = PlayerState{
-	Start: func(p *Player) {
-		p.HeldObj = p.Hs.GetLastHitObj(true)
-	},
-	Loop: func(p *Player) {
-		p.HsItemGrabLoop(direction.MaxLeft())
-	},
-	End: func(p *Player) {
-		p.HeldObj.Delta.SetPos(0,0)
-		p.HeldObj = nil
-	},
-}.denil()
+
+
