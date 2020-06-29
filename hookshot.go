@@ -35,13 +35,7 @@ func (p *Player) HsItemGrabLoop(dir direction.Dir) {
 func (p *Player) HsExtendLoop(dir direction.Dir) {
 	p.Hs.Active = true
 	if p.TimeFromStateStart() > HsExtendTime {
-		if dir.IsJustRight() {
-			p.SetState(HsRetractRightState)
-		} else if dir.IsJustLeft() {
-			p.SetState(HsRetractLeftState)
-		} else {
-			panic("unknown direction given to HsExtendLoop")
-		}
+		p.SetState(HsRetractState(dir))
 	} else if dir.IsJustRight() && p.Hs.ActiColls.RightWallHit {
 		if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
 			p.SetState(HsItemGrabRightState)
@@ -59,14 +53,7 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 			return
 		}
 	} else if p.TimeFromStateStart() > HsInputTime && isHsInput() {
-			if dir.IsJustRight() {
-				p.SetState(HsRetractRightState)
-			} else if dir.IsJustLeft() {
-				p.SetState(HsRetractLeftState)
-			} else {
-				panic("invalid direction to HsExtendLoop")
-			}
-			return
+			p.SetState(HsRetractState(dir))
 	} else {
 		p.Body.Delta.SetPos(0, 0)
 		if dir.IsJustRight() {
@@ -79,6 +66,24 @@ func (p *Player) HsExtendLoop(dir direction.Dir) {
 
 func (p *Player) HsPullLoop(dir direction.Dir) {
 	panic("no longer used")
+}
+
+// closure based states
+
+func HsRetractState(dir direction.Dir) PlayerState{
+	coeffX := direction.ToCoeff(dir.H)
+	coeffY := direction.ToCoeff(dir.V)
+	return PlayerState{
+		Loop: func(p *Player) {
+			if p.Hs.X >= 0 {
+				p.EndHs()
+				return
+			}
+
+			p.Hs.Body.Delta.SetPos(p.Hs.Body.Speed.X() * coeffX,
+				p.Hs.Body.Speed.Y() * coeffY)
+		},
+	}
 }
 
 func HsPullState(dir direction.Dir) PlayerState {
@@ -140,51 +145,42 @@ var HsExtendLeftState = PlayerState{
 }.denil()
 
 
-var HsRetractRightState = PlayerState{
-	Loop: func(p *Player) {
-		if p.Hs.X <= 0 {
-			p.EndHs()
-			return
-		}
-		p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-		//p.Hs.X -= p.Hs.Body.Speed.X()
-	},
-}.denil()
+v// ar HsRetractRightState = PlayerState{
+// 	Loop: func(p *Player) {
+// 		if p.Hs.X <= 0 {
+// 			p.EndHs()
+// 			return
+// 		}
+// 		p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+// 		//p.Hs.X -= p.Hs.Body.Speed.X()
+// 	},
+// }.denil()
 
-var HsRetractLeftState = PlayerState{
-	Loop: func(p *Player) {
-		if p.Hs.X >= 0 {
-			p.EndHs()
-			return
-		}
-		p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
-		//p.Hs.X -= p.Hs.Body.Speed.X()
-	},
-}.denil()
+// var HsRetractLeftState = PlayerState{
+// 	Loop: func(p *Player) 
+// }.denil()
 
 //HsPullRightState is the state for when the hookshot is
 //pulling the player after having hit an object
-var HsPullRightState = PlayerState{
-	Loop: func(p *Player) {
-		//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-		p.HsPullLoop(direction.MaxRight())
-		//p.PullPlayer()
-	},
-}.denil()
+// var HsPullRightState = PlayerState{
+// 	Loop: func(p *Player) {
+// 		//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+// 		p.HsPullLoop(direction.MaxRight())
+// 		//p.PullPlayer()
+// 	},
+// }.denil()
 
-var HsPullLeftState = PlayerState{
-	Loop: func(p *Player) {
-		p.HsPullLoop(direction.MaxLeft())
-		//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-		//p.PullPlayer()
-	},
-}.denil()
+// var HsPullLeftState = PlayerState{
+// 	Loop: func(p *Player) {
+// 		p.HsPullLoop(direction.MaxLeft())
+// 		//p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+// 		//p.PullPlayer()
+// 	},
+// }.denil()
 
-var HsPullUpState = PlayerState{
-	Loop: func(p *Player) {
-		p.HsPullLoop(direction.MaxUp())
-	},
-}
+//var HsPullUpState = PlayerState{
+//	Loop: func(p *Player) {
+
 
 var HsItemGrabRightState = PlayerState{
 	Start: func(p *Player) {
