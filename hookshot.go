@@ -3,66 +3,75 @@ package main
 import (
 	"time"
 
-	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/direction"
+	"github.com/lolbinarycat/hookshot-oak/labels"
 
 	oak "github.com/oakmound/oak/v2"
 )
 
 // This file contains functions that handle hookshot behavior
 
+const HsStartTime time.Duration = time.Millisecond * 60
 
+var HsStartState = PlayerState{
+	Loop: func(p *Player) {
+		if player.Mods.Hookshot.Equipped == false {
+			p.SetState(AirState)
+			return
+		}
+		if p.TimeFromStateStart() > HsStartTime {
+			if oak.IsDown(currentControls.Right) {
+				p.SetState(HsExtendState(direction.MaxRight()))
+			} else if oak.IsDown(currentControls.Left) {
+				p.SetState(HsExtendState(direction.MaxLeft()))
+			} else {
+				p.SetState(AirState)
+			}
+		}
+	}}.denil()
 
-func (p *Player) HsExtendLoop(dir direction.Dir) {
-	p.Hs.Active = true
-	if p.TimeFromStateStart() > HsExtendTime {
-		p.SetState(HsRetractState(dir))
-	} else if dir.IsJustRight() && p.Hs.ActiColls.RightWallHit {
-		if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
-			p.SetState(HsItemGrabState(dir))
-			return
-		} else {
-			p.SetState(HsPullState(dir))
-			return
-		}
-	} else if dir.IsJustLeft() && p.Hs.ActiColls.LeftWallHit {
-		if p.Hs.ActiColls.HLabel == labels.Block && p.Mods.HsItemGrab.Equipped {
-			p.SetState(HsItemGrabState(dir))
-			return
-		} else {
-			p.SetState(HsPullState(dir))
-			return
-		}
-	} else if p.TimeFromStateStart() > HsInputTime && isHsInput() {
-			p.SetState(HsRetractState(dir))
-	} else {
-		p.Body.Delta.SetPos(0, 0)
-		if dir.IsJustRight() {
-			p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
-		} else if dir.IsJustLeft() {
-			p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-		}
-	}
+func HsExtendState(dir direction.Dir) PlayerState {
+	return PlayerState{
+		Loop: func(p *Player) {
+			p.Hs.Active = true
+
+			if p.TimeFromStateStart() > HsExtendTime {
+				p.SetState(HsRetractState(dir))
+			} else if (dir.IsRight() && p.Hs.ActiColls.RightWallHit) ||
+				(dir.IsLeft() && p.Hs.ActiColls.LeftWallHit) {
+				if p.Hs.ActiColls.HLabel == labels.Block &&
+					p.Mods.HsItemGrab.Equipped {
+					p.SetState(HsItemGrabState(dir))
+				} else {
+					p.SetState(HsPullState(dir))
+				}
+			} else if p.TimeFromStateStart() > HsInputTime && isHsInput() {
+				p.SetState(HsRetractState(dir))
+			} else {
+				p.Body.Delta.SetPos(0, 0)
+				if dir.IsJustRight() {
+					p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
+				} else if dir.IsJustLeft() {
+					p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
+				}
+			}
+		},
+	}.denil()
 }
 
-func (p *Player) HsPullLoop(dir direction.Dir) {
-	panic("no longer used")
-}
-
-// closure based states
-
-func HsRetractState(dir direction.Dir) PlayerState{
+func HsRetractState(dir direction.Dir) PlayerState {
 	coeffX := direction.ToCoeff(dir.H)
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Loop: func(p *Player) {
-			if (dir.IsLeft() && p.Hs.X >= 0) || (dir.IsRight() && p.Hs.X <= 0) {
+			if (dir.IsLeft() && p.Hs.X >= 0) ||
+				(dir.IsRight() && p.Hs.X <= 0) {
 				p.EndHs()
 				return
 			}
 
-			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X() * coeffX,
-				-p.Hs.Body.Speed.Y() * coeffY)
+			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X()*coeffX,
+				-p.Hs.Body.Speed.Y()*coeffY)
 		},
 	}.denil()
 }
@@ -83,8 +92,8 @@ func HsPullState(dir direction.Dir) PlayerState {
 			}
 			coeffX := direction.ToCoeff(dir.H)
 			coeffY := direction.ToCoeff(dir.V)
-			p.Body.Delta.SetPos(coeffX * p.Hs.Body.Speed.X(),
-				coeffY * p.Hs.Body.Speed.Y())
+			p.Body.Delta.SetPos(coeffX*p.Hs.Body.Speed.X(),
+				coeffY*p.Hs.Body.Speed.Y())
 		},
 	}.denil()
 }
@@ -102,56 +111,18 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 				p.EndHs()
 				return
 			}
-
-
-
-			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X() * coeffX,
-				-p.Hs.Body.Speed.X() * coeffY)
+			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X()*coeffX,
+				-p.Hs.Body.Speed.X()*coeffY)
 			p.HeldObj.Delta.SetPos(p.Hs.Body.Delta.GetPos())
 		},
 		End: func(p *Player) {
-			p.HeldObj.Delta.SetPos(0,0)
+			p.HeldObj.Delta.SetPos(0, 0)
 			p.HeldObj = nil
 		},
 	}.denil()
 }
 
 //STATES:
-
-
-const HsStartTime time.Duration = time.Millisecond * 60
-
-var HsStartState = PlayerState{
-	Loop: func(p *Player) {
-		if player.Mods.Hookshot.Equipped == false {
-			p.SetState(AirState)
-			return
-		}
-		if p.TimeFromStateStart() > HsStartTime {
-			if oak.IsDown(currentControls.Right) {
-				p.SetState(HsExtendRightState)
-			} else if oak.IsDown(currentControls.Left) {
-				p.SetState(HsExtendLeftState)
-			//} else if oak.IsDown(currentControls.Up) {
-			//p.SetState(HsExtendUpState)
-			} else {
-				p.SetState(AirState)
-			}
-		}
-	}}.denil()
-
-var HsExtendRightState = PlayerState{
-	Loop: func(p *Player) {
-		p.HsExtendLoop(direction.MaxRight())
-	},
-}.denil()
-
-var HsExtendLeftState = PlayerState{
-	Loop: func(p *Player) {
-		p.HsExtendLoop(direction.MaxLeft())
-	},
-}.denil()
-
 
 // var HsRetractRightState = PlayerState{
 // 	Loop: func(p *Player) {
@@ -165,7 +136,7 @@ var HsExtendLeftState = PlayerState{
 // }.denil()
 
 // var HsRetractLeftState = PlayerState{
-// 	Loop: func(p *Player) 
+// 	Loop: func(p *Player)
 // }.denil()
 
 //HsPullRightState is the state for when the hookshot is
@@ -188,8 +159,3 @@ var HsExtendLeftState = PlayerState{
 
 //var HsPullUpState = PlayerState{
 //	Loop: func(p *Player) {
-
-
-
-
-
