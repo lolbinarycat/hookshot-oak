@@ -27,6 +27,7 @@ import (
 	"github.com/oakmound/oak/v2/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
+	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 
@@ -91,12 +92,12 @@ var currentControls ControlConfig = ControlConfig{
 
 var curCtrls = &currentControls
 
-type Direction uint8
+//type Direction uint8
 
-const (
-	Left Direction = iota
-	Right
-)
+// const (
+//	 Left Direction = iota
+//	 Right
+// )
 
 type Pos struct {
 	X float64
@@ -120,6 +121,7 @@ type Player struct {
 	RespawnPos     Pos
 	Hs             Hookshot
 	HeldObj        *entities.Moving
+	Eyes  [2]*render.Sprite
 }
 
 type Hookshot struct {
@@ -170,12 +172,12 @@ var blocks []*PhysObject
 
 //var log dlog.Logger = dlog.NewLogger()
 
-func (p *Player) WallJump(dir Direction, EnterLaunch bool) {
+func (p *Player) WallJump(dir direction.Dir, EnterLaunch bool) {
 	p.Body.Delta.SetY(-WallJumpHeight)
 
-	if dir == Left {
+	if dir.IsLeft() {
 		p.Body.Delta.SetX(-WallJumpWidth)
-	} else if dir == Right {
+	} else if dir.IsRight() {
 		p.Body.Delta.SetX(WallJumpWidth)
 	} else {
 		panic("invalid direction to WallJump functon")
@@ -348,14 +350,24 @@ var screenSpace *collision.Space
 
 func loadScene() {
 	//loadJsonLevelData("level.json")
-
+	var eyeColor = color.RGBA{0,255,255,255}
 	playerSprite := utils.Check2(
 		render.LoadSprite("assets/images","player_new.png")).(render.Renderable)
 
-	player.Body = entities.NewMoving(100, 100, 16, 16,
+	eye1 := render.NewColorBox(1,4,eyeColor)
+	eye2 := eye1.Copy().(*render.Sprite)
+	player.Eyes = [2]*render.Sprite{eye1,eye2}
+	player.Body = entities.NewMoving(100, 100, 12, 12,
 		playerSprite,
 		nil, 0, 0)
 	player.Body.Init()
+	eye1.LayeredPoint.Vector = eye1.Attach(player.Body,4,3)
+	eye2.LayeredPoint.Vector = eye1.Attach(player.Body,8,3)
+	//AttachMut(&eye1.LayeredPoint.Vector,player.Body)
+	//vectAttach(eye1).AttachMut(player.Body)
+	render.Draw(eye1,1)
+	render.Draw(eye2,1)
+
 	player.State = RespawnFallState
 	player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
 	render.Draw(player.Body.R)
@@ -479,6 +491,8 @@ func main() {
 			}
 
 			player.Hs.DoCollision(HsUpdater)
+
+			//player.Eyes[1].SetX(5)
 
 			return 0
 		}, event.Enter)
@@ -685,5 +699,12 @@ func (p *Player) DoHsCheck() bool {
 	return false
 }
 
+//func (p *Player) SetEyePos() {
+//
+//}
 
 
+
+//func AttachMut(a *vectAttach,attachTo physics.Attachable,offsets... float64) {
+//	*a = a.Attach(attachTo,offsets...)
+//}

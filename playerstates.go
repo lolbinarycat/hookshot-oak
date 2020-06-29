@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	oak "github.com/oakmound/oak/v2"
 )
@@ -58,7 +59,6 @@ func AirStateLoop(p *Player) {
 
 	p.DoAirControls()
 	p.StateCommon()
-
 }
 
 var RespawnFallState = PlayerState{
@@ -211,7 +211,7 @@ var WallSlideLeftState = PlayerState{
 			return
 		}
 		if isJumpInput() {
-			p.WallJump(Right, true)
+			p.WallJump(direction.MaxLeft(), true)
 			return
 		}
 		if p.ActiColls.LeftWallHit == false {
@@ -229,7 +229,7 @@ var WallSlideRightState = PlayerState{
 			return //return to stop airstate for overwriting our change
 		}
 		if isJumpInput() {
-			p.WallJump(Left, true)
+			p.WallJump(direction.MaxLeft(), true)
 			return
 		}
 		if p.ActiColls.RightWallHit == false {
@@ -257,7 +257,7 @@ var WallJumpLaunchState = PlayerState{
 var ClimbRightState = PlayerState{
 	Loop: func(p *Player) {
 		if isJumpInput() {
-			p.WallJump(Left, oak.IsDown(currentControls.Left))
+			p.WallJump(direction.MaxRight(), oak.IsDown(currentControls.Left))
 			return
 		}
 		p.DoCliming()
@@ -269,7 +269,7 @@ var ClimbRightState = PlayerState{
 var ClimbLeftState = PlayerState{
 	Loop: func(p *Player) {
 		if isJumpInput() {
-			p.WallJump(Right, oak.IsDown(currentControls.Right))
+			p.WallJump(direction.MaxRight(), oak.IsDown(currentControls.Right))
 			return
 		}
 		p.Body.Delta.SetX(-1)
