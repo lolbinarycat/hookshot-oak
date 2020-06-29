@@ -12,7 +12,7 @@ require (
 	github.com/lolbinarycat/utils v0.0.0-00010101000000-000000000000
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oakmound/oak/v2 v2.3.3
-	github.com/stretchr/testify v1.5.1 // indirect
+	github.com/stretchr/testify v1.5.1
 	github.com/yobert/alsa v0.0.0-20200618200352-d079056f5370 // indirect
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8 // indirect
 	golang.org/x/mobile v0.0.0-20200329125638-4c31acba0007 // indirect

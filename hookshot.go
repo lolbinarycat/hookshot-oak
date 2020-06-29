@@ -75,15 +75,15 @@ func HsRetractState(dir direction.Dir) PlayerState{
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Loop: func(p *Player) {
-			if p.Hs.X >= 0 {
+			if (dir.IsLeft() && p.Hs.X >= 0) || (dir.IsRight() && p.Hs.X <= 0) {
 				p.EndHs()
 				return
 			}
 
-			p.Hs.Body.Delta.SetPos(p.Hs.Body.Speed.X() * coeffX,
-				p.Hs.Body.Speed.Y() * coeffY)
+			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X() * coeffX,
+				-p.Hs.Body.Speed.Y() * coeffY)
 		},
-	}
+	}.denil()
 }
 
 func HsPullState(dir direction.Dir) PlayerState {
@@ -145,7 +145,7 @@ var HsExtendLeftState = PlayerState{
 }.denil()
 
 
-v// ar HsRetractRightState = PlayerState{
+// var HsRetractRightState = PlayerState{
 // 	Loop: func(p *Player) {
 // 		if p.Hs.X <= 0 {
 // 			p.EndHs()
