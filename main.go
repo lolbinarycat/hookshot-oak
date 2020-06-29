@@ -708,3 +708,11 @@ func (p *Player) DoHsCheck() bool {
 //func AttachMut(a *vectAttach,attachTo physics.Attachable,offsets... float64) {
 //	*a = a.Attach(attachTo,offsets...)
 //}
+
+
+func (o *PhysObject) HasHitInDir(dir direction.Dir) bool {
+	return (dir.IsRight() && o.ActiColls.RightWallHit) ||
+		(dir.IsLeft() && o.ActiColls.LeftWallHit)   ||
+		(dir.IsUp() && o.ActiColls.CeilingHit)      ||
+		(dir.IsDown() && o.ActiColls.GroundHit)
+}

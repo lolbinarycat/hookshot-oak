@@ -42,7 +42,7 @@ func (object *PhysObject) DoCollision(updater func()) {
 			object.ActiColls.GroundHit = true
 			object.Body.SetY(hit.Y() - object.Body.H)
 		} else if object.Body.Delta.Y() < 0 { //Ceiling
-			//object.ActiColls.CeilingHit = true
+			object.ActiColls.CeilingHit = true
 			//TODO: make this work like other collision
 			object.Body.SetY(oldY)
 		}

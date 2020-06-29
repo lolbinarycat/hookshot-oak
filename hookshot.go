@@ -24,6 +24,8 @@ var HsStartState = PlayerState{
 				p.SetState(HsExtendState(direction.MaxRight()))
 			} else if oak.IsDown(currentControls.Left) {
 				p.SetState(HsExtendState(direction.MaxLeft()))
+			} else if oak.IsDown(currentControls.Up){
+				p.SetState(HsExtendState(direction.MaxUp()))
 			} else {
 				p.SetState(AirState)
 			}
@@ -31,29 +33,31 @@ var HsStartState = PlayerState{
 	}}.denil()
 
 func HsExtendState(dir direction.Dir) PlayerState {
+	coeffX := direction.ToCoeff(dir.H)
+	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Loop: func(p *Player) {
 			p.Hs.Active = true
-
 			if p.TimeFromStateStart() > HsExtendTime {
 				p.SetState(HsRetractState(dir))
-			} else if (dir.IsRight() && p.Hs.ActiColls.RightWallHit) ||
-				(dir.IsLeft() && p.Hs.ActiColls.LeftWallHit) {
-				if p.Hs.ActiColls.HLabel == labels.Block &&
-					p.Mods.HsItemGrab.Equipped {
-					p.SetState(HsItemGrabState(dir))
-				} else {
-					p.SetState(HsPullState(dir))
-				}
 			} else if p.TimeFromStateStart() > HsInputTime && isHsInput() {
 				p.SetState(HsRetractState(dir))
 			} else {
+				if (dir.IsRight() && p.Hs.ActiColls.RightWallHit) ||
+				(dir.IsLeft() && p.Hs.ActiColls.LeftWallHit)   ||
+				(dir.IsUp() && p.Hs.ActiColls.CeilingHit)      ||
+				(dir.IsDown() && p.Hs.ActiColls.GroundHit) {
+					if p.Mods.HsItemGrab.Equipped && (
+						(p.Hs.ActiColls.HLabel == labels.Block && dir.H != 0) ||
+							(p.Hs.ActiColls.VLabel == labels.Block && dir.V != 0)) {
+							p.SetState(HsItemGrabState(dir))
+						} else {
+							p.SetState(HsPullState(dir))
+						}
+					}
 				p.Body.Delta.SetPos(0, 0)
-				if dir.IsJustRight() {
-					p.Hs.Body.Delta.SetX(p.Hs.Body.Speed.X())
-				} else if dir.IsJustLeft() {
-					p.Hs.Body.Delta.SetX(-p.Hs.Body.Speed.X())
-				}
+				p.Hs.Body.Delta.SetPos(p.Hs.Body.Speed.X()*coeffX,
+					p.Hs.Body.Speed.Y()*coeffY)
 			}
 		},
 	}.denil()
@@ -65,7 +69,9 @@ func HsRetractState(dir direction.Dir) PlayerState {
 	return PlayerState{
 		Loop: func(p *Player) {
 			if (dir.IsLeft() && p.Hs.X >= 0) ||
-				(dir.IsRight() && p.Hs.X <= 0) {
+				(dir.IsRight() && p.Hs.X <= 0) ||
+				(dir.IsUp() && p.Hs.Y >= 0) ||
+				(dir.IsDown() && p.Hs.Y <= 0){
 				p.EndHs()
 				return
 			}
@@ -79,17 +85,10 @@ func HsRetractState(dir direction.Dir) PlayerState {
 func HsPullState(dir direction.Dir) PlayerState {
 	return PlayerState{
 		Loop: func(p *Player) {
-			if dir.IsRight() {
-				if p.ActiColls.RightWallHit {
+			if p.HasHitInDir(dir) {
 					p.EndHs()
 					return
-				}
-			} else if dir.IsLeft() {
-				if p.ActiColls.LeftWallHit {
-					p.EndHs()
-					return
-				}
-			}
+			} 
 			coeffX := direction.ToCoeff(dir.H)
 			coeffY := direction.ToCoeff(dir.V)
 			p.Body.Delta.SetPos(coeffX*p.Hs.Body.Speed.X(),
@@ -107,7 +106,10 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 		},
 		Loop: func(p *Player) {
 			if (dir.IsJustRight() && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
-				(dir.IsJustLeft() && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) {
+				(dir.IsJustLeft() && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) ||
+				(dir.IsUp() && (p.Hs.Y >= 0 || p.ActiColls.CeilingHit)) ||
+				(dir.IsDown() && (p.Hs.Y <= 0 || p.ActiColls.GroundHit)) {
+
 				p.EndHs()
 				return
 			}
