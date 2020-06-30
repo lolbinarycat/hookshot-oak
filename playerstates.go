@@ -206,7 +206,7 @@ var CoyoteState = PlayerState{
 		//p.AirState()
 
 		if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
-			p.SetState(BlockPushRightState)
+			p.SetState(BlockPushState(false))
 		} else if p.ActiColls.LeftWallHit && p.ActiColls.HLabel == labels.Block {
 			p.SetState(BlockPushState(true))
 		}
