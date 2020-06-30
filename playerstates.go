@@ -75,31 +75,7 @@ var RespawnFallState = PlayerState{
 	},
 }.denil()
 
-const GroundPoundStartTime = time.Second/5
-var GroundPoundStartState = PlayerState{
-	Start: func(p *Player) {
-p.Body.Delta.SetPos(0,0)
-	},
-	Loop: func(p *Player) {
-		if p.TimeFromStateStart() > GroundPoundStartTime {
-			p.SetState(GroundPoundState)
-		}
-	},
-}.denil()
 
-const GroundPoundSpeed = 8
-var GroundPoundState = PlayerState{
-	Loop: func(p *Player) {
-		if p.ActiColls.GroundHit {
-			p.SetState(GroundState)
-		} else if oak.IsDown(curCtrls.Up){
-			p.Body.Delta.SetY(0)
-			p.SetState(AirState)
-		} else {
-			p.Body.Delta.SetY(GroundPoundSpeed)
-		}
-	},
-}.denil()
 
 var GroundState PlayerState
 
