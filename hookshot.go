@@ -35,6 +35,7 @@ var HsStartState = PlayerState{
 		}
 	}}.denil()
 
+const HsExtendTime time.Duration = time.Second * 2
 func HsExtendState(dir direction.Dir) PlayerState {
 	coeffX := direction.ToCoeff(dir.H)
 	coeffY := direction.ToCoeff(dir.V)

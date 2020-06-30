@@ -177,6 +177,8 @@ var BlockPullRightState = PlayerState{
 	},
 }.denil()
 
+//JumpHeightDecTime is how long JumpHeightDecState lasts
+const JumpHeightDecTime time.Duration = time.Millisecond * 200
 //the function JumpHeightDecState is the state that decides the height of the players jump.
 //it does this by decreasing the gravity temporaraly when jump is held.
 var JumpHeightDecState = PlayerState{
@@ -195,6 +197,8 @@ var JumpHeightDecState = PlayerState{
 	},
 }.denil()
 
+//CoyoteTime is how long CoyoteState lasts
+const CoyoteTime time.Duration = time.Millisecond * 7
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var CoyoteState = PlayerState{
@@ -255,6 +259,7 @@ var WallSlideRightState = PlayerState{
 	},
 }.denil()
 
+const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
 //func WallJumpLaunchState is entered after you walljump,
 //temporaraly disabling your controls. This should prevent one sided
 //walljumps

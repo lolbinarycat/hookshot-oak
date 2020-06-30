@@ -37,7 +37,7 @@ import (
 const JumpHeight int = 6
 const WallJumpHeight float64 = 6
 const WallJumpWidth float64 = 3
-const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
+
 const (
 	AirAccel    float64 = 0.4
 	AirMaxSpeed float64 = 3
@@ -52,8 +52,7 @@ const (
 )
 const Gravity float64 = 0.35
 
-//CoyoteTime is how long CoyoteState lasts
-const CoyoteTime time.Duration = time.Millisecond * 7
+
 
 //JumpInputTime describes the length of time after the jump button is pressed in which it will count as the player jumping.
 //Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
@@ -61,10 +60,6 @@ const JumpInputTime time.Duration = time.Millisecond * 90
 
 const HsInputTime time.Duration = time.Millisecond * 70
 
-//JumpHeightDecTime is how long JumpHeightDecState lasts
-const JumpHeightDecTime time.Duration = time.Millisecond * 200
-
-const HsExtendTime time.Duration = time.Second * 2
 
 type ActiveCollisions struct {
 	GroundHit          bool
