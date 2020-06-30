@@ -117,9 +117,9 @@ func GroundStateLoop(p *Player) {
 	if p.ActiColls.HLabel == labels.Block {
 		if p.Mods.BlockPush.Equipped {
 			if p.ActiColls.RightWallHit {
-				p.SetState(BlockPushRightState)
+				p.SetState(BlockPushState(false))
 			} else if p.ActiColls.LeftWallHit {
-				p.SetState(BlockPushLeftState)
+				p.SetState(BlockPushState(true))
 			}
 		}
 	}
@@ -139,43 +139,28 @@ func GroundStateLoop(p *Player) {
 
 const BlockPushSpeed float64 = 1
 
-var BlockPushRightState = PlayerState{
-	Start: func(p *Player) {
-		p.GrabObjRight(labels.Block)
-		//var ok bool
-		// obj, ok := p.ActiColls.LastHitH.E().(*entities.Moving)
-		// if !ok  {
-		// 	dlog.Warn("unable to grab entity")
-		// } else {
-		// 	p.HeldObj = &*obj
-		// }
-	},
-	Loop: func(p *Player) {
-		if oak.IsDown(currentControls.Right) == false {
-			p.HeldObj.Delta.SetX(0)
-			p.SetState(GroundState)
-			return
-		}
-		p.Body.Delta.SetX(BlockPushSpeed)
-
-		p.HeldObj.Delta.SetX(BlockPushSpeed)
-	},
-	//End: func(p *Player) { p.HeldObj = nil},
-}.denil()
-
-var BlockPushLeftState = PlayerState{
+func BlockPushState(isLeft bool) PlayerState {
+	return PlayerState{
 	Start: func(p *Player) { p.GrabObjLeft(labels.Block) },
 	Loop: func(p *Player) {
-		if oak.IsDown(currentControls.Left) == false {
+		if (isLeft && oak.IsDown(currentControls.Left) == false) ||
+			(isLeft == false && oak.IsDown(curCtrls.Right) == false ) {
 			p.HeldObj.Delta.SetX(0)
 			p.SetState(GroundState)
-			return
+		} else {
+			var spd float64
+			if isLeft {
+				spd = -BlockPushSpeed
+			} else {
+				spd = BlockPushSpeed
+			}
+
+			p.Body.Delta.SetX(spd)
+			p.HeldObj.Delta.SetX(spd)
 		}
-		p.Body.Delta.SetX(-BlockPushSpeed)
-		//hitBlock := p.Body.HitLabel(labels.Block)
-		p.HeldObj.Delta.SetX(-BlockPushSpeed)
 	},
-}.denil()
+	}.denil()
+}
 
 const BlockPullSpeed float64 = BlockPushSpeed
 
@@ -223,7 +208,7 @@ var CoyoteState = PlayerState{
 		if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
 			p.SetState(BlockPushRightState)
 		} else if p.ActiColls.LeftWallHit && p.ActiColls.HLabel == labels.Block {
-			p.SetState(BlockPushLeftState)
+			p.SetState(BlockPushState(true))
 		}
 
 		if isJumpInput() {
