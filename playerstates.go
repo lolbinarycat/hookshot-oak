@@ -110,7 +110,6 @@ func GroundStateLoop(p *Player) {
 	}
 	p.DoGravity()
 	p.StateCommon()
-
 }
 
 const BlockPushSpeed float64 = 1
@@ -154,14 +153,20 @@ var BlockPullRightState = PlayerState{
 }.denil()
 
 //JumpHeightDecTime is how long JumpHeightDecState lasts
-const JumpHeightDecTime time.Duration = time.Millisecond * 200
+const JumpHeightDecTime time.Duration = time.Millisecond * 150
 //the function JumpHeightDecState is the state that decides the height of the players jump.
 //it does this by decreasing the gravity temporaraly when jump is held.
+const MinHeightJumpInputTime = time.Millisecond * 85
 var JumpHeightDecState = PlayerState{
 	Loop: func(p *Player) {
 		if p.TimeFromStateStart() > JumpHeightDecTime {
 			p.SetState(AirState)
 			return
+		}
+		if p.TimeFromStateStart() < MinHeightJumpInputTime &&
+			!oak.IsDown(curCtrls.Jump) {
+			p.Body.Delta.SetY(-float64(JumpHeight)/2)
+			p.SetState(AirState)
 		}
 		if oak.IsDown(currentControls.Jump) {
 			//p.DoCustomGravity(Gravity/5)

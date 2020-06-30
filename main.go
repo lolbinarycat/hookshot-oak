@@ -34,7 +34,7 @@ import (
 	"github.com/lolbinarycat/utils"
 )
 
-const JumpHeight int = 6
+const JumpHeight int = 5
 const WallJumpHeight float64 = 6
 const WallJumpWidth float64 = 3
 
@@ -148,6 +148,7 @@ type PlayerModuleList struct {
 	BlockPull,
 	Fly,
 	GroundPound, // FloorDollar
+	GroundPoundJump,
 	HsItemGrab PlayerModule
 }
 
@@ -428,6 +429,7 @@ func loadScene() {
 			&m.BlockPull,
 			&m.HsItemGrab,
 			&m.GroundPound,
+			&m.GroundPoundJump,
 			&m.Fly)
 	}
 	render.NewDrawFPS()

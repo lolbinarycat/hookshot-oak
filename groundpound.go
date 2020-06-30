@@ -28,6 +28,7 @@ var GroundPoundState = PlayerState{
 			p.SetState(AirState)
 		} else {
 			p.Body.Delta.SetY(GroundPoundSpeed)
+			p.StateCommon()
 		}
 	},
 }.denil()
@@ -37,7 +38,31 @@ var GroundPoundEndState = PlayerState{
 	Loop: func(p *Player) {
 		if p.TimeFromStateStart() > GroundPoundEndTime {
 			p.SetState(GroundState)
+		} else if isJumpInput() && p.Mods.GroundPoundJump.Equipped {
+			p.SetState(GroundPoundJumpState)
+		} else {
+			p.Body.Delta.SetX(0)
 		}
-		p.Body.Delta.SetX(0)
+	},
+}.denil()
+
+const GroundPoundJumpGravity float64 = Gravity/2
+const GroundPoundJumpTime = time.Millisecond * 60
+const GroundPoundJumpForce = 9
+var GroundPoundJumpState = PlayerState{
+	Start: func(p *Player) {
+		if p.Mods.GroundPoundJump.Equipped == false {
+			p.SetState(AirState)
+		} else {
+			p.Body.Delta.SetY(-GroundPoundJumpForce)
+		}
+	},
+	Loop: func(p *Player) {
+		if p.Body.Delta.Y() >= 0 || p.TimeFromStateStart() > GroundPoundJumpTime {
+			p.SetState(AirState)
+		} else {
+			p.DoCustomGravity(GroundPoundJumpGravity)
+			p.DoAirControls()
+		}
 	},
 }.denil()
