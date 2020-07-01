@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // denil returns a modified version of a playerstate with nil functions replaced
 // with empty functions, preventing segfaults from happening if they are called.
 // It is designed to be called on a struct literal when setting a value
@@ -12,6 +14,12 @@ func (s PlayerState) denil() PlayerState {
 	}
 	if s.End == nil {
 		s.End = func(p *Player) {}
+	}
+	if (s.NextState == nil) {
+		s.NextState = &AirState
+	}
+	if (s.MaxDuration == 0) {
+		s.MaxDuration = time.Minute * 20
 	}
 	return s
 }

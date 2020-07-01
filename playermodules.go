@@ -21,6 +21,7 @@ type PlayerModuleList struct {
 	GroundPound, // FloorDollar
 	GroundPoundJump,
 	HsItemGrab PlayerModule
+	XDash CtrldPlayerModule 
 }
 
 type PlayerModule struct {
@@ -71,7 +72,8 @@ func SetDefaultCtrls(p *Player) {
 	p.Mods.Jump.inputTime = JumpInputTime
 	p.Mods.Hookshot.input = &p.Ctrls.Mod[1]
 	p.Mods.Hookshot.inputTime = HsInputTime
-	p.Mods.Climb.input = &p.Ctrls.Mod[2]
+	p.Mods.XDash.input = &p.Ctrls.Mod[2]
+	p.Mods.XDash.inputTime = HsInputTime
 }
 
 func (m CtrldPlayerModule) Active() bool {

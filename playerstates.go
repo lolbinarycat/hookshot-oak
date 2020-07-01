@@ -97,6 +97,10 @@ func GroundStateLoop(p *Player) {
 		}
 	}
 
+	if p.Mods.XDash.JustActivated() {
+		p.SetState(XDashState)
+	}
+
 	if oak.IsDown(currentControls.Left) {
 		player.Body.Delta.SetX(-player.Body.Speed.X())
 	} else if oak.IsDown(currentControls.Right) {
@@ -105,6 +109,7 @@ func GroundStateLoop(p *Player) {
 		player.Body.Delta.SetX(0)
 		//player.Body.Delta.X()/2)
 	}
+
 	p.DoGravity()
 	p.StateCommon()
 }

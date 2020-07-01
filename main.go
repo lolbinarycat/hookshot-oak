@@ -27,7 +27,7 @@ import (
 	"github.com/oakmound/oak/v2/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
-	"github.com/lolbinarycat/hookshot-oak/direction"
+	dir "github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 
@@ -123,6 +123,8 @@ type Hookshot struct {
 
 type PlayerState struct {
 	Start, Loop, End PlayerStateFunc
+	MaxDuration time.Duration
+	NextState *PlayerState //only used when MaxDuration is reached
 }
 
 type PlayerStateFunc func(*Player)
@@ -145,7 +147,7 @@ var blocks []*PhysObject
 
 //var log dlog.Logger = dlog.NewLogger()
 
-func (p *Player) WallJump(dir direction.Dir, EnterLaunch bool) {
+func (p *Player) WallJump(dir dir.Dir, EnterLaunch bool) {
 	p.Body.Delta.SetY(-WallJumpHeight)
 
 	if dir.IsLeft() {
@@ -644,6 +646,9 @@ func (o *PhysObject) GetLastHitObj(Horis bool) *entities.Moving {
 }*/
 
 func (p *Player) DoStateLoop() {
+	if p.TimeFromStateStart() > p.State.MaxDuration {
+		p.SetState(*p.State.NextState)
+	}
 	p.State.Loop(p)
 }
 
@@ -679,9 +684,25 @@ func (p *Player) DoHsCheck() bool {
 //	*a = a.Attach(attachTo,offsets...)
 //}
 
-func (o *PhysObject) HasHitInDir(dir direction.Dir) bool {
-	return (dir.IsRight() && o.ActiColls.RightWallHit) ||
-		(dir.IsLeft() && o.ActiColls.LeftWallHit) ||
-		(dir.IsUp() && o.ActiColls.CeilingHit) ||
-		(dir.IsDown() && o.ActiColls.GroundHit)
+func (o *PhysObject) HasHitInDir(d dir.Dir) bool {
+	return (d.IsRight() && o.ActiColls.RightWallHit) ||
+		(d.IsLeft() && o.ActiColls.LeftWallHit) ||
+		(d.IsUp() && o.ActiColls.CeilingHit) ||
+		(d.IsDown() && o.ActiColls.GroundHit)
+}
+
+func (p *Player) HeldDir() (d dir.Dir) {
+	if oak.IsDown(p.Ctrls.Up) {
+		d = d.Add(dir.MaxUp())
+	}
+	if oak.IsDown(p.Ctrls.Down) {
+		d = d.Add(dir.MaxDown())
+	}
+	if oak.IsDown(p.Ctrls.Left) {
+		d = d.Add(dir.MaxLeft())
+	}
+	if oak.IsDown(p.Ctrls.Right) {
+		d = d.Add(dir.MaxRight())
+	}
+	return d
 }

@@ -157,3 +157,7 @@ func copySign(s,in int8) int8 {
 func ToCoeff(in int8) float64 {
 	return float64(in/MaxInt8)
 }
+
+func (d1 Dir) Add(d2 Dir) Dir {
+	return Dir{d1.H + d2.H,d1.V + d1.V}
+}
