@@ -52,14 +52,11 @@ const (
 )
 const Gravity float64 = 0.35
 
-
-
 //JumpInputTime describes the length of time after the jump button is pressed in which it will count as the player jumping.
 //Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
 const JumpInputTime time.Duration = time.Millisecond * 90
 
 const HsInputTime time.Duration = time.Millisecond * 70
-
 
 type ActiveCollisions struct {
 	GroundHit          bool
@@ -67,11 +64,12 @@ type ActiveCollisions struct {
 	RightWallHit       bool
 	CeilingHit         bool
 	HLabel, VLabel     collision.Label // these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
-	LastHitV, LastHitH event.CID // cid of the last collision space that was hit
+	LastHitV, LastHitH event.CID       // cid of the last collision space that was hit
 }
 
 type ControlConfig struct {
-	Left, Right, Up, Down, Jump, Hs, Climb, Quit string
+	Left, Right, Up, Down, Quit string
+	Mod                         ModInputList
 }
 
 var currentControls ControlConfig = ControlConfig{
@@ -79,9 +77,6 @@ var currentControls ControlConfig = ControlConfig{
 	Right: key.RightArrow,
 	Up:    key.UpArrow,
 	Down:  key.DownArrow,
-	Jump:  key.Z,
-	Hs:    key.X,
-	Climb: key.LeftShift,
 	Quit:  key.Q,
 }
 
@@ -113,10 +108,11 @@ type Player struct {
 	State          PlayerState //func()
 	StateStartTime time.Time
 	Mods           PlayerModuleList
+	Ctrls          ControlConfig
 	RespawnPos     Pos
 	Hs             Hookshot
 	HeldObj        *entities.Moving
-	Eyes  [2]*render.Sprite
+	Eyes           [2]*render.Sprite
 }
 
 type Hookshot struct {
@@ -140,29 +136,9 @@ type PhysObject struct {
 
 //type Body *entities.Moving
 
-type PlayerModuleList struct {
-	WallJump  PlayerModule
-	Climb     PlayerModule
-	Hookshot  PlayerModule
-	BlockPush PlayerModule
-	BlockPull,
-	Fly,
-	GroundPound, // FloorDollar
-	GroundPoundJump,
-	HsItemGrab PlayerModule
-}
-
-type PlayerModule struct {
-	Equipped bool
-	Obtained bool
-}
-
-//whether modules should be automaticaly equipped when recived
-var autoEquipMods bool = true
-
 //this is the default level for debugLevel,
 //value will be set in loadYamlConfigData()
-var debugLevel dlog.Level = /** dlog.VERBOSE /*/ dlog.INFO/**/ 
+var debugLevel dlog.Level = /** dlog.VERBOSE /*/ dlog.INFO /**/
 
 //temporary global
 var blocks []*PhysObject
@@ -187,19 +163,19 @@ func (p *Player) WallJump(dir direction.Dir, EnterLaunch bool) {
 	}
 }
 
-//DoCliming is the function for shared procceses between
-//ClimbRightState and ClimbLeft state
+// DoCliming is the function for shared procceses between
+// ClimbRightState and ClimbLeft state
 func (p *Player) DoCliming() {
-	//this is a hack, and should problebly be fixed
+	// this is a hack, and should problebly be fixed
 	if int(p.TimeFromStateStart())%2 == 0 && p.ActiColls.LeftWallHit == false && p.ActiColls.RightWallHit == false {
 		p.SetState(AirState)
 	}
-	if !oak.IsDown(currentControls.Climb) {
+	if !p.Mods.Jump.JustActivated() {
 		p.SetState(AirState)
 	}
-	if oak.IsDown(currentControls.Up) {
+	if oak.IsDown(p.Ctrls.Up) {
 		p.Body.Delta.SetY(-ClimbSpeed)
-	} else if oak.IsDown(currentControls.Down) {
+	} else if oak.IsDown(p.Ctrls.Down) {
 		p.Body.Delta.SetY(ClimbSpeed)
 	} else {
 		p.Body.Delta.SetY(0)
@@ -209,7 +185,7 @@ func (p *Player) DoCliming() {
 }
 
 func isJumpInput() bool {
-	return isButtonPressedWithin(currentControls.Jump, JumpInputTime)
+	return player.Mods.Jump.JustActivated()
 }
 
 func isButtonPressedWithin(button string, dur time.Duration) bool {
@@ -221,7 +197,7 @@ func isButtonPressedWithin(button string, dur time.Duration) bool {
 }
 
 func isHsInput() bool {
-	return isButtonPressedWithin(currentControls.Hs, HsInputTime)
+	return player.Mods.Hookshot.JustActivated()
 }
 
 func (p *Player) ifHsPressedStartHs() {
@@ -294,7 +270,6 @@ func (o *PhysObject) DoCustomGravity(grav float64) {
 	o.Body.Delta.ShiftY(grav)
 }
 
-
 func openFileAsBytes(filename string) ([]byte, error) {
 	dlog.Info("opening file", filename)
 	file, err := os.Open(filename)
@@ -347,23 +322,23 @@ var screenSpace *collision.Space
 
 func loadScene() {
 	//loadJsonLevelData("level.json")
-	var eyeColor = color.RGBA{0,255,255,255}
+	var eyeColor = color.RGBA{0, 255, 255, 255}
 	playerSprite := utils.Check2(
-		render.LoadSprite("assets/images","player_new.png")).(render.Renderable)
+		render.LoadSprite("assets/images", "player_new.png")).(render.Renderable)
 
-	eye1 := render.NewColorBox(1,4,eyeColor)
+	eye1 := render.NewColorBox(1, 4, eyeColor)
 	eye2 := eye1.Copy().(*render.Sprite)
-	player.Eyes = [2]*render.Sprite{eye1,eye2}
+	player.Eyes = [2]*render.Sprite{eye1, eye2}
 	player.Body = entities.NewMoving(100, 100, 12, 12,
 		playerSprite,
 		nil, 0, 0)
 	player.Body.Init()
-	eye1.LayeredPoint.Vector = eye1.Attach(player.Body,4,3)
-	eye2.LayeredPoint.Vector = eye1.Attach(player.Body,8,3)
+	eye1.LayeredPoint.Vector = eye1.Attach(player.Body, 4, 3)
+	eye2.LayeredPoint.Vector = eye1.Attach(player.Body, 8, 3)
 	//AttachMut(&eye1.LayeredPoint.Vector,player.Body)
 	//vectAttach(eye1).AttachMut(player.Body)
-	render.Draw(eye1,1)
-	render.Draw(eye2,1)
+	render.Draw(eye1, 1)
+	render.Draw(eye2, 1)
 
 	player.State = RespawnFallState
 	player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
@@ -384,7 +359,7 @@ func loadScene() {
 
 	//player.Body.Doodad.Point.Attach(player.Hs.Body)
 	//player.Body.AttachX(player.Hs.Body,0)
-	render.Draw(player.Hs.Body.R,-1)
+	render.Draw(player.Hs.Body.R, -1)
 
 	var block PhysObject
 	var block2 PhysObject
@@ -408,7 +383,6 @@ func loadScene() {
 	block.Body.UpdateLabel(labels.Block)
 	blocks = append(blocks, &block, &block2)
 
-
 	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
 	level.LoadDevRoom()
@@ -420,7 +394,7 @@ func loadScene() {
 	// " "
 	//player.Mods.Hookshot.Equipped = true
 	//player.Mods.BlockPush.Equipped = true
-	{
+	/*{
 		m := &player.Mods
 		GiveMods(&m.BlockPush,
 			&m.Climb,
@@ -431,8 +405,10 @@ func loadScene() {
 			&m.GroundPound,
 			&m.GroundPoundJump,
 			&m.Fly)
-	}
-	render.NewDrawFPS()
+	}*/
+	player.Mods.GiveAll(true)
+	SetDefaultCtrls(&player)
+	//render.NewDrawFPS()
 	//render.Draw(fps)
 }
 
@@ -518,7 +494,7 @@ func main() {
 	oak.AddCommand("fly", func(args []string) {
 		if player.Mods.Fly.Equipped {
 			if len(args) == 1 &&
-				utils.EqualsAny(args[0],"stop","end","halt") {
+				utils.EqualsAny(args[0], "stop", "end", "halt") {
 
 				player.SetState(AirState)
 			} else {
@@ -526,7 +502,6 @@ func main() {
 			}
 		}
 	})
-
 
 	/*err := oak.SetBorderless(true
 	/*err := oak.SetBorderless(true)
@@ -539,10 +514,10 @@ func main() {
 	//oak.ScreenHeight = 600
 	err := oak.LoadConf("config.json")
 	if err != nil {
-		dlog.Error("failed to load config.json, error:",err)
+		dlog.Error("failed to load config.json, error:", err)
 	}
-	oak.SetupConfig.Screen = oak.Screen{Height:600,Width:800}
-	oak.SetAspectRatio(8.0/6.0)
+	oak.SetupConfig.Screen = oak.Screen{Height: 600, Width: 800}
+	oak.SetAspectRatio(8.0 / 6.0)
 	oak.Init("platformer")
 }
 
@@ -660,8 +635,6 @@ func (o *PhysObject) GetLastHitObj(Horis bool) *entities.Moving {
 	return iface.(*entities.Moving)
 }
 
-
-
 // defines a playerstate with only a loop function
 /*func (p *Player) NewJustLoopState(loopFunc PlayerStateFunc) PlayerState {
 	PlayerState{
@@ -702,16 +675,13 @@ func (p *Player) DoHsCheck() bool {
 //
 //}
 
-
-
 //func AttachMut(a *vectAttach,attachTo physics.Attachable,offsets... float64) {
 //	*a = a.Attach(attachTo,offsets...)
 //}
 
-
 func (o *PhysObject) HasHitInDir(dir direction.Dir) bool {
 	return (dir.IsRight() && o.ActiColls.RightWallHit) ||
-		(dir.IsLeft() && o.ActiColls.LeftWallHit)   ||
-		(dir.IsUp() && o.ActiColls.CeilingHit)      ||
+		(dir.IsLeft() && o.ActiColls.LeftWallHit) ||
+		(dir.IsUp() && o.ActiColls.CeilingHit) ||
 		(dir.IsDown() && o.ActiColls.GroundHit)
 }

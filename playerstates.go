@@ -37,7 +37,6 @@ var FlyState = PlayerState{
 	},
 }.denil()
 
-
 var AirState PlayerState
 
 func AirStateLoop(p *Player) {
@@ -74,8 +73,6 @@ var RespawnFallState = PlayerState{
 		p.DoGravity()
 	},
 }.denil()
-
-
 
 var GroundState PlayerState
 
@@ -116,24 +113,24 @@ const BlockPushSpeed float64 = 1
 
 func BlockPushState(isLeft bool) PlayerState {
 	return PlayerState{
-	Start: func(p *Player) { p.GrabObjLeft(labels.Block) },
-	Loop: func(p *Player) {
-		if (isLeft && oak.IsDown(currentControls.Left) == false) ||
-			(isLeft == false && oak.IsDown(curCtrls.Right) == false ) {
-			p.HeldObj.Delta.SetX(0)
-			p.SetState(GroundState)
-		} else {
-			var spd float64
-			if isLeft {
-				spd = -BlockPushSpeed
+		Start: func(p *Player) { p.GrabObjLeft(labels.Block) },
+		Loop: func(p *Player) {
+			if (isLeft && oak.IsDown(currentControls.Left) == false) ||
+				(isLeft == false && oak.IsDown(curCtrls.Right) == false) {
+				p.HeldObj.Delta.SetX(0)
+				p.SetState(GroundState)
 			} else {
-				spd = BlockPushSpeed
-			}
+				var spd float64
+				if isLeft {
+					spd = -BlockPushSpeed
+				} else {
+					spd = BlockPushSpeed
+				}
 
-			p.Body.Delta.SetX(spd)
-			p.HeldObj.Delta.SetX(spd)
-		}
-	},
+				p.Body.Delta.SetX(spd)
+				p.HeldObj.Delta.SetX(spd)
+			}
+		},
 	}.denil()
 }
 
@@ -142,7 +139,7 @@ const BlockPullSpeed float64 = BlockPushSpeed
 var BlockPullRightState = PlayerState{
 	Loop: func(p *Player) {
 		//if either button isn't pushed
-		if (oak.IsDown(currentControls.Climb) && oak.IsDown(currentControls.Right)) == false {
+		if (p.Mods.Hookshot.JustActivated() && oak.IsDown(currentControls.Right)) == false {
 			p.SetState(GroundState)
 			return
 		}
@@ -154,9 +151,11 @@ var BlockPullRightState = PlayerState{
 
 //JumpHeightDecTime is how long JumpHeightDecState lasts
 const JumpHeightDecTime time.Duration = time.Millisecond * 150
+
 //the function JumpHeightDecState is the state that decides the height of the players jump.
 //it does this by decreasing the gravity temporaraly when jump is held.
 const MinHeightJumpInputTime = time.Millisecond * 85
+
 var JumpHeightDecState = PlayerState{
 	Loop: func(p *Player) {
 		if p.TimeFromStateStart() > JumpHeightDecTime {
@@ -164,11 +163,11 @@ var JumpHeightDecState = PlayerState{
 			return
 		}
 		if p.TimeFromStateStart() < MinHeightJumpInputTime &&
-			!oak.IsDown(curCtrls.Jump) {
-			p.Body.Delta.SetY(-float64(JumpHeight)/2)
+			!p.Mods.Jump.Active() {
+			p.Body.Delta.SetY(-float64(JumpHeight) / 2)
 			p.SetState(AirState)
 		}
-		if oak.IsDown(currentControls.Jump) {
+		if p.Mods.Jump.JustActivated() {
 			//p.DoCustomGravity(Gravity/5)
 		} else {
 			p.DoGravity()
@@ -180,6 +179,7 @@ var JumpHeightDecState = PlayerState{
 
 //CoyoteTime is how long CoyoteState lasts
 const CoyoteTime time.Duration = time.Millisecond * 7
+
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var CoyoteState = PlayerState{
@@ -206,7 +206,7 @@ var CoyoteState = PlayerState{
 
 var WallSlideLeftState = PlayerState{
 	Loop: func(p *Player) {
-		if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
+		if p.Mods.Climb.Active() && p.Mods.Climb.Equipped {
 			p.SetState(ClimbLeftState)
 			return
 		}
@@ -224,7 +224,7 @@ var WallSlideLeftState = PlayerState{
 
 var WallSlideRightState = PlayerState{
 	Loop: func(p *Player) {
-		if oak.IsDown(currentControls.Climb) && p.Mods.Climb.Equipped {
+		if p.Mods.Climb.Active() && p.Mods.Climb.Equipped {
 			p.SetState(ClimbRightState)
 			return //return to stop airstate for overwriting our change
 		}
@@ -241,6 +241,7 @@ var WallSlideRightState = PlayerState{
 }.denil()
 
 const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
+
 //func WallJumpLaunchState is entered after you walljump,
 //temporaraly disabling your controls. This should prevent one sided
 //walljumps
@@ -278,4 +279,3 @@ var ClimbLeftState = PlayerState{
 		//don't call StateCommon() because ... (see ClimbRightState)
 	},
 }.denil()
-
