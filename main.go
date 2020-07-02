@@ -544,7 +544,7 @@ func (b *PhysObject) BlockUpdater() {
 	if player.HeldObj != b.Body {
 		b.DoGravity()
 		if b.ActiColls.GroundHit {
-b.Body.Delta.SetPos(0,0)
+			b.Body.Delta.SetPos(0,0)
 		}
 	}
 }

@@ -87,7 +87,7 @@ func GroundStateLoop(p *Player) {
 		p.SetState(CoyoteState)
 	}
 
-	if p.ActiColls.HLabel == labels.Block {
+	if p.ActiColls.HLabel == labels.Block && p.ActiColls.VLabel != labels.Block {
 		if p.Mods["blockpush"].Active() {
 			if p.ActiColls.RightWallHit {
 				p.SetState(BlockPushState(false))
@@ -120,8 +120,17 @@ const BlockPushSpeed float64 = 1
 
 func BlockPushState(isLeft bool) PlayerState {
 	return PlayerState{
-		Start: func(p *Player) { p.GrabObjLeft(labels.Block) },
+		Start: func(p *Player) {
+			if isLeft {
+				p.GrabObjLeft(labels.Block)
+			} else {
+				p.GrabObjRight(labels.Block)
+			}
+		},
 		Loop: func(p *Player) {
+			if p.HeldObj == nil {
+				p.SetState(GroundState)
+			}
 			if (isLeft && oak.IsDown(currentControls.Left) == false) ||
 				(isLeft == false && oak.IsDown(curCtrls.Right) == false) {
 				p.HeldObj.Delta.SetX(0)
@@ -137,6 +146,8 @@ func BlockPushState(isLeft bool) PlayerState {
 
 				p.Body.Delta.SetX(spd)
 				p.HeldObj.Delta.SetX(spd)
+
+				p.StateCommon()
 			}
 		},
 	}.denil()
