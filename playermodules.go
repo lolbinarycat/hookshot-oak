@@ -84,6 +84,7 @@ func InitMods(p *Player) {
 		AddBasic("groundpound").
 		AddBasic("groundpoundjump").
 		AddBasic("hsitemgrab").
+		AddBasic("itemcarry").
 		AddCtrld("jump",&p.Ctrls.Mod[0],JumpInputTime).
 		AddCtrld("climb",nil,time.Minute * 20).
 		AddCtrld("hs",&p.Ctrls.Mod[1],HsInputTime).

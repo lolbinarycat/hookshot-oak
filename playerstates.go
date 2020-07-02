@@ -101,17 +101,19 @@ func GroundStateLoop(p *Player) {
 		p.SetState(XDashState)
 	}
 
+	p.DoGroundCtrls()
+	p.DoGravity()
+	p.StateCommon()
+}
+
+func (p *Player) DoGroundCtrls() {
 	if oak.IsDown(currentControls.Left) {
 		player.Body.Delta.SetX(-player.Body.Speed.X())
 	} else if oak.IsDown(currentControls.Right) {
 		player.Body.Delta.SetX(player.Body.Speed.X())
 	} else {
 		player.Body.Delta.SetX(0)
-		//player.Body.Delta.X()/2)
 	}
-
-	p.DoGravity()
-	p.StateCommon()
 }
 
 const BlockPushSpeed float64 = 1
@@ -124,6 +126,7 @@ func BlockPushState(isLeft bool) PlayerState {
 				(isLeft == false && oak.IsDown(curCtrls.Right) == false) {
 				p.HeldObj.Delta.SetX(0)
 				p.SetState(GroundState)
+				return
 			} else {
 				var spd float64
 				if isLeft {
@@ -284,4 +287,31 @@ var ClimbLeftState = PlayerState{
 		p.DoCliming()
 		//don't call StateCommon() because ... (see ClimbRightState)
 	},
+}.denil()
+
+var ItemCarryGroundState PlayerState
+var ItemCarryAirState PlayerState
+
+func ItemCarryLoop(p *Player) {
+	if p.Mods["hs"].JustActivated() {
+		p.ThrowHeldItem(5*p.HeldDir().HCoeff(),-7)
+		p.SetState(ItemThrowLag)
+	} else {
+		p.HeldObj.SetPos(p.Body.X(),p.Body.Y() - p.HeldObj.H)
+		p.HeldObj.Delta.SetPos(p.Body.Delta.GetPos())
+		p.HeldObj.ShiftPos(p.HeldObj.Delta.GetPos())
+	}
+}
+
+func (p *Player) ThrowHeldItem(xSpeed,ySpeed float64) {
+	p.HeldObj.Delta.SetPos(xSpeed,ySpeed)
+	if p.HeldObj.Space.Label < 0 {
+		p.HeldObj.Space.UpdateLabel(-p.HeldObj.Space.Label)
+	}
+	p.HeldObj = nil
+}
+
+var ItemThrowLag = PlayerState{
+	MaxDuration: Frame*3,
+	NextState: &AirState,
 }.denil()

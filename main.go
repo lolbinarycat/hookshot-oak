@@ -33,6 +33,8 @@ import (
 	"github.com/lolbinarycat/utils"
 )
 
+const Frame = time.Second/60
+
 const JumpHeight int = 5
 const WallJumpHeight float64 = 6
 const WallJumpWidth float64 = 3
@@ -55,7 +57,7 @@ const Gravity float64 = 0.35
 //Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
 const JumpInputTime time.Duration = time.Millisecond * 90
 
-const HsInputTime time.Duration = time.Millisecond * 70
+const HsInputTime time.Duration = time.Second/60 * 2
 
 type ActiveCollisions struct {
 	GroundHit          bool
@@ -213,7 +215,11 @@ func (p *Player) Jump() {
 	player.SetState(JumpHeightDecState)
 }
 
-func (p *Player) SetState(state PlayerState) {
+type SetStateOptArgs struct {
+	SkipEnd bool
+}
+
+func (p *Player) SetStateAdv(state PlayerState,opt SetStateOptArgs) {
 	defer func() {
 		if r := recover(); r != nil {
 			dlog.Error("error while setting state", r)
@@ -221,11 +227,17 @@ func (p *Player) SetState(state PlayerState) {
 		}
 	}()
 
-	p.State.End(p)
+	if opt.SkipEnd == false {
+		p.State.End(p)
+	}
 	p.StateStartTime = time.Now()
 
 	p.State = state
 	p.State.Start(p)
+}
+
+func (p *Player) SetState(state PlayerState) {
+	p.SetStateAdv(state,SetStateOptArgs{})
 }
 
 func (p *Player) DoAirControls() {
@@ -515,7 +527,6 @@ func (p *Player) EndHs() {
 	p.Hs.X = 0
 	p.Hs.Y = 0
 	p.Hs.Body.Delta.SetPos(0, 0)
-	p.SetState(AirState)
 }
 
 func GiveMods(mods ...*PlayerModule) {
@@ -530,7 +541,12 @@ func GiveMods(mods ...*PlayerModule) {
 func (b *PhysObject) BlockUpdater() {
 	//b.Body.ApplyFriction(1)
 	//b.Body.Delta.
-	b.DoGravity()
+	if player.HeldObj != b.Body {
+		b.DoGravity()
+		if b.ActiColls.GroundHit {
+b.Body.Delta.SetPos(0,0)
+		}
+	}
 }
 
 // Depreciated
@@ -626,6 +642,7 @@ func (o *PhysObject) GetLastHitObj(Horis bool) *entities.Moving {
 func (p *Player) DoStateLoop() {
 	if p.TimeFromStateStart() > p.State.MaxDuration {
 		p.SetState(*p.State.NextState)
+		return
 	}
 	p.State.Loop(p)
 }

@@ -75,8 +75,9 @@ func HsRetractState(dir direction.Dir) PlayerState {
 			if (dir.IsLeft() && p.Hs.X >= 0) ||
 				(dir.IsRight() && p.Hs.X <= 0) ||
 				(dir.IsUp() && p.Hs.Y >= 0) ||
-				(dir.IsDown() && p.Hs.Y <= 0){
+				(dir.IsDown() && p.Hs.Y <= 0) {
 				p.EndHs()
+				p.SetState(AirState)
 				return
 			}
 
@@ -92,8 +93,9 @@ func HsPullState(dir direction.Dir) PlayerState {
 	return PlayerState{
 		Loop: func(p *Player) {
 			if p.HasHitInDir(dir) {
-					p.EndHs()
-					return
+				p.EndHs()
+				p.SetState(AirState)
+				return
 			}
 			p.Body.Delta.SetPos(coeffX*p.Hs.Body.Speed.X(),
 				coeffY*p.Hs.Body.Speed.Y())
@@ -113,8 +115,9 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 				(dir.IsJustLeft() && (p.Hs.X >= 0 || p.ActiColls.LeftWallHit)) ||
 				(dir.IsUp() && (p.Hs.Y >= 0 || p.ActiColls.CeilingHit)) ||
 				(dir.IsDown() && (p.Hs.Y <= 0 || p.ActiColls.GroundHit)) {
-
 				p.EndHs()
+				p.State.End(p)
+
 				return
 			}
 			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X()*coeffX,
@@ -122,8 +125,13 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 			p.HeldObj.Delta.SetPos(p.Hs.Body.Delta.GetPos())
 		},
 		End: func(p *Player) {
-			p.HeldObj.Delta.SetPos(0, 0)
-			p.HeldObj = nil
+			if p.Mods["itemcarry"].Active() {
+				p.SetStateAdv(ItemCarryGroundState, SetStateOptArgs{SkipEnd: true})
+			} else {
+				p.HeldObj.Delta.SetPos(0, 0)
+				p.HeldObj = nil
+				p.SetState(AirState)
+			}
 		},
 	}.denil()
 }

@@ -161,3 +161,11 @@ func ToCoeff(in int8) float64 {
 func (d1 Dir) Add(d2 Dir) Dir {
 	return Dir{d1.H + d2.H,d1.V + d1.V}
 }
+
+func (d Dir) HCoeff() float64 {
+	return ToCoeff(d.H)
+}
+
+func (d Dir) VCoeff() float64 {
+	return ToCoeff(d.V)
+}

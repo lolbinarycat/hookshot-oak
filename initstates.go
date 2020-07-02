@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 // denil returns a modified version of a playerstate with nil functions replaced
 // with empty functions, preventing segfaults from happening if they are called.
@@ -32,7 +34,34 @@ func initStates() {
 		Start:func(p *Player) {},
 		End:func(p *Player) {},
 	}.denil()
+	
 	GroundState = PlayerState{
 		Loop: GroundStateLoop,
+	}.denil()
+	ItemCarryGroundState = PlayerState{
+		Start: func(p *Player) {
+			if p.HeldObj.Space.Label > 0 {
+				// disbles collision
+				p.HeldObj.UpdateLabel(-p.HeldObj.Space.Label)
+			}
+		},
+		Loop: func(p *Player) {
+			p.DoGroundCtrls()
+			ItemCarryLoop(p)
+			if p.Mods["jump"].JustActivated() {
+				p.Jump()
+				p.SetState(ItemCarryAirState)
+			}
+		},
+	}.denil()
+	ItemCarryAirState = PlayerState{
+		Loop: func(p *Player) {
+			if p.ActiColls.GroundHit {
+				p.SetState(ItemCarryGroundState)
+			}
+			p.DoAirControls()
+			p.DoGravity()
+			ItemCarryLoop(p)
+		},
 	}.denil()
 }
