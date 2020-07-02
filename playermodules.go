@@ -108,14 +108,12 @@ func (m CtrldPlayerModule) JustActivated() bool {
 }
 
 func (l *PlayerModuleList) GiveAll(equip bool) {
-	rl := reflect.ValueOf(l) //reflected list
-	rlv := reflect.Indirect(rl) //reflected list value
-	for i := 0; i < rlv.NumField(); i++ {
-		rlv.Field(i).Addr().Interface().(interface{Obtain()}).Obtain()
+	l.ForEach(func(mod interface{}) {
+		mod.(interface{Obtain()}).Obtain()
 		if equip {
-			rlv.Field(i).Addr().Interface().(interface{Equip()}).Equip()
+			mod.(interface{Equip()}).Equip()
 		}
-	}
+	})
 }
 
 func (m *PlayerModule) Obtain() {
@@ -134,4 +132,13 @@ func (m *CtrldPlayerModule) Obtain() {
 
 func (m *CtrldPlayerModule) Equip() {
 	m.PlayerModule.Equip()
+}
+
+// ForEach evaluates `do` on each `mod` in `l`
+func (l *PlayerModuleList) ForEach(do func(mod interface{})) {
+	rl := reflect.ValueOf(l) //reflected list
+	rlv := reflect.Indirect(rl) //reflected list value
+	for i := 0; i < rlv.NumField(); i++ {
+		do(rlv.Field(i).Addr().Interface())
+	}
 }
