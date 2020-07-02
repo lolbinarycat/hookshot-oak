@@ -505,6 +505,7 @@ func main() {
 		}
 	})
 	oak.AddCommand("mods",ModCommand)
+	oak.AddCommand("mod",ModCommand)
 
 	/*err := oak.SetBorderless(true
 	/*err := oak.SetBorderless(true)

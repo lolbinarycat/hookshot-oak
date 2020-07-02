@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"fmt"
+	"strconv"
 
 	"github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
@@ -37,6 +38,7 @@ type CtrldPlayerModule struct {
 
 type PlayerModule interface{
 	Equip()
+	Unequip()
 	Obtain()
 	Active() bool
 	JustActivated() bool
@@ -49,7 +51,7 @@ type ModInput struct {
 	button string
 }
 
-//whether modules should be automaticaly equipped when recived
+//whether modules should be automaticaly equipped when recived (depreciated)
 var autoEquipMods bool = true
 
 
@@ -162,6 +164,19 @@ func (m *BasicPlayerModule) Equip() {
 	}
 }
 
+func (m *BasicPlayerModule) Unequip() {
+	m.Equipped = false
+}
+
+func (m *CtrldPlayerModule) Unequip() {
+	m.Equipped = false
+	m.input = nil
+}
+
+func (m *CtrldPlayerModule) Bind(p *Player,i int) {
+	m.input = &p.Ctrls.Mod[i]
+}
+
 func (m *CtrldPlayerModule) Obtain() {
 	m.BasicPlayerModule.Obtain()
 }
@@ -181,8 +196,41 @@ func ModCommand(args []string) {
 		switch args[0] {
 		case "list":
 			player.Mods.ListModules()
+		case "equip":
+			if len(args) < 2 {
+				fmt.Println("not enough args")
+			} else {
+				player.Mods[args[1]].Equip()
+			}
+		case "unequip":
+			if len(args) < 2 {
+				goto NeedMoreArgs
+			} else {
+				player.Mods[args[1]].Unequip()
+			}
+		case "inputs":
+		case "input" :
+			if len(args) < 2 || args[1] == "list" {
+				for _, m := range player.Ctrls.Mod {
+					fmt.Println(m)
+				}
+			} else if args[1] == "bind" {
+				if len(args) < 4 {
+					fmt.Println("not enough args")
+				} else {
+					inpNum, err := strconv.Atoi(args[3])
+					dlog.ErrorCheck(err)
+					player.Mods[args[2]].(*CtrldPlayerModule).
+						Bind(&player,inpNum)
+				}
+			} 
+		default:
+			fmt.Println("unknown command",args[0])
 		}
 	}
+	return
+NeedMoreArgs:
+	fmt.Println("not enough args")
 }
 
 func (l PlayerModuleList) ListModules() {

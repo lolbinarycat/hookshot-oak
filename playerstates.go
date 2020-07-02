@@ -217,7 +217,7 @@ var WallSlideLeftState = PlayerState{
 			return
 		}
 		if isJumpInput() {
-			p.WallJump(direction.MaxLeft(), true)
+			p.WallJump(direction.MaxRight(), true)
 			return
 		}
 		if p.ActiColls.LeftWallHit == false {
