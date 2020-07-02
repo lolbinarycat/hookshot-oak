@@ -9,7 +9,7 @@ import (
 
 func (object *PhysObject) DoCollision(updater func()) {
 	const stepThreshold = 8
-	_, oldY := object.Body.GetPos()
+	oldX, oldY := object.Body.GetPos()
 	updater()
 	object.ActiColls = ActiveCollisions{} //reset the struct to be all false
 
@@ -19,10 +19,10 @@ func (object *PhysObject) DoCollision(updater func()) {
 	if hit != nil {
 		if object.Body.Delta.X() > 0 { //Right Wall
 			object.ActiColls.RightWallHit = true
-			object.Body.SetX(hit.X() - object.Body.W)
+			object.Body.SetX(oldX)
 		} else if object.Body.Delta.X() < 0 { //Left Wall
 			object.ActiColls.LeftWallHit = true
-			object.Body.SetX(hit.X() + hit.W())
+			object.Body.SetX(oldX)
 		}
 		object.Body.Delta.SetX(0)
 		object.ActiColls.HLabel = hit.Label
