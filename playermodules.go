@@ -201,6 +201,7 @@ func ModCommand(args []string) {
 				goto NeedMoreArgs
 			} else {
 				player.Mods[args[1]].Equip()
+				fmt.Println("equipped",args[1])
 			}
 		case "unequip":
 			if len(args) < 2 {
@@ -211,6 +212,19 @@ func ModCommand(args []string) {
 				}
 			} else {
 				player.Mods[args[1]].Unequip()
+				fmt.Println("unequiped",args[1])
+			}
+		case "bind":
+			if args[1] == "input" {
+				goto BindInput
+			} else if len(args) == 3 {
+				oldArgs := args
+				args = make([]string,4)
+				args[3] = oldArgs[2]
+				args[2] = oldArgs[1]
+				goto BindInput
+			} else {
+				fmt.Println("malformed command")
 			}
 		case "inputs":
 		case "input" :
@@ -219,22 +233,33 @@ func ModCommand(args []string) {
 					fmt.Println(m)
 				}
 			} else if args[1] == "bind" {
-				if len(args) < 4 {
-					fmt.Println("not enough args")
-				} else {
-					inpNum, err := strconv.Atoi(args[3])
-					dlog.ErrorCheck(err)
-					player.Mods[args[2]].(*CtrldPlayerModule).
-						Bind(&player,inpNum)
-				}
+				goto BindInput
 			}
 		default:
-			fmt.Println("unknown command",args[0])
+			fmt.Println("unknown subcommand",args[0])
 		}
 	}
 	return
 NeedMoreArgs:
 	fmt.Println("not enough args")
+	return
+BindInput:
+if len(args) < 4 {
+	fmt.Println("not enough args")
+} else {
+	inpNum, err := strconv.Atoi(args[3])
+	if err != nil {
+		dlog.Error(err)
+		return
+	}
+	mod, ok := player.Mods[args[2]].(*CtrldPlayerModule)
+	if !ok {
+		fmt.Println("module",args[2],"cannot be bound")
+	} else {
+		mod.Bind(&player,inpNum)
+		fmt.Println("module",args[2],"bound to input",args[3])
+	}
+}
 }
 
 func (l PlayerModuleList) ListModules() {
