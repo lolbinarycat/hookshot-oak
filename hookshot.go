@@ -15,7 +15,7 @@ const HsStartTime time.Duration = time.Millisecond * 60
 
 var HsStartState = PlayerState{
 	Loop: func(p *Player) {
-		if player.Mods.Hookshot.Equipped == false {
+		if player.Mods["hs"].Active() == false {
 			p.SetState(AirState)
 			return
 		}
@@ -51,7 +51,7 @@ func HsExtendState(dir direction.Dir) PlayerState {
 				(dir.IsLeft() && p.Hs.ActiColls.LeftWallHit)   ||
 				(dir.IsUp() && p.Hs.ActiColls.CeilingHit)      ||
 				(dir.IsDown() && p.Hs.ActiColls.GroundHit) {
-					if p.Mods.HsItemGrab.Equipped && (
+					if p.Mods["hsitemgrab"].Active() && (
 						(p.Hs.ActiColls.HLabel == labels.Block && dir.H != 0) ||
 							(p.Hs.ActiColls.VLabel == labels.Block && dir.V != 0)) {
 							p.SetState(HsItemGrabState(dir))

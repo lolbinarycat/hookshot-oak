@@ -172,7 +172,7 @@ func (p *Player) DoCliming() {
 	if int(p.TimeFromStateStart())%2 == 0 && p.ActiColls.LeftWallHit == false && p.ActiColls.RightWallHit == false {
 		p.SetState(AirState)
 	}
-	if !p.Mods.Jump.JustActivated() {
+	if p.Mods["jump"].JustActivated() {
 		p.SetState(AirState)
 	}
 	if oak.IsDown(p.Ctrls.Up) {
@@ -187,7 +187,7 @@ func (p *Player) DoCliming() {
 }
 
 func isJumpInput() bool {
-	return player.Mods.Jump.JustActivated()
+	return player.Mods["jump"].JustActivated()
 }
 
 func isButtonPressedWithin(button string, dur time.Duration) bool {
@@ -199,7 +199,7 @@ func isButtonPressedWithin(button string, dur time.Duration) bool {
 }
 
 func isHsInput() bool {
-	return player.Mods.Hookshot.JustActivated()
+	return player.Mods["hs"].JustActivated()
 }
 
 func (p *Player) ifHsPressedStartHs() {
@@ -408,8 +408,8 @@ func loadScene() {
 			&m.GroundPoundJump,
 			&m.Fly)
 	}*/
+	InitMods(&player)
 	player.Mods.GiveAll(true)
-	SetDefaultCtrls(&player)
 	//render.NewDrawFPS()
 	//render.Draw(fps)
 }
@@ -494,7 +494,7 @@ func main() {
 		oak.ChangeWindow(oak.ScreenWidth, oak.ScreenHeight)
 	})
 	oak.AddCommand("fly", func(args []string) {
-		if player.Mods.Fly.Equipped {
+		if player.Mods["fly"].Active() {
 			if len(args) == 1 &&
 				utils.EqualsAny(args[0], "stop", "end", "halt") {
 
@@ -504,6 +504,7 @@ func main() {
 			}
 		}
 	})
+	oak.AddCommand("mods",ModCommand)
 
 	/*err := oak.SetBorderless(true
 	/*err := oak.SetBorderless(true)
@@ -542,9 +543,9 @@ func (p *Player) EndHs() {
 
 func GiveMods(mods ...*PlayerModule) {
 	for _, m := range mods {
-		m.Obtained = true
+		(*m).Obtain()
 		if autoEquipMods {
-			m.Equipped = true
+			(*m).Equip()
 		}
 	}
 }

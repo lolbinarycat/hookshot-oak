@@ -2,7 +2,7 @@ package main
 
 import (
 	"time"
-	"reflect"
+	"fmt"
 
 	"github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
@@ -10,29 +10,36 @@ import (
 	//"gopkg.in/mcuadros/go-defaults"
 )
 
-type PlayerModuleList struct {
-	Jump CtrldPlayerModule //`default`
-	WallJump  PlayerModule
+type PlayerModuleList map[string]PlayerModule
+	/*	Jump CtrldPlayerModule //`default`
+	WallJump  BasicPlayerModule
 	Climb     CtrldPlayerModule
 	Hookshot  CtrldPlayerModule
-	BlockPush PlayerModule
+	BlockPush BasicPlayerModule
 	BlockPull,
 	Fly,
 	GroundPound, // FloorDollar
 	GroundPoundJump,
-	HsItemGrab PlayerModule
-	XDash CtrldPlayerModule 
-}
+	HsItemGrab BasicPlayerModule
+	XDash CtrldPlayerModule
+}*/
 
-type PlayerModule struct {
+type BasicPlayerModule struct {
 	Equipped bool
 	Obtained bool //`default:true`
 }
 
 type CtrldPlayerModule struct {
-	PlayerModule
+	BasicPlayerModule
 	input *ModInput
 	inputTime time.Duration
+}
+
+type PlayerModule interface{
+	Equip()
+	Obtain()
+	Active() bool
+	JustActivated() bool
 }
 
 // ModInput refers to a keyboard key/controller button input.
@@ -65,15 +72,33 @@ func (cnf *ControlConfig) DefaultMapCtrls() {
 	}
 }
 
-func SetDefaultCtrls(p *Player) {
+func InitMods(p *Player) {
 	p.Ctrls.DefaultMapCtrls()
+	p.Mods = make(PlayerModuleList)
+	p.Mods.AddBasic("walljump").
+		AddBasic("blockpush").
+		AddBasic("blockpull"). //still not implemented
+		AddBasic("fly").
+		AddBasic("groundpound").
+		AddBasic("groundpoundjump").
+		AddBasic("hsitemgrab").
+		AddCtrld("jump",&p.Ctrls.Mod[0],JumpInputTime).
+		AddCtrld("climb",nil,time.Minute * 20).
+		AddCtrld("hs",&p.Ctrls.Mod[1],HsInputTime).
+		AddCtrld("xdash",&p.Ctrls.Mod[2],HsInputTime)
+}
 
-	p.Mods.Jump.input = &p.Ctrls.Mod[0]
-	p.Mods.Jump.inputTime = JumpInputTime
-	p.Mods.Hookshot.input = &p.Ctrls.Mod[1]
-	p.Mods.Hookshot.inputTime = HsInputTime
-	p.Mods.XDash.input = &p.Ctrls.Mod[2]
-	p.Mods.XDash.inputTime = HsInputTime
+func (l *PlayerModuleList) AddBasic(key string) *PlayerModuleList {
+	(*l)[key] = PlayerModule(&BasicPlayerModule{})
+	return l
+}
+
+func (l *PlayerModuleList) AddCtrld(key string,inp *ModInput,inpTime time.Duration)  (*PlayerModuleList) {
+	mod := CtrldPlayerModule{BasicPlayerModule{},inp,inpTime}
+	//mod.input = inp
+	//mod.inputTime = inpTime
+	(*l)[key] = PlayerModule(&mod)
+	return l
 }
 
 func (m CtrldPlayerModule) Active() bool {
@@ -97,7 +122,10 @@ return false
 
 func (m CtrldPlayerModule) ActivatedWithin(dur time.Duration) bool {
 	if m.input == nil {
-		dlog.Error("m.input = false",m)
+		//dlog.Error("m.input = false",m)
+		return false
+	}
+	if m.Active() == false {
 		return false
 	}
 	return isButtonPressedWithin(m.input.key,dur)
@@ -107,38 +135,60 @@ func (m CtrldPlayerModule) JustActivated() bool {
 	return m.ActivatedWithin(m.inputTime)
 }
 
-func (l *PlayerModuleList) GiveAll(equip bool) {
-	l.ForEach(func(mod interface{}) {
-		mod.(interface{Obtain()}).Obtain()
-		if equip {
-			mod.(interface{Equip()}).Equip()
-		}
-	})
+//this is here to fufill the interface
+func (m BasicPlayerModule) JustActivated() bool {
+	return false
 }
 
-func (m *PlayerModule) Obtain() {
+func (l *PlayerModuleList) GiveAll(equip bool) {
+	if len(*l) == 0 {
+		dlog.Error("no modules to give")
+	}
+	for _, m := range *l {
+		m.Obtain()
+		if equip {
+			m.Equip()
+		}
+	}
+}
+
+func (m *BasicPlayerModule) Obtain() {
 	m.Obtained = true
 }
 
-func (m *PlayerModule) Equip() {
+func (m *BasicPlayerModule) Equip() {
 	if m.Obtained {
 		m.Equipped = true
 	}
 }
 
 func (m *CtrldPlayerModule) Obtain() {
-	m.PlayerModule.Obtain()
+	m.BasicPlayerModule.Obtain()
 }
 
 func (m *CtrldPlayerModule) Equip() {
-	m.PlayerModule.Equip()
+	m.BasicPlayerModule.Equip()
 }
 
-// ForEach evaluates `do` on each `mod` in `l`
-func (l *PlayerModuleList) ForEach(do func(mod interface{})) {
-	rl := reflect.ValueOf(l) //reflected list
-	rlv := reflect.Indirect(rl) //reflected list value
-	for i := 0; i < rlv.NumField(); i++ {
-		do(rlv.Field(i).Addr().Interface())
+func (m BasicPlayerModule) Active() bool {
+	return m.Equipped && m.Obtained
+}
+
+func ModCommand(args []string) {
+	if len(args) == 0 {
+		player.Mods.ListModules()
+	} else {
+		switch args[0] {
+		case "list":
+			player.Mods.ListModules()
+		}
 	}
 }
+
+func (l PlayerModuleList) ListModules() {
+	for i, m := range l {
+		fmt.Println(i,m)
+	}
+}
+
+

@@ -45,7 +45,7 @@ func AirStateLoop(p *Player) {
 		p.SetState(GroundState)
 		return
 	} else {
-		if p.Mods.WallJump.Equipped && p.ActiColls.HLabel != labels.NoWallJump {
+		if p.Mods["walljump"].Active() && p.ActiColls.HLabel != labels.NoWallJump {
 			if p.PhysObject.ActiColls.LeftWallHit {
 				p.SetState(WallSlideLeftState)
 			} else if p.PhysObject.ActiColls.RightWallHit {
@@ -56,7 +56,7 @@ func AirStateLoop(p *Player) {
 		p.DoGravity()
 	}
 
-	if oak.IsDown(curCtrls.Down) && p.Mods.GroundPound.Equipped {
+	if oak.IsDown(curCtrls.Down) && p.Mods["groundpound"].Active() {
 		p.SetState(GroundPoundStartState)
 	}
 
@@ -88,7 +88,7 @@ func GroundStateLoop(p *Player) {
 	}
 
 	if p.ActiColls.HLabel == labels.Block {
-		if p.Mods.BlockPush.Equipped {
+		if p.Mods["blockpush"].Active() {
 			if p.ActiColls.RightWallHit {
 				p.SetState(BlockPushState(false))
 			} else if p.ActiColls.LeftWallHit {
@@ -97,7 +97,7 @@ func GroundStateLoop(p *Player) {
 		}
 	}
 
-	if p.Mods.XDash.JustActivated() {
+	if p.Mods["xdash"].JustActivated() {
 		p.SetState(XDashState)
 	}
 
@@ -144,7 +144,7 @@ const BlockPullSpeed float64 = BlockPushSpeed
 var BlockPullRightState = PlayerState{
 	Loop: func(p *Player) {
 		//if either button isn't pushed
-		if (p.Mods.Hookshot.JustActivated() && oak.IsDown(currentControls.Right)) == false {
+		if (p.Mods["hs"].JustActivated() && oak.IsDown(currentControls.Right)) == false {
 			p.SetState(GroundState)
 			return
 		}
@@ -168,11 +168,12 @@ var JumpHeightDecState = PlayerState{
 			return
 		}
 		if p.TimeFromStateStart() < MinHeightJumpInputTime &&
-			!p.Mods.Jump.Active() {
+			!p.Mods["jump"].Active() {
 			p.Body.Delta.SetY(-float64(JumpHeight) / 2)
 			p.SetState(AirState)
+			return
 		}
-		if p.Mods.Jump.JustActivated() {
+		if p.Mods["jump"].Active() {
 			//p.DoCustomGravity(Gravity/5)
 		} else {
 			p.DoGravity()
@@ -211,7 +212,7 @@ var CoyoteState = PlayerState{
 
 var WallSlideLeftState = PlayerState{
 	Loop: func(p *Player) {
-		if p.Mods.Climb.Active() && p.Mods.Climb.Equipped {
+		if p.Mods["climb"].Active() {
 			p.SetState(ClimbLeftState)
 			return
 		}
@@ -229,7 +230,7 @@ var WallSlideLeftState = PlayerState{
 
 var WallSlideRightState = PlayerState{
 	Loop: func(p *Player) {
-		if p.Mods.Climb.Active() && p.Mods.Climb.Equipped {
+		if p.Mods["climb"].Active() {
 			p.SetState(ClimbRightState)
 			return //return to stop airstate for overwriting our change
 		}
