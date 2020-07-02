@@ -52,6 +52,10 @@ func initStates() {
 				p.Jump()
 				p.SetState(ItemCarryAirState)
 			}
+			p.DoGravity()
+			if p.ActiColls.GroundHit == false {
+				p.SetState(ItemCarryAirState)
+			}
 		},
 	}.denil()
 	ItemCarryAirState = PlayerState{
