@@ -15,6 +15,7 @@ var GroundPoundStartState = PlayerState{
 		if p.TimeFromStateStart() > GroundPoundStartTime {
 			p.SetState(GroundPoundState)
 		}
+		p.StateCommon()
 	},
 }.denil()
 
