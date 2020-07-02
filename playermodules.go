@@ -198,13 +198,17 @@ func ModCommand(args []string) {
 			player.Mods.ListModules()
 		case "equip":
 			if len(args) < 2 {
-				fmt.Println("not enough args")
+				goto NeedMoreArgs
 			} else {
 				player.Mods[args[1]].Equip()
 			}
 		case "unequip":
 			if len(args) < 2 {
 				goto NeedMoreArgs
+			} else if args[1] == "all" {
+				for _, m := range player.Mods {
+					m.Unequip()
+				}
 			} else {
 				player.Mods[args[1]].Unequip()
 			}
@@ -223,7 +227,7 @@ func ModCommand(args []string) {
 					player.Mods[args[2]].(*CtrldPlayerModule).
 						Bind(&player,inpNum)
 				}
-			} 
+			}
 		default:
 			fmt.Println("unknown command",args[0])
 		}
