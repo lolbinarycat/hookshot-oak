@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image/color"
 	"math"
-	"strconv"
 
 	//"math"
 	"os"
@@ -482,30 +481,7 @@ func main() {
 	oak.AddCommand("kill", func(args []string) {
 		player.Die()
 	})
-	oak.AddCommand("setAspectRatio", func(args []string) {
-		if len(args) != 1 {
-			fmt.Println("Usage: setAspectRatio .75")
-		}
-		xToY, err := strconv.ParseFloat(args[0], 64)
-		if err != nil {
-			fmt.Println("failed to parse floating point ratio")
-		}
-		oak.SetAspectRatio(xToY)
-		oak.ChangeWindow(oak.ScreenWidth, oak.ScreenHeight)
-	})
-	oak.AddCommand("fly", func(args []string) {
-		if player.Mods["fly"].Active() {
-			if len(args) == 1 &&
-				utils.EqualsAny(args[0], "stop", "end", "halt") {
-
-				player.SetState(AirState)
-			} else {
-				player.SetState(FlyState)
-			}
-		}
-	})
-	oak.AddCommand("mods",ModCommand)
-	oak.AddCommand("mod",ModCommand)
+	BindCommands()
 
 	/*err := oak.SetBorderless(true
 	/*err := oak.SetBorderless(true)
