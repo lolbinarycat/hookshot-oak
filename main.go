@@ -105,14 +105,14 @@ type Player struct {
 	//Body           *entities.Moving
 	//ActiColls      ActiveCollisions
 	PhysObject
-	State          PlayerState //func()
-	StateStartTime time.Time
+	State          PlayerState  `json:"-"`
+	StateStartTime time.Time `json:"-"`
 	Mods           PlayerModuleList
 	Ctrls          ControlConfig
 	RespawnPos     Pos
-	Hs             Hookshot
-	HeldObj        *entities.Moving
-	Eyes           [2]*render.Sprite
+	Hs             Hookshot `json:"-"`
+	HeldObj        *entities.Moving `json:"-"`
+	Eyes           [2]*render.Sprite `json:"-"`
 }
 
 type Hookshot struct {
@@ -131,9 +131,9 @@ type PlayerStateFunc func(*Player)
 
 type PhysObject struct {
 	Body      *entities.Moving
-	ActiColls ActiveCollisions
+	ActiColls ActiveCollisions `json:"-"`
 	//ExtraSolids defines labels that should be solid only for this object.
-	ExtraSolids []collision.Label
+	ExtraSolids []collision.Label 
 }
 
 //type Body *entities.Moving
@@ -399,26 +399,13 @@ func loadScene() {
 
 	level.LoadDevRoom()
 
-	//Give player walljump for now
-	//player.Mods.WallJump.Equipped = true
-	//same for climbing
-	//player.Mods.Climb.Equipped = true
-	// " "
-	//player.Mods.Hookshot.Equipped = true
-	//player.Mods.BlockPush.Equipped = true
-	/*{
-		m := &player.Mods
-		GiveMods(&m.BlockPush,
-			&m.Climb,
-			&m.Hookshot,
-			&m.WallJump,
-			&m.BlockPull,
-			&m.HsItemGrab,
-			&m.GroundPound,
-			&m.GroundPoundJump,
-			&m.Fly)
-	}*/
 	InitMods(&player)
+	err := player.Load("save.json")
+	if err != nil {
+		panic(err)
+	}
+
+
 	player.Mods.GiveAll(true)
 	//render.NewDrawFPS()
 	//render.Draw(fps)
@@ -440,6 +427,7 @@ func main() {
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
 		loadScene()
+		
 
 		camera.StartCameraLoop(player.Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)

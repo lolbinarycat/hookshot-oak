@@ -36,6 +36,7 @@ func BindCommands() {
 	oak.AddCommand("mods",ModCommand)
 	oak.AddCommand("mod",ModCommand)
 	oak.AddCommand("exit", func(_ []string) {os.Exit(0)})
+	oak.AddCommand("playerInfo",func(_ []string) {fmt.Println(player)})
 }
 
 func ModCommand(args []string) {

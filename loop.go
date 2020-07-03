@@ -74,6 +74,13 @@ func init() {
 		// Do nothing for now, later display the pause menu
 	}
 
+		if oak.IsDown(key.S) {
+			err :=  player.Save("save.json")
+			if err != nil {
+				panic(err)
+			}
+		}
+
 	if oak.IsDown(PauseButton) {
 		if !PauseButtonHeld {
 			PauseButtonHeld = true
