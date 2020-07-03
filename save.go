@@ -1,13 +1,19 @@
 package main
 
 import (
-	"encoding/json"
-	"os"
 	"bytes"
+	"encoding/json"
+	//"zfmt"
+	"os"
 	//"github.com/oakmound/oak/v2/fileutil"
 )
 
 //var SaveFileName = "save.json"
+
+type JSONVector struct {
+	X float64
+	Y float64
+}
 
 func (p Player) Save(saveFileName string) error {
 	saveFile, err := os.Create(saveFileName)
@@ -108,3 +114,22 @@ func (l PlayerModuleList) UnmarshalJSON(b []byte) error {
 //func (ac ActiveCollisions) UnmarshalJSON(b []byte) error {
 //	return nil
 //}
+
+func (o PhysObject) MarshalJSON() ([]byte,error) {
+	buf := bytes.NewBuffer([]byte{})
+	enc := json.NewEncoder(buf)
+	pos := JSONVector{X:o.Body.X(),Y:o.Body.Y()}
+	enc.Encode(pos)
+	return buf.Bytes(), nil
+}
+
+func (o *PhysObject) UnmarshalJSON(b []byte) error {
+	rdr := bytes.NewReader(b)
+
+	dec := json.NewDecoder(rdr)
+	vec := JSONVector{}
+	dec.Decode(&vec)
+
+	o.Body.SetPos(vec.X,vec.Y)
+	return nil
+}

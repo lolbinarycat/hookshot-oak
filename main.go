@@ -51,7 +51,7 @@ const (
 	WindowHeight int = 600
 )
 const Gravity float64 = 0.35
-
+var loadSave = true
 //JumpInputTime describes the length of time after the jump button is pressed in which it will count as the player jumping.
 //Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
 const JumpInputTime time.Duration = time.Millisecond * 90
@@ -68,8 +68,8 @@ type ActiveCollisions struct {
 }
 
 type ControlConfig struct {
-	Left, Right, Up, Down, Quit string
-	Mod                         ModInputList
+	Left, Right, Up, Down, Quit string `json:"-"`
+	Mod                         ModInputList `json:"-"`
 }
 
 var currentControls ControlConfig = ControlConfig{
@@ -400,11 +400,12 @@ func loadScene() {
 	level.LoadDevRoom()
 
 	InitMods(&player)
-	err := player.Load("save.json")
-	if err != nil {
-		panic(err)
+	if loadSave {
+		err := player.Load("save.json")
+		if err != nil {
+			panic(err)
+		}
 	}
-
 
 	player.Mods.GiveAll(true)
 	//render.NewDrawFPS()
