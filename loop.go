@@ -7,15 +7,31 @@ import (
 	oak "github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/key"
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	"github.com/oakmound/oak/v2/render"
 )
 
 var Paused = false
+var PauseButtonHeld = false //stop the game from pausing/unpausing every frame
+const PauseButton = key.P
 
-func MainSceneLoop() bool {
-	if Paused == false {
+var MainSceneLoop func() bool
+
+type PauseScreen struct {
+	Text *render.Text
+}
+
+func init() {
+
+	pauseScreen := PauseScreen{
+		Text:render.NewStrText("Paused",0,0),
+	}
+	pauseScreen.Text.Center()
+	render.Draw(pauseScreen.Text,3)
+
+	MainSceneLoop = func() bool {
 		hsOffX := player.Body.W/2 - player.Hs.Body.H/2
 		hsOffY := player.Body.H/2 - player.Hs.Body.H/2
-
+	if Paused == false {
 			//xdlog.SetDebugLevel(dlog.VERBOSE)
 			if oak.IsDown(key.L) {
 				//oak.ScreenWidth = 800
@@ -23,7 +39,6 @@ func MainSceneLoop() bool {
 				//oak.ChangeWindow(800,600)
 				//oak.MoveWindow(20, 20, 800, 600)
 				//oak.SetAspectRatio(16 / 9)
-
 			}
 			if oak.IsDown(currentControls.Quit) {
 				if oak.IsDown(key.I) {
@@ -55,11 +70,19 @@ func MainSceneLoop() bool {
 			player.Hs.DoCollision(HsUpdater)
 
 			//player.Eyes[1].SetX(5)
-
-		return true
 	} else {
 		// Do nothing for now, later display the pause menu
-		return true
 	}
 
+	if oak.IsDown(PauseButton) {
+		if !PauseButtonHeld {
+			PauseButtonHeld = true
+			Paused = !Paused
+		}
+	} else {
+		PauseButtonHeld = false
+	}
+	return true
 }
+}
+

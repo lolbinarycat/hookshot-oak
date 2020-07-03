@@ -349,12 +349,12 @@ func loadScene() {
 	eye2.LayeredPoint.Vector = eye1.Attach(player.Body, 8, 3)
 	//AttachMut(&eye1.LayeredPoint.Vector,player.Body)
 	//vectAttach(eye1).AttachMut(player.Body)
-	render.Draw(eye1, 1)
-	render.Draw(eye2, 1)
+	render.Draw(eye1, 2)
+	render.Draw(eye2, 2)
 
 	player.State = RespawnFallState
 	player.RespawnPos = Pos{X: player.Body.X(), Y: player.Body.Y()}
-	render.Draw(player.Body.R)
+	render.Draw(player.Body.R,1)
 	player.Body.Speed = physics.NewVector(3, float64(JumpHeight))
 
 	player.Hs.Body = entities.NewMoving(100, 100, 4, 4,
@@ -371,7 +371,7 @@ func loadScene() {
 
 	//player.Body.Doodad.Point.Attach(player.Hs.Body)
 	//player.Body.AttachX(player.Hs.Body,0)
-	render.Draw(player.Hs.Body.R, -1)
+	render.Draw(player.Hs.Body.R, 0)
 
 	var block PhysObject
 	var block2 PhysObject
@@ -426,6 +426,14 @@ func loadScene() {
 
 //var progStartTime time.Time
 func main() {
+	render.SetDrawStack(
+		render.NewDynamicHeap(),
+		render.NewDynamicHeap(),
+		render.NewDynamicHeap(),
+		render.NewDynamicHeap(),
+		//render.NewDrawFPS(),
+		render.NewLogicFPS(),
+	)
 	dlog.SetDebugLevel(debugLevel)
 	initStates()
 	//progStartTime = time.Now()
@@ -461,6 +469,7 @@ func main() {
 		dlog.Error("failed to load config.json, error:", err)
 	}
 	oak.SetupConfig.Screen = oak.Screen{Height: 600, Width: 800}
+	oak.SetupConfig.FrameRate = 60
 	oak.SetAspectRatio(8.0 / 6.0)
 	oak.Init("platformer")
 }
