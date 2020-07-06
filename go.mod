@@ -5,6 +5,7 @@ go 1.14
 replace github.com/lolbinarycat/utils => /home/binarycat/go/src/github.com/lolbinarycat/utils
 
 require (
+	fyne.io/fyne v1.3.0 // indirect
 	github.com/disintegration/gift v1.2.1 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.0 // indirect
 	github.com/lafriks/go-tiled v0.1.0

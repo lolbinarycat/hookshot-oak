@@ -11,6 +11,7 @@ const (
 	Checkpoint
 	Block
 	Player
+	Collectable
 )
 
 var Solids []collision.Label= []collision.Label{

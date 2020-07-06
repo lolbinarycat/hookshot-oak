@@ -345,6 +345,7 @@ func loadScene() {
 		playerSprite,
 		nil, 0, 0)
 	player.Body.Init()
+	player.Body.Space.UpdateLabel(labels.Player)
 	eye1.LayeredPoint.Vector = eye1.Attach(player.Body, 4, 3)
 	eye2.LayeredPoint.Vector = eye1.Attach(player.Body, 8, 3)
 	//AttachMut(&eye1.LayeredPoint.Vector,player.Body)
@@ -408,6 +409,9 @@ func loadScene() {
 	}
 
 	player.Mods.GiveAll(true)
+	modClct := NewModuleClct(120,550,8,8,
+		render.NewColorBox(8,8,color.RGBA{0,255,100,255}), 72,"hs")
+	render.Draw(modClct.React.R,3)
 	//render.NewDrawFPS()
 	//render.Draw(fps)
 }
@@ -428,7 +432,6 @@ func main() {
 	//dlog.SetLogger(log)
 	oak.Add("platformer", func(string, interface{}) {
 		loadScene()
-		
 
 		camera.StartCameraLoop(player.Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
