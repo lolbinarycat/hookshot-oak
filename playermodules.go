@@ -71,6 +71,7 @@ func (cnf *ControlConfig) DefaultMapCtrls() {
 		NewModInput(key.Z,""),
 		NewModInput(key.X,""),
 		NewModInput(key.LeftShift,""),
+		NewModInput(key.R,""),
 	}
 }
 
@@ -88,7 +89,8 @@ func InitMods(p *Player) {
 		AddCtrld("jump",&p.Ctrls.Mod[0],JumpInputTime).
 		AddCtrld("climb",nil,time.Minute * 20).
 		AddCtrld("hs",&p.Ctrls.Mod[1],HsInputTime).
-		AddCtrld("xdash",&p.Ctrls.Mod[2],HsInputTime)
+		AddCtrld("xdash",&p.Ctrls.Mod[2],HsInputTime).
+		AddCtrld("quickrestart",&p.Ctrls.Mod[3],Frame)
 }
 
 func (l *PlayerModuleList) AddBasic(key string) *PlayerModuleList {

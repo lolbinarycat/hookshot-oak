@@ -80,6 +80,9 @@ func init() {
 				panic(err)
 			}
 		}
+		if player.Mods["quickrestart"].Active() {
+			player.Respawn()
+		}
 
 	if oak.IsDown(PauseButton) {
 		if !PauseButtonHeld {
