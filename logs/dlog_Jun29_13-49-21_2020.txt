@@ -1,0 +1,2 @@
+[config:207]  ERROR:[{{assets/ audio/ images/ font/} { error} {0 0 600 800 1} {none 12 72  white} 60 60 English Oak Window false false false false}] 
+[rng:39]  ERROR:Oak seed: 1593452961475803398 

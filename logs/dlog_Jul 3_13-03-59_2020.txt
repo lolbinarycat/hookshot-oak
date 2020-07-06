@@ -1,0 +1,3 @@
+[config:219]  ERROR:[{{assets/ audio/ images/ font/} { error} {0 0 600 800 1 0 0} {none 12 72  white} 60 60 English Oak Window false false false false}] 
+[rng:39]  ERROR:Oak seed: 1593795839202062473 
+[drawStack:82]  ERROR:[Layer -1 does not exist on global draw stack] 
