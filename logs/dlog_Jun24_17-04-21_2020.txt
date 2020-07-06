@@ -1,3 +1,0 @@
-[config:219]  ERROR:[{{assets/ audio/ images/ font/} { ERROR} {0 0 480 640 1 0 0} {none 12 72  white} 60 60 English Oak Window false false false false}] 
-[rng:39]  ERROR:Oak seed: 1593032661229838371 
-[main:234]  ERROR:[error while setting state runtime error: invalid memory address or nil pointer dereference] 

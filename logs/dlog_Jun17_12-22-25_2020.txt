@@ -1,3 +1,0 @@
-[config:219]  VERBOSE:[{{assets/ audio/ images/ font/} { ERROR} {0 0 480 640 1 0 0} {none 12 72  white} 60 60 English Oak Window false false false false}] 
-[rng:39]  ERROR:Oak seed: 1592410945633948652 
-[main:377]  ERROR:[TEST] 
