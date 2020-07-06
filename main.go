@@ -28,6 +28,7 @@ import (
 	dir "github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
+	"github.com/lolbinarycat/hookshot-oak/player"
 
 	"github.com/lolbinarycat/utils"
 )
@@ -52,89 +53,14 @@ const (
 )
 const Gravity float64 = 0.35
 var loadSave = true
-//JumpInputTime describes the length of time after the jump button is pressed in which it will count as the player jumping.
-//Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
-const JumpInputTime time.Duration = time.Millisecond * 90
 
-const HsInputTime time.Duration = time.Second/60 * 2
 
-type ActiveCollisions struct {
-	GroundHit          bool
-	LeftWallHit        bool
-	RightWallHit       bool
-	CeilingHit         bool
-	HLabel, VLabel     collision.Label // these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
-	LastHitV, LastHitH event.CID       // cid of the last collision space that was hit
-}
 
-type ControlConfig struct {
-	Left, Right, Up, Down, Quit string `json:"-"`
-	Mod                         ModInputList `json:"-"`
-}
-
-var currentControls ControlConfig = ControlConfig{
-	Left:  key.LeftArrow,
-	Right: key.RightArrow,
-	Up:    key.UpArrow,
-	Down:  key.DownArrow,
-	Quit:  key.Q,
-}
-
-var curCtrls = &currentControls
-
-//type Direction uint8
-
-// const (
-//	 Left Direction = iota
-//	 Right
-// )
-
-type Pos struct {
-	X float64
-	Y float64
-}
 
 //var block PhysObject //this is global temporaraly
 
-var player Player
+var player player.Player
 
-//Player is a type representing the player
-//StateInit is a variable that should be set to true when changing states
-//it tells the state to initialize values like StateTimer
-type Player struct {
-	//Body           *entities.Moving
-	//ActiColls      ActiveCollisions
-	PhysObject
-	State          PlayerState  `json:"-"`
-	StateStartTime time.Time `json:"-"`
-	Mods           PlayerModuleList
-	Ctrls          ControlConfig
-	RespawnPos     Pos
-	Hs             Hookshot `json:"-"`
-	HeldObj        *entities.Moving `json:"-"`
-	Eyes           [2]*render.Sprite `json:"-"`
-}
-
-type Hookshot struct {
-	PhysObject
-	X, Y   float64
-	Active bool
-}
-
-type PlayerState struct {
-	Start, Loop, End PlayerStateFunc
-	MaxDuration time.Duration
-	NextState *PlayerState //only used when MaxDuration is reached
-}
-
-type PlayerStateFunc func(*Player)
-
-type PhysObject struct {
-	Body      *entities.Moving
-	ActiColls ActiveCollisions `json:"-"`
-	//ExtraSolids defines labels that should be solid only for this object.
-	ExtraSolids []collision.Label 
-}
 
 //type Body *entities.Moving
 

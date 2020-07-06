@@ -1,4 +1,4 @@
-package main
+package player
 
 import (
 	"time"
@@ -10,6 +10,14 @@ import (
 	"github.com/oakmound/oak/v2/key"
 	//"gopkg.in/mcuadros/go-defaults"
 )
+
+const Frame = time.Second/60
+
+//JumpInputTime describes the length of time after the jump button is pressed in which it will count as the player jumping.
+//Setting this to be too high may result in multiple jumps to occur for one press of the jump button, while setting it too low may result in jumps being eaten.
+const JumpInputTime time.Duration = time.Millisecond * 90
+
+const HsInputTime time.Duration = time.Second/60 * 2
 
 type PlayerModuleList map[string]PlayerModule
 	/*	Jump CtrldPlayerModule //`default`
@@ -201,3 +209,10 @@ func (l PlayerModuleList) ListModules() {
 }
 
 
+func isButtonPressedWithin(button string, dur time.Duration) bool {
+	if k, d := oak.IsHeld(button); k && (d <= dur) {
+		return true
+	} else {
+		return false
+	}
+}

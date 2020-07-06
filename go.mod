@@ -11,6 +11,7 @@ require (
 	github.com/lafriks/go-tiled v0.1.0
 	github.com/lolbinarycat/utils v0.0.0-00010101000000-000000000000
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/oakmound/oak v2.0.0+incompatible // indirect
 	github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75
 	github.com/stretchr/testify v1.5.1
 	github.com/yobert/alsa v0.0.0-20200618200352-d079056f5370 // indirect

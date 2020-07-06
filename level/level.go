@@ -18,6 +18,7 @@ import (
 	//"github.com/rustyoz/svg"
 	"github.com/lafriks/go-tiled"
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	"github.com/lolbinarycat/hookshot-oak/collectables"
 )
 
 /*type Rect struct {
@@ -239,6 +240,21 @@ func LoadTmx(mapPath string) error {
 
 
 	fmt.Println(levelMap.TileHeight,levelMap.TileWidth)
+	LoadTileLayers(*levelMap)
+	LoadObjects(*levelMap)
+
+	return nil
+}
+
+/*func LoadTmxLayer(layer *tiled.Layer,parentMap *tiled.Map) {
+	for i, tile := layer.Tiles {
+		} else {
+			entities.NewSolid((parentMap.TileWidth*i)%parentMap.Width, y float64, w float64, h float64, r render.Renderable, tree *collision.Tree, cid event.CID)
+		}
+	}
+}*/
+
+func LoadTileLayers(levelMap tiled.Map) error {
 	// for each _Loop, the contents of the loop are ran once for every _
 	LayerLoop: for _, layer := range levelMap.Layers {
 		/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
@@ -268,7 +284,7 @@ func LoadTmx(mapPath string) error {
 					e.UpdateLabel(labels.Ground)
 					_, err = render.Draw(e.R,1)
 					if err != nil {
-						panic(err)
+						return err
 					}
 				}
 			}
@@ -277,10 +293,21 @@ func LoadTmx(mapPath string) error {
 	return nil
 }
 
-/*func LoadTmxLayer(layer *tiled.Layer,parentMap *tiled.Map) {
-	for i, tile := layer.Tiles {
-		} else {
-			entities.NewSolid((parentMap.TileWidth*i)%parentMap.Width, y float64, w float64, h float64, r render.Renderable, tree *collision.Tree, cid event.CID)
+const moduleCollectable = "modClct"
+
+func LoadObjects(levelMap tiled.Map) {
+	for _, objGroup := range levelMap.ObjectGroups {
+		for _, obj := range objGroup.Objects {
+			if obj.Type == moduleCollectable {
+				collectables.NewModuleClct(
+					obj.X + float64(objGroup.OffsetX),
+					obj.Y + float64(objGroup.OffsetY),
+					obj.Width, obj.Height,
+					render.NewColorBox(int(obj.Width), int(obj.Height), color.RGBA{255,255,0,255}),70,obj.Name)
+				//o.Init()
+
+				
+			}
 		}
 	}
-}*/
+}

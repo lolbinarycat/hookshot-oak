@@ -53,6 +53,8 @@ github.com/oakmound/libudev v0.2.1 h1:gaXuw7Pbt3RSRxbUakAjl0dSW6Wo3TZWpwS5aMq8+E
 github.com/oakmound/libudev v0.2.1/go.mod h1:zYF5CkHY+UP6lzWbPR+XoVAscl/s+OncWA//qWjMLUs=
 github.com/oakmound/oak v1.5.1 h1:t6C1/wgnSoSxV1uVUJyrMBouS3DAIWJ59T8jhywwSAM=
 github.com/oakmound/oak v2.0.0+incompatible h1:88iLPCK9PO+cVLUJpeZG0s7NmHSilkWzIQOolu3AL3E=
+github.com/oakmound/oak v2.0.0+incompatible/go.mod h1:LgESy19NqYObZlqk1GcoZJav1Wwmp+YGj2KvziJmU6A=
+github.com/oakmound/oak/v2 v2.3.3 h1:xkEP/OuCuKDe9pQUYD1wrArsNmByvpciSQKIZYvZvJE=
 github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75 h1:JmXsAfdM22rZm1Z4JvprUcfy8MNgzAZATz1ViElZveM=
 github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75/go.mod h1:IeLz/IxfiVKdrPFw45yebPmiBJMYyLHlHQOLWdmC76I=
 github.com/oakmound/shiny v0.4.2-beta.0.20200620232743-6df262b89055 h1:Q6pxnU82bqSWes7nvRhbHWDFPMDX2L+sgpN2MBuW8AI=
