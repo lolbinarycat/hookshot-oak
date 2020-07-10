@@ -42,6 +42,7 @@ type CtrldPlayerModule struct {
 	BasicPlayerModule
 	input *ModInput
 	inputTime time.Duration
+	player *Player
 }
 
 type PlayerModule interface{
@@ -50,6 +51,7 @@ type PlayerModule interface{
 	Obtain()
 	Active() bool
 	JustActivated() bool
+	GetBasic() *BasicPlayerModule
 }
 
 // ModInput refers to a keyboard key/controller button input.
@@ -94,11 +96,11 @@ func InitMods(p *Player) {
 		AddBasic("groundpoundjump").
 		AddBasic("hsitemgrab").
 		AddBasic("itemcarry").
-		AddCtrld("jump",&p.Ctrls.Mod[0],JumpInputTime).
-		AddCtrld("climb",nil,time.Minute * 20).
-		AddCtrld("hs",&p.Ctrls.Mod[1],HsInputTime).
-		AddCtrld("xdash",&p.Ctrls.Mod[2],HsInputTime).
-		AddCtrld("quickrestart",&p.Ctrls.Mod[3],Frame)
+		AddCtrld("jump",p,0,JumpInputTime).
+		AddCtrld("climb",p,2,time.Minute * 20).
+		AddCtrld("hs",p,1,HsInputTime).
+		AddCtrld("xdash",p,-1,HsInputTime).
+		AddCtrld("quickrestart",p,3,Frame)
 }
 
 func (l *PlayerModuleList) AddBasic(key string) *PlayerModuleList {
@@ -106,10 +108,19 @@ func (l *PlayerModuleList) AddBasic(key string) *PlayerModuleList {
 	return l
 }
 
-func (l *PlayerModuleList) AddCtrld(key string,inp *ModInput,inpTime time.Duration)  (*PlayerModuleList) {
-	mod := CtrldPlayerModule{BasicPlayerModule{},inp,inpTime}
-	//mod.input = inp
-	//mod.inputTime = inpTime
+func (l *PlayerModuleList) AddCtrld(key string,p *Player,inputNum int8,inpTime time.Duration)  (*PlayerModuleList) {
+	var inp *ModInput
+	if inputNum >= 0 && inputNum <= 8 {
+		inp = &p.Ctrls.Mod[inputNum]
+	} else {
+		inp = nil
+	}
+	mod := CtrldPlayerModule{BasicPlayerModule:BasicPlayerModule{},
+		input:inp,
+		inputTime:inpTime,
+		player:p,
+	}
+
 	(*l)[key] = PlayerModule(&mod)
 	return l
 }
@@ -200,7 +211,23 @@ func (m BasicPlayerModule) Active() bool {
 	return m.Equipped && m.Obtained
 }
 
+func (m *BasicPlayerModule) GetBasic() *BasicPlayerModule {
+	return m
+}
 
+func (m *CtrldPlayerModule) GetBasic() *BasicPlayerModule {
+	return &m.BasicPlayerModule
+}
+
+func (m *CtrldPlayerModule) SetInput(i int8) {
+	var inp *ModInput
+	if i >= 0 && i <= 8 {
+		inp = &m.player.Ctrls.Mod[i]
+	} else {
+		inp = nil
+	}
+	m.input = inp
+}
 
 func (l PlayerModuleList) ListModules() {
 	for i, m := range l {

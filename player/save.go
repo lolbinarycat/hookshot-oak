@@ -88,6 +88,7 @@ func (m BasicPlayerModule) UnmarshalJSON(b []byte) error {
 
 func (m CtrldPlayerModule) UnmarshalJSON(b []byte) error {
 	err := m.BasicPlayerModule.UnmarshalJSON(b)
+
 	return err
 }
 
@@ -133,3 +134,4 @@ func (o *PhysObject) UnmarshalJSON(b []byte) error {
 	o.Body.SetPos(vec.X,vec.Y)
 	return nil
 }
+
