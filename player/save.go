@@ -6,10 +6,30 @@ import (
 	//"zfmt"
 	"os"
 	//"github.com/oakmound/oak/v2/fileutil"
+	"github.com/pkg/errors"
 )
 
 //var SaveFileName = "save.json"
-
+//type JSONSave struct {
+//	Player JSONPlayer
+//}
+type JSONPlayer struct {
+	Pos,RespawnPos JSONVector
+	Ctrls ControlConfig
+	Mods PlayerModuleList
+}
+type JSONModList map[string]JSONMod
+type JSONMod struct {
+	Type JSONModType
+	Obtained bool
+	Equipped bool
+	InputNum int //0-7, or -1 if N/A
+}
+type JSONModType int
+const (
+	BasicMod JSONModType = iota
+	CtrldMod
+)
 type JSONVector struct {
 	X float64
 	Y float64
@@ -46,15 +66,18 @@ func (p *Player) Load(filename string) error {
 	data := make([]byte,fileStats.Size())
 	file.Read(data)
 
+	if p == nil {
+		panic("p == nil")
+	}
 	err = json.Unmarshal(data,p)
 	if err != nil {
-		return err
+		return errors.Wrapf(err,"%v.Load(%v) failed",p,filename)
 	}
 
 	return nil
 }
 
-func (m BasicPlayerModule) UnmarshalJSON(b []byte) error {
+/*func (m BasicPlayerModule) UnmarshalJSON(b []byte) error {
 	dec := json.NewDecoder(bytes.NewReader(b))
 	for dec.More() {
 		tok, err := dec.Token()
@@ -90,7 +113,24 @@ func (m CtrldPlayerModule) UnmarshalJSON(b []byte) error {
 	err := m.BasicPlayerModule.UnmarshalJSON(b)
 
 	return err
+}*/
+
+func (m CtrldPlayerModule) UnmarshalJSON(b []byte) error {
+	return PlayerModUnmarshalJSON(&m,b)
 }
+
+func (m CtrldPlayerModule) MarshalJSON() ([]byte,error)  {
+	return PlayerModMarshalJSON(&m)
+}
+
+func (m BasicPlayerModule) UnmarshalJSON(b []byte) error {
+	return PlayerModUnmarshalJSON(&m,b)
+}
+
+func (m BasicPlayerModule) MarshalJSON() ([]byte, error) {
+	return PlayerModMarshalJSON(&m)
+}
+
 
 func (l PlayerModuleList) UnmarshalJSON(b []byte) error {
 	dec := json.NewDecoder(bytes.NewReader(b))
@@ -135,3 +175,60 @@ func (o *PhysObject) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (p Player) MarshalJSON() ([]byte,error) {
+	return json.Marshal(
+		JSONPlayer{
+			JSONVector{p.Body.X(),p.Body.Y()},
+			JSONVector(p.RespawnPos),
+			p.Ctrls,
+			p.Mods,
+		})
+}
+
+func (p *Player) UnmarshalJSON(b []byte) error {
+	jsonP := JSONPlayer{}
+	err := json.Unmarshal(b,&jsonP)
+	if err != nil {
+		return err
+	}
+	p.Body.SetPos(jsonP.Pos.X,jsonP.Pos.Y)
+	p.RespawnPos = Pos(jsonP.RespawnPos)
+	p.Ctrls = jsonP.Ctrls
+	p.Mods = jsonP.Mods
+	return nil
+}
+
+func PlayerModMarshalJSON(m PlayerModule) ([]byte,error) {
+	jsonM := JSONMod{}
+	if ctrldM, ok := m.(*CtrldPlayerModule); ok {
+		jsonM.Type = CtrldMod
+		jsonM.InputNum = ctrldM.GetInputNum()
+	} else {
+		jsonM.Type = BasicMod
+		jsonM.InputNum = -1
+	}
+	basicM := m.GetBasic()
+	jsonM.Equipped = basicM.Equipped
+	jsonM.Obtained = basicM.Obtained
+
+	return json.Marshal(jsonM)
+}
+
+func PlayerModUnmarshalJSON(m PlayerModule,b []byte) error {
+	jsonM := JSONMod{}
+	err := json.Unmarshal(b,jsonM)
+	if err != nil {
+		return errors.Wrapf(err,"PlayerModUnmarshalJSON(%v,%v) failed",m,b)
+	}
+	if jsonM.Obtained {
+		m.Obtain()
+	}
+	if jsonM.Equipped {
+		m.Equip()
+	}
+	if jsonM.Type == CtrldMod {
+		ctrldM := m.(*CtrldPlayerModule)
+		ctrldM.Bind(nil,jsonM.InputNum)
+	}
+	return nil
+}

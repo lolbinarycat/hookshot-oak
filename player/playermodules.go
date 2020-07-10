@@ -108,19 +108,14 @@ func (l *PlayerModuleList) AddBasic(key string) *PlayerModuleList {
 	return l
 }
 
-func (l *PlayerModuleList) AddCtrld(key string,p *Player,inputNum int8,inpTime time.Duration)  (*PlayerModuleList) {
-	var inp *ModInput
-	if inputNum >= 0 && inputNum <= 8 {
-		inp = &p.Ctrls.Mod[inputNum]
-	} else {
-		inp = nil
-	}
+func (l *PlayerModuleList) AddCtrld(key string,p *Player,inputNum int,inpTime time.Duration)  (*PlayerModuleList) {
+	
 	mod := CtrldPlayerModule{BasicPlayerModule:BasicPlayerModule{},
-		input:inp,
+		//input:inp,
 		inputTime:inpTime,
-		player:p,
+		//player:p,
 	}
-
+	mod.Bind(p,inputNum)
 	(*l)[key] = PlayerModule(&mod)
 	return l
 }
@@ -195,8 +190,30 @@ func (m *CtrldPlayerModule) Unequip() {
 	m.input = nil
 }
 
+// Bind sets the input of m to be p.Ctrls.Mod[i], unless p is nil,
+// in which case it uses m.player.
+// if i is not a valid input number, m.input will be set to nil
 func (m *CtrldPlayerModule) Bind(p *Player,i int) {
-	m.input = &p.Ctrls.Mod[i]
+	if p != nil {
+		m.player = p
+	}
+	var inp *ModInput
+	if IsValidInputNum(i) {
+		inp = &m.player.Ctrls.Mod[i]
+	} else {
+		inp = nil
+	}
+	m.input = inp
+}
+
+func (m CtrldPlayerModule) GetInputNum() int {
+	for i, inp := range m.player.Ctrls.Mod {
+		if m.input != nil && *m.input == inp {
+			return i
+		}
+	}
+	fmt.Println("GetInputNum failed on:",m)
+	return -1
 }
 
 func (m *CtrldPlayerModule) Obtain() {
@@ -219,14 +236,8 @@ func (m *CtrldPlayerModule) GetBasic() *BasicPlayerModule {
 	return &m.BasicPlayerModule
 }
 
-func (m *CtrldPlayerModule) SetInput(i int8) {
-	var inp *ModInput
-	if i >= 0 && i <= 8 {
-		inp = &m.player.Ctrls.Mod[i]
-	} else {
-		inp = nil
-	}
-	m.input = inp
+func (m *CtrldPlayerModule) SetInput(i int) {
+	m.Bind(nil,i)
 }
 
 func (l PlayerModuleList) ListModules() {
@@ -242,4 +253,8 @@ func isButtonPressedWithin(button string, dur time.Duration) bool {
 	} else {
 		return false
 	}
+}
+
+func IsValidInputNum(n int) bool {
+	return n >= 0 && n <= 7
 }

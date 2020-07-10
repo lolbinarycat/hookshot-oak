@@ -84,6 +84,12 @@ func initMainLoop() {
 				panic(err)
 			}
 		}
+		if oak.IsDown(key.L) {
+			err := plr.Load("save.json")
+			if err != nil {
+				panic(err)
+			}
+		}
 		//if plr.Mods["quickrestart"].Active() {
 		//	plr.Respawn()
 		//}
