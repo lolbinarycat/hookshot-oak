@@ -186,10 +186,10 @@ func (p Player) MarshalJSON() ([]byte,error) {
 }
 
 func (p *Player) UnmarshalJSON(b []byte) error {
-	jsonP := JSONPlayer{}
+	jsonP :=  newJSONPlayer()
 	err := json.Unmarshal(b,&jsonP)
 	if err != nil {
-		return err
+		return errors.Wrapf(err,"Player.UnmarshalJSON: json.Unmarshal([]byte,%v)",jsonP)
 	}
 	p.Body.SetPos(jsonP.Pos.X,jsonP.Pos.Y)
 	p.RespawnPos = Pos(jsonP.RespawnPos)
@@ -211,12 +211,16 @@ func PlayerModMarshalJSON(m PlayerModule) ([]byte,error) {
 	jsonM.Equipped = basicM.Equipped
 	jsonM.Obtained = basicM.Obtained
 
-	return json.Marshal(jsonM)
+	b, err := json.Marshal(jsonM)
+	if err != nil {
+		return []byte{}, errors.Wrap(err,"PlayerModMarshalJSON")
+	}
+	return b, nil
 }
 
 func PlayerModUnmarshalJSON(m PlayerModule,b []byte) error {
 	jsonM := JSONMod{}
-	err := json.Unmarshal(b,jsonM)
+	err := json.Unmarshal(b,&jsonM)
 	if err != nil {
 		return errors.Wrapf(err,"PlayerModUnmarshalJSON(%v,%v) failed",m,b)
 	}
@@ -231,4 +235,14 @@ func PlayerModUnmarshalJSON(m PlayerModule,b []byte) error {
 		ctrldM.Bind(nil,jsonM.InputNum)
 	}
 	return nil
+}
+
+func newJSONPlayer() JSONPlayer {
+	jplr := JSONPlayer{}
+	plr := Player{}
+
+	InitMods(&plr)
+	jplr.Mods = plr.Mods
+	jplr.Ctrls = plr.Ctrls
+	return jplr
 }

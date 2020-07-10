@@ -57,8 +57,8 @@ type ActiveCollisions struct {
 }
 
 type ControlConfig struct {
-	Left, Right, Up, Down, Quit string `json:"-"`
-	Mod                         ModInputList `json:"-"`
+	Left, Right, Up, Down, Quit string //`json:"-"`
+	Mod                         ModInputList //`json:"-"`
 }
 
 var currentControls ControlConfig = ControlConfig{
