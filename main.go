@@ -249,7 +249,6 @@ func main() {
 			return "platformer", nil
 		})
 
-	
 	BindCommands()
 
 	/*err := oak.SetBorderless(true
