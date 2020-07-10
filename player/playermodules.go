@@ -57,8 +57,8 @@ type PlayerModule interface{
 // ModInput refers to a keyboard key/controller button input.
 // An empty string refers to an unbound input
 type ModInput struct {
-	key string
-	button string
+	Key string `json:"key"`
+	Button string `json:"button"`
 }
 
 //whether modules should be automaticaly equipped when recived (depreciated)
@@ -129,10 +129,10 @@ return false
 		return false
 	}
 	if m.Equipped {
-		if oak.IsDown(m.input.key)  {
+		if oak.IsDown(m.input.Key)  {
 			return true
 		}
-		if oak.IsDown(m.input.button) {
+		if oak.IsDown(m.input.Button) {
 			return true
 		}
 	}
@@ -147,7 +147,7 @@ func (m CtrldPlayerModule) ActivatedWithin(dur time.Duration) bool {
 	if m.Active() == false {
 		return false
 	}
-	return isButtonPressedWithin(m.input.key,dur)
+	return isButtonPressedWithin(m.input.Key,dur)
 }
 
 func (m CtrldPlayerModule) JustActivated() bool {
@@ -240,6 +240,10 @@ func (m *CtrldPlayerModule) SetInput(i int) {
 	m.Bind(nil,i)
 }
 
+//func (m CtrldPlayerModule) String() string {
+
+//}
+
 func (l PlayerModuleList) ListModules() {
 	for i, m := range l {
 		fmt.Println(i,m)
@@ -257,4 +261,12 @@ func isButtonPressedWithin(button string, dur time.Duration) bool {
 
 func IsValidInputNum(n int) bool {
 	return n >= 0 && n <= 7
+}
+
+func (l ModInputList) String() string {
+	var str string
+	for i, v := range l {
+		str += fmt.Sprintf("%d{key:%v,button:%v}\n",i,v.Key,v.Button)
+	}
+	return str
 }
