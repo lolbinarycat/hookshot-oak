@@ -163,56 +163,14 @@ func (p Player) MarshalJSON() ([]byte,error) {
 }
 
 func (p *Player) UnmarshalJSON(b []byte) error {
-	dec := json.NewDecoder(bytes.NewReader(b))
+	//dec := json.NewDecoder(bytes.NewReader(b))
 	jsonP :=  newJSONPlayer(p)
-	for dec.More() {
-		toc, err := dec.Token()
-		if err != nil {
-			return errors.Wrap(err,"failed to get token")
-		}
-		if _,ok := toc.(json.Delim); ok {
-			continue
-		}
-		switch toc.(string) {
-		case "Pos":
-			dec.Decode(&jsonP.Pos)
-		case "RespawnPos":
-			dec.Decode(&jsonP.RespawnPos)
-		case "Ctrls":
-			dec.Decode(&jsonP.Ctrls)
-		case "Mods":
-			dec.Decode(&jsonP.Mods)
-			/*if t, _ := dec.Token(); t.(json.Delim).String() != "{" {
-				return errors.Errorf("unexpected token when decoding json, expecting '{', got '%v'", t)
-			}*/
-			/*bts := ""//make(string,128)
-			err := dec.Decode(&bts)
-			if err != nil {
-				return errors.Wrap(err,"unable to read buffered data")
-			}
-
-			for dec.More() {
-				modName, err := dec.Token()
-				if err != nil {
-					return errors.Wrap(err,"failed to get module name")
-				}
-				err = PlayerModUnmarshalJSON(jsonP.Mods[modName.(string)],[]byte(bts)) //dec.Decode(jsonP.Mods[modName.(string)])
-
-				if err != nil {
-					return errors.Wrap(err,"failed to decode module data")
-				}
-			}*/
-
-
-		default:
-			return errors.New("unknown field \""+toc.(string)+"\"")
-		}
-	}
-	//err := json.Unmarshal(b,&jsonP)
+	
+	err := json.Unmarshal(b,&jsonP)
 	fmt.Println(jsonP.Ctrls.Mod)
-	//if err != nil {
-	//	return errors.Wrapf(err,"Player.UnmarshalJSON: json.Unmarshal([]byte,%v)",jsonP)
-	//}
+	if err != nil {
+		return errors.Wrapf(err,"Player.UnmarshalJSON: json.Unmarshal([]byte,%v)",jsonP)
+	}
 	p.Body.SetPos(jsonP.Pos.X,jsonP.Pos.Y)
 	p.RespawnPos = Pos(jsonP.RespawnPos)
 	p.Ctrls = jsonP.Ctrls
