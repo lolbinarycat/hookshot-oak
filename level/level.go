@@ -14,6 +14,7 @@ import (
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/render"
+	"github.com/oakmound/oak/v2/render/mod"
 
 	//"github.com/rustyoz/svg"
 	"github.com/lafriks/go-tiled"
@@ -308,6 +309,15 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y 
 		tilesetTile := levelMap.Tilesets[0].Tiles[tile.ID]
 		spritePath := tilesetTile.Image.Source
 		sprite, err := render.LoadSprite("assets/",spritePath)
+		if tile.DiagonalFlip {
+			sprite.SetRGBA(mod.Transpose(sprite))
+		}
+		if tile.HorizontalFlip {
+			sprite.SetRGBA(mod.FlipX(sprite))
+		}
+		if tile.VerticalFlip {
+			sprite.SetRGBA(mod.FlipY(sprite))
+		}
 		if err != nil {
 			return nil, false, err
 		}
