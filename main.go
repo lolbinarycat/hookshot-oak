@@ -200,7 +200,10 @@ func loadScene() {
 
 	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
-	level.LoadDevRoom()
+	err := level.LoadDevRoom()
+	if err != nil {
+		panic(err)
+	}
 
 	player.InitMods(plr)
 	if loadSave {

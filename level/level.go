@@ -60,6 +60,12 @@ func newCounter(n int) func() event.CID {
 	}
 }
 
+var getNextCID func() event.CID
+
+func init() {
+	getNextCID = newCounter(100)
+}
+
 func OpenFileAsBytes(filename string) ([]byte, error) {
 	dlog.Info("opening file", filename)
 	file, err := os.Open(filename)
@@ -83,7 +89,7 @@ func OpenFileAsBytes(filename string) ([]byte, error) {
 	return byteArr, nil
 }
 
-func LoadDevRoom() {
+func LoadDevRoom() error {
 	n := newCounter(3)
 	fmt.Println(n())
 	// ground := entities.NewSolid(10, 400, 500, 20,
@@ -130,11 +136,12 @@ func LoadDevRoom() {
 
 	err := LoadTmx("assets/level.tmx")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	//err := loadSvg("level.svg", -800, 0)
 	//dlog.ErrorCheck(err)
+	return nil
 }
 
 // func loadSvg(filename string, offsetX, offsetY float64) error {
@@ -241,7 +248,10 @@ func LoadTmx(mapPath string) error {
 
 
 	//fmt.Println(levelMap.TileHeight,levelMap.TileWidth)
-	LoadTileLayers(levelMap)
+	err = LoadTileLayers(levelMap)
+	if err != nil {
+		return err
+	}
 	LoadObjects(levelMap)
 
 	return nil
@@ -309,6 +319,9 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y 
 		tilesetTile := levelMap.Tilesets[0].Tiles[tile.ID]
 		spritePath := tilesetTile.Image.Source
 		sprite, err := render.LoadSprite("assets/",spritePath)
+		if err != nil {
+			return nil, false, err
+		}
 		if tile.DiagonalFlip {
 			sprite.SetRGBA(mod.Transpose(sprite))
 		}
@@ -334,6 +347,8 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y 
 			e.UpdateLabel(labels.Ground)
 		case "spikes":
 			e.UpdateLabel(labels.Death)
+		case "checkpoint":
+			e.UpdateLabel(labels.Checkpoint)
 		default:
 			return nil, false, UnknownTileTypeError{*tilesetTile}
 		}
