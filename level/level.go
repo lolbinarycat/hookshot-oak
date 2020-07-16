@@ -239,9 +239,9 @@ func LoadTmx(mapPath string) error {
 	fmt.Println(levelMap)
 
 
-	fmt.Println(levelMap.TileHeight,levelMap.TileWidth)
-	LoadTileLayers(*levelMap)
-	LoadObjects(*levelMap)
+	//fmt.Println(levelMap.TileHeight,levelMap.TileWidth)
+	LoadTileLayers(levelMap)
+	LoadObjects(levelMap)
 
 	return nil
 }
@@ -254,7 +254,7 @@ func LoadTmx(mapPath string) error {
 	}
 }*/
 
-func LoadTileLayers(levelMap tiled.Map) error {
+func LoadTileLayers(levelMap *tiled.Map) error {
 	// for each _Loop, the contents of the loop are ran once for every _
 	LayerLoop: for _, layer := range levelMap.Layers {
 		/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
@@ -267,22 +267,7 @@ func LoadTileLayers(levelMap tiled.Map) error {
 				if tile.Nil == true {
 					continue BlockLoop
 				} else {
-					sprite, err := render.LoadSprite("assets/images","wall.png")
-					if err != nil {
-						return err
-					}
-					e := entities.NewSolid(
-						float64(j*levelMap.TileWidth+layer.OffsetX),
-						float64(i*levelMap.TileHeight+layer.OffsetY),
-						float64(levelMap.TileWidth),
-						float64(levelMap.TileHeight),
-						//render.NewColorBox(levelMap.TileWidth,levelMap.TileHeight
-						//color.RGBA{100,100,120,255}),
-						sprite,
-						nil, event.CID(100+tileIndex))
-					e.Init()
-					e.UpdateLabel(labels.Ground)
-					_, err = render.Draw(e.R,1)
+					_, _, err := LoadTile(tile,layer,levelMap,j,i)
 					if err != nil {
 						return err
 					}
@@ -295,7 +280,7 @@ func LoadTileLayers(levelMap tiled.Map) error {
 
 const moduleCollectable = "modClct"
 
-func LoadObjects(levelMap tiled.Map) {
+func LoadObjects(levelMap *tiled.Map) {
 	for _, objGroup := range levelMap.ObjectGroups {
 		for _, obj := range objGroup.Objects {
 			if obj.Type == moduleCollectable {
@@ -310,4 +295,50 @@ func LoadObjects(levelMap tiled.Map) {
 			}
 		}
 	}
+}
+
+// LoadTile loads `tile` from `layer` of `levelMap`.
+// (x, y) is the position of the tile (in tiles), reletive to the offset of `layer`
+// It returns the loaded tile (or nil), whether tile.Nil == true, and any error that occurred
+func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y int) (
+	*entities.Solid,bool,error) {
+	if tile.Nil == true {
+		return nil, true, nil
+	} else {
+		tilesetTile := levelMap.Tilesets[0].Tiles[tile.ID]
+		spritePath := tilesetTile.Image.Source
+		sprite, err := render.LoadSprite("assets/",spritePath)
+		if err != nil {
+			return nil, false, err
+		}
+		e := entities.NewSolid(
+			float64(x*levelMap.TileWidth+layer.OffsetX),
+			float64(y*levelMap.TileHeight+layer.OffsetY),
+			float64(levelMap.TileWidth),
+			float64(levelMap.TileHeight),
+			sprite,
+			nil, event.CID(100+x+(y*levelMap.Width)))
+		e.Init()
+		switch tilesetTile.Type {
+		case "ground":
+			e.UpdateLabel(labels.Ground)
+		case "spikes":
+			e.UpdateLabel(labels.Death)
+		default:
+			return nil, false, UnknownTileTypeError{*tilesetTile}
+		}
+		_, err = render.Draw(e.R,1)
+		if err != nil {
+			return nil, false, err
+		}
+		return e, false, nil
+	}
+}
+
+type UnknownTileTypeError struct {
+	tilesetTile tiled.TilesetTile // we don't use pointers to prevent nil pointer derefrencing, we wouldn't want errors in our errors, would we?
+}
+
+func (e UnknownTileTypeError) Error() string {
+	return "unknown tile type: " + e.tilesetTile.Type
 }
