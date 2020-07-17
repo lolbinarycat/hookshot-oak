@@ -7,6 +7,7 @@ import (
 const (
 	Ground collision.Label = iota
 	NoWallJump
+	NoHs
 	Death
 	Checkpoint
 	Block
@@ -17,6 +18,7 @@ const (
 var Solids []collision.Label= []collision.Label{
 	Ground,
 	NoWallJump,
+	NoHs,
 	Block,
 }
 

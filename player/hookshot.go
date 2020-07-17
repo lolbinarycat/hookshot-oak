@@ -34,8 +34,6 @@ func (p *Player) HsUpdater() {
 	p.Hs.Y = p.Hs.Body.Y() - p.Body.Y() - hsOffY
 }
 
-
-
 // This file contains functions that handle hookshot behavior
 
 const HsStartTime time.Duration = time.Millisecond * 60
@@ -71,15 +69,22 @@ func HsExtendState(dir direction.Dir) PlayerState {
 		Loop: func(p *Player) {
 			p.Hs.Active = true
 			if p.TimeFromStateStart() > HsExtendTime {
-				p.SetState(HsRetractState(dir))
+				goto Retract
 			} else if p.TimeFromStateStart() > HsInputTime && p.IsHsInput() {
-				p.SetState(HsRetractState(dir))
+				goto Retract
 			} else {
-				if (dir.IsRight() && p.Hs.ActiColls.RightWallHit) ||
-					(dir.IsLeft() && p.Hs.ActiColls.LeftWallHit) ||
-					(dir.IsUp() && p.Hs.ActiColls.CeilingHit) ||
-					(dir.IsDown() && p.Hs.ActiColls.GroundHit) {
-					if p.Mods["hsitemgrab"].Active() && ((p.Hs.ActiColls.HLabel == labels.Block && dir.H != 0) ||
+				if dir.IsRight() && p.Hs.ActiColls.RightWallHit ||
+					dir.IsLeft() && p.Hs.ActiColls.LeftWallHit ||
+					dir.IsUp() && p.Hs.ActiColls.CeilingHit ||
+					dir.IsDown() && p.Hs.ActiColls.GroundHit {
+
+					if (dir.H == 0 || p.Hs.ActiColls.HLabel == labels.NoHs) &&
+					   (dir.V == 0 || p.Hs.ActiColls.VLabel == labels.NoHs) {
+						goto Retract
+					}
+
+					if p.Mods["hsitemgrab"].Active() &&
+						((p.Hs.ActiColls.HLabel == labels.Block && dir.H != 0) ||
 						(p.Hs.ActiColls.VLabel == labels.Block && dir.V != 0)) {
 						p.SetState(HsItemGrabState(dir))
 					} else {
@@ -89,7 +94,12 @@ func HsExtendState(dir direction.Dir) PlayerState {
 				p.Body.Delta.SetPos(0, 0)
 				p.Hs.Body.Delta.SetPos(p.Hs.Body.Speed.X()*coeffX,
 					p.Hs.Body.Speed.Y()*coeffY)
-			}
+
+				}
+				return
+			Retract:
+				p.SetState(HsRetractState(dir))
+
 		},
 	}.denil()
 }

@@ -301,8 +301,6 @@ func LoadObjects(levelMap *tiled.Map) {
 					obj.Width, obj.Height,
 					render.NewColorBox(int(obj.Width), int(obj.Height), color.RGBA{255,255,0,255}),70,obj.Name)
 				//o.Init()
-
-				
 			}
 		}
 	}
@@ -349,6 +347,8 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y 
 			e.UpdateLabel(labels.Death)
 		case "checkpoint":
 			e.UpdateLabel(labels.Checkpoint)
+		case "dirt":
+			e.UpdateLabel(labels.NoHs)
 		default:
 			return nil, false, UnknownTileTypeError{*tilesetTile}
 		}
