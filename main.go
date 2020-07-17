@@ -127,7 +127,7 @@ func loadPlayer() {
 	eye1 := render.NewColorBox(1, 4, eyeColor)
 	eye2 := eye1.Copy().(*render.Sprite)
 	plr.Eyes = [2]*render.Sprite{eye1, eye2}
-	plr.Body = entities.NewMoving(100, 100, PlayerWidth,PlayerHeight,
+	plr.Body = entities.NewMoving(300, 400, PlayerWidth,PlayerHeight,
 		playerSprite,
 		nil, 0, 0)
 	plr.Body.Init()
@@ -242,7 +242,6 @@ func main() {
 	initMainLoop()
 	oak.Add("platformer", func(string, interface{}) {
 		loadScene()
-		
 		camera.StartCameraLoop(player.GetPlayer(0).Body)
 		//fmt.Println("screenWidth",oak.ScreenWidth)
 		//fmt.Println("screenHeight",oak.ScreenHeight)
