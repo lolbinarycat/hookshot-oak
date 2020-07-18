@@ -4,14 +4,9 @@ import (
 	"bufio"
 	"image/color"
 
-	//"math"
 	"os"
 	"time"
 
-	//"compress/flate"
-	//"gopkg.in/yaml.v2"
-
-	//"github.com/disintegration/gift"
 	oak "github.com/oakmound/oak/v2"
 
 	"github.com/oakmound/oak/v2/collision"
@@ -47,18 +42,12 @@ type PhysObject = player.PhysObject
 type PlayerModule player.PlayerModule
 type PlayerState player.PlayerState
 
-//var block PhysObject //this is global temporaraly
 
-//type Body *entities.Moving
-
-//this is the default level for debugLevel,
-//value will be set in loadYamlConfigData()
-var debugLevel dlog.Level = /** dlog.VERBOSE /*/ dlog.INFO /**/
 
 //temporary global
 var blocks []*PhysObject
 
-//var log dlog.Logger = dlog.NewLogger()
+
 
 func openFileAsBytes(filename string) ([]byte, error) {
 	dlog.Info("opening file", filename)
@@ -83,30 +72,7 @@ func openFileAsBytes(filename string) ([]byte, error) {
 	return byteArr, nil
 }
 
-//TODO: complete this function (don't)
-func loadYamlConfigData(filename string) {
-	dlog.Info("loading yaml config data from", filename)
 
-	rawYaml, err := openFileAsBytes(filename)
-	dlog.ErrorCheck(err)
-	if err != nil {
-		return
-	}
-	dlog.Verb(rawYaml)
-
-	dlog.Error("function incomplete")
-
-	/*fileInfo, err := file.Stat()
-	dlog.ErrorCheck(err)
-
-	if err != nil {
-		dlog.Error("unable to get yaml config, using defaults")
-		return
-	}
-
-	fileSize := fileInfo.Size()
-	reader*/
-}
 
 var screenSpace *collision.Space
 
@@ -153,29 +119,16 @@ func loadPlayer() *player.Player {
 }
 
 func loadScene() *player.Player {
-	//loadJsonLevelData("level.json")
-
-	//AttachMut(&eye1.LayeredPoint.Vector,plr.Body)
-	//vectAttach(eye1).AttachMut(plr.Body)
 	plr := loadPlayer()
 
 	plr.Hs.Body.Speed = physics.NewVector(3, 3)
 	plr.Body.UpdateLabel(labels.Player)
 	plr.ExtraSolids = []collision.Label{labels.Block}
-	//plr.Hs.Body = entities.NewInteractive(100, 10, 4, 4,
-	//	render.NewColorBox(16, 16, color.RGBA{0, 0, 255, 255}),
-	//	nil, 1, 0)
-
-	//plr.Body.Doodad.Point.Attach(plr.Hs.Body)
-	//plr.Body.AttachX(plr.Hs.Body,0)
 	render.Draw(plr.Hs.Body.R, 0)
 
 	var block PhysObject
 	var block2 PhysObject
-	//(mod.ResizeToFit(16*2,16*2, gift.NearestNeighborResampling))//.(*render.Sprite)
-	//if err != nil {
-	//	panic(err)
-	//}
+
 	block.Body = entities.NewMoving(150, 100, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
 		nil, 2, 1)
@@ -212,12 +165,9 @@ func loadScene() *player.Player {
 		render.NewColorBox(8, 8, color.RGBA{0, 255, 100, 255}), 72, "hs")
 	render.Draw(modClct.React.R, 3)
 
-	//render.NewDrawFPS()
-	//render.Draw(fps)
 	return plr
 }
 
-//var progStartTime time.Time
 func main() {
 	// Apperenly 1 DynamicHeap = 1 layer.
 	render.SetDrawStack(
@@ -228,12 +178,7 @@ func main() {
 		//render.NewDrawFPS(),
 		render.NewLogicFPS(),
 	)
-	dlog.SetDebugLevel(debugLevel)
 
-	//MainSceneLoop = func() bool {return true}
-	//progStartTime = time.Now()
-	//dlog.SetLogger(log)
-	//loadPlayer()
 	MainSceneStart, MainSceneLoop, MainSceneEnd := buildMainSceneFuncs()
 	oak.Add("platformer",
 		MainSceneStart,
@@ -243,15 +188,6 @@ func main() {
 
 	BindCommands()
 
-	/*err := oak.SetBorderless(true
-	/*err := oak.SetBorderless(true)
-	if err != nil {
-		panic(err)
-	}*/
-	//dlog.SetLogLevel()
-	//oak.SetAspectRatio(float64(6/8))
-	//oak.ScreenWidth = 800
-	//oak.ScreenHeight = 600
 	err := oak.LoadConf("config.json")
 	if err != nil {
 		dlog.Error("failed to load config.json, error:", err)
@@ -262,10 +198,3 @@ func main() {
 	oak.Init("platformer")
 }
 
-// defines a playerstate with only a loop function
-/*func (p *Player) NewJustLoopState(loopFunc PlayerStateFunc) PlayerState {
-	PlayerState{
-		Loop:loopFunc,
-
-	}
-}*/
