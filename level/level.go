@@ -21,16 +21,6 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/collectables"
 )
 
-/*type Rect struct {
-	
-	//X, 
-	//Y,
-	W string `xml:"width,attr"`
-	H string `xml:"height,attr"`
-}*/
-
-
-
 
 //color constants
 var (
