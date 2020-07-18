@@ -147,7 +147,7 @@ func loadScene() *player.Player {
 
 	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
-	err := level.LoadDevRoom()
+	err := level.LoadTmx("assets/level.tmx")
 	if err != nil {
 		panic(err)
 	}

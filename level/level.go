@@ -2,7 +2,6 @@ package level
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"image/color"
 	"os"
@@ -103,9 +102,6 @@ func LoadDevRoom() error {
 	death.Init()
 
 
-	//ground.UpdateLabel(labels.Ground)
-	//wall1.UpdateLabel(labels.Ground)
-	//wall2.UpdateLabel(labels.Ground)
 	checkpoint.UpdateLabel(labels.Checkpoint)
 	death.UpdateLabel(labels.Death)
 
