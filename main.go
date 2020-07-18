@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"image/color"
-	
 
 	//"math"
 	"os"
@@ -20,13 +19,13 @@ import (
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/physics"
 	"github.com/oakmound/oak/v2/render"
-	"github.com/oakmound/oak/v2/scene"
 
-	"github.com/lolbinarycat/hookshot-oak/camera"
+
+
+	"github.com/lolbinarycat/hookshot-oak/collectables"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/player"
-	"github.com/lolbinarycat/hookshot-oak/collectables"
 
 	"github.com/lolbinarycat/utils"
 )
@@ -111,23 +110,22 @@ func loadYamlConfigData(filename string) {
 
 var screenSpace *collision.Space
 
-
 const PlayerWidth = 12
 const PlayerHeight = 12
 
 const HsWidth = 4
 const HsHeight = 4
 
-func loadPlayer() {
+func loadPlayer() *player.Player {
 	var eyeColor = color.RGBA{0, 255, 255, 255}
 	playerSprite := utils.Check2(
 		render.LoadSprite("assets/images", "player_new.png")).(render.Renderable)
 
-	var plr player.Player
+	var plr = new(player.Player)
 	eye1 := render.NewColorBox(1, 4, eyeColor)
 	eye2 := eye1.Copy().(*render.Sprite)
 	plr.Eyes = [2]*render.Sprite{eye1, eye2}
-	plr.Body = entities.NewMoving(300, 400, PlayerWidth,PlayerHeight,
+	plr.Body = entities.NewMoving(300, 400, PlayerWidth, PlayerHeight,
 		playerSprite,
 		nil, 0, 0)
 	plr.Body.Init()
@@ -136,7 +134,7 @@ func loadPlayer() {
 	eye1.LayeredPoint.Vector = eye1.Attach(plr.Body, 4, 3)
 	eye2.LayeredPoint.Vector = eye1.Attach(plr.Body, 8, 3)
 
-	player.SetPlayer(0, &plr)
+	player.SetPlayer(0, plr)
 
 	render.Draw(eye1, 2)
 	render.Draw(eye2, 2)
@@ -150,20 +148,16 @@ func loadPlayer() {
 		render.NewColorBox(HsHeight, HsWidth, color.RGBA{0, 0, 255, 255}),
 		nil, 1, 0)
 	plr.Hs.Body.Init()
+
+	return plr
 }
 
-func loadScene() {
+func loadScene() *player.Player {
 	//loadJsonLevelData("level.json")
-	
-	
+
 	//AttachMut(&eye1.LayeredPoint.Vector,plr.Body)
 	//vectAttach(eye1).AttachMut(plr.Body)
-	loadPlayer()
-	plr := player.GetPlayer(0)
-
-
-
-	
+	plr := loadPlayer()
 
 	plr.Hs.Body.Speed = physics.NewVector(3, 3)
 	plr.Body.UpdateLabel(labels.Player)
@@ -218,13 +212,14 @@ func loadScene() {
 		render.NewColorBox(8, 8, color.RGBA{0, 255, 100, 255}), 72, "hs")
 	render.Draw(modClct.React.R, 3)
 
-	
 	//render.NewDrawFPS()
 	//render.Draw(fps)
+	return plr
 }
 
 //var progStartTime time.Time
 func main() {
+	// Apperenly 1 DynamicHeap = 1 layer.
 	render.SetDrawStack(
 		render.NewDynamicHeap(),
 		render.NewDynamicHeap(),
@@ -235,21 +230,16 @@ func main() {
 	)
 	dlog.SetDebugLevel(debugLevel)
 
-	MainSceneLoop = func() bool {return true}
+	//MainSceneLoop = func() bool {return true}
 	//progStartTime = time.Now()
 	//dlog.SetLogger(log)
-	loadPlayer()
-	initMainLoop()
-	oak.Add("platformer", func(string, interface{}) {
-		loadScene()
-		camera.StartCameraLoop(player.GetPlayer(0).Body)
-		//fmt.Println("screenWidth",oak.ScreenWidth)
-		//fmt.Println("screenHeight",oak.ScreenHeight)
-	},
+	//loadPlayer()
+	MainSceneStart, MainSceneLoop, MainSceneEnd := buildMainSceneFuncs()
+	oak.Add("platformer",
+		MainSceneStart,
 		MainSceneLoop,
-		func() (string, *scene.Result) {
-			return "platformer", nil
-		})
+		MainSceneEnd,
+	)
 
 	BindCommands()
 

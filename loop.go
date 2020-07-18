@@ -8,6 +8,9 @@ import (
 	oak "github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/key"
 	"github.com/oakmound/oak/v2/render"
+	"github.com/oakmound/oak/v2/scene"
+
+	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
 )
 
@@ -21,18 +24,24 @@ type PauseScreen struct {
 	Text *render.Text
 }
 
-func initMainLoop() {
+func buildMainSceneFuncs() (MainSceneStart func (string, interface{}), MainSceneLoop func () bool, MainSceneEnd func() (string, *scene.Result)) {
 
-	plr := player.GetPlayer(0)
-	pauseScreen := PauseScreen{
-		Text: render.NewStrText("Paused", 0, 0),
+
+	var plr = new (player.Player)
+	MainSceneStart = func (_ string, _ interface{}) {
+		//*plr = new(player.Player) 
+		plr = loadScene()
+		camera.StartCameraLoop(player.GetPlayer(0).Body)
+		pauseScreen := PauseScreen{
+			Text: render.NewStrText("Paused", 0, 0),
+		}
+		pauseScreen.Text.Center()
+		render.Draw(pauseScreen.Text, 3)
 	}
-	pauseScreen.Text.Center()
-	render.Draw(pauseScreen.Text, 3)
 
 	MainSceneLoop = func() bool {
 		//defer func () {recover()}()
-		plr = player.GetPlayer(0)
+		//plr = player.GetPlayer(0)
 		hsOffX := float64(PlayerWidth/2 - HsWidth/2)
 		hsOffY := float64(PlayerHeight/2 - HsHeight/2)
 		if Paused == false {
@@ -104,4 +113,11 @@ func initMainLoop() {
 		}
 		return true
 	}
+
+	MainSceneEnd = func() (string, *scene.Result) {
+		return "platformer", nil
+	}
+
+	// return named return values 
+	return
 }
