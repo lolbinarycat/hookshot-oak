@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.4" tiledversion="1.4.1" name="tileset" tilewidth="8" tileheight="8" tilecount="6" columns="0">
+<tileset version="1.4" tiledversion="1.4.1" name="tileset" tilewidth="8" tileheight="8" tilecount="7" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="ground">
   <properties>
@@ -21,5 +21,8 @@
  </tile>
  <tile id="5" type="spikes">
   <image width="8" height="8" source="images/tall-spikes.png"/>
+ </tile>
+ <tile id="6" type="background">
+  <image width="8" height="8" source="images/pattern.png"/>
  </tile>
 </tileset>
