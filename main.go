@@ -21,6 +21,7 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/player"
+	"github.com/lolbinarycat/hookshot-oak/ui"
 
 	"github.com/lolbinarycat/utils"
 )
@@ -186,6 +187,8 @@ func main() {
 		MainSceneEnd,
 	)
 
+	oak.Add(ui.BuildTitlescreenScene("titlescreen","platformer"))
+
 	BindCommands()
 
 	err := oak.LoadConf("config.json")
@@ -195,6 +198,6 @@ func main() {
 	oak.SetupConfig.Screen = oak.Screen{Height: 600, Width: 800}
 	oak.SetupConfig.FrameRate = 60
 	oak.SetAspectRatio(8.0 / 6.0)
-	oak.Init("platformer")
+	oak.Init("titlescreen")
 }
 

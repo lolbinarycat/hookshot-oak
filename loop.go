@@ -12,6 +12,7 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
+	"github.com/lolbinarycat/hookshot-oak/ui"
 )
 
 var Paused = false
@@ -27,7 +28,12 @@ type PauseScreen struct {
 func buildMainSceneFuncs() (MainSceneStart func (string, interface{}), MainSceneLoop func () bool, MainSceneEnd func() (string, *scene.Result)) {
 
 
+	pauseMenu := buildPauseScreen(&Paused)
+	// pauseMenuR is used to refernce the pause menu in order to undraw it.
+	// this should be it's only use
+	var pauseMenuR render.Renderable
 	var plr = new (player.Player)
+
 	MainSceneStart = func (_ string, _ interface{}) {
 		//*plr = new(player.Player) 
 		plr = loadScene()
@@ -84,6 +90,18 @@ func buildMainSceneFuncs() (MainSceneStart func (string, interface{}), MainScene
 
 			//player.Eyes[1].SetX(5)
 		} else {
+			if b, d := oak.IsHeld(key.Tab);b && d < Frame {
+				pauseMenu.Do(ui.CycleSelection)
+				pauseMenuR.Undraw()
+				var err error
+				pauseMenuR, err = render.Draw(pauseMenu.GetR())
+				if err != nil {
+					panic(err)
+				}
+			}
+			if b, d := oak.IsHeld(key.Z);b && d < Frame {
+				pauseMenu.Do(ui.Activate)
+			}
 			// Do nothing for now, later display the pause menu
 		}
 
@@ -107,6 +125,15 @@ func buildMainSceneFuncs() (MainSceneStart func (string, interface{}), MainScene
 			if !PauseButtonHeld {
 				PauseButtonHeld = true
 				Paused = !Paused
+				if Paused { // executed once each time the game is paused 
+					var err error
+					pauseMenuR, err = render.Draw(pauseMenu.GetR(),3,3)
+					if err != nil {
+						panic(err)
+					}
+				} else { // executed once each time the game is unpaused
+					pauseMenuR.Undraw()
+				}
 			}
 		} else {
 			PauseButtonHeld = false
