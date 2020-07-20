@@ -213,14 +213,21 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y 
 			e.UpdateLabel(labels.Checkpoint)
 		case "dirt":
 			e.UpdateLabel(labels.NoHs)
+		case "background":
+			// no label
+			goto Background
 		default:
 			return nil, false, UnknownTileTypeError{*tilesetTile}
 		}
 		_, err = render.Draw(e.R,1)
+	ErrCheckAndReturn:
 		if err != nil {
 			return nil, false, err
 		}
 		return e, false, nil
+	Background:
+		_, err = render.Draw(e.R,0,-1)
+		goto ErrCheckAndReturn
 	}
 }
 
