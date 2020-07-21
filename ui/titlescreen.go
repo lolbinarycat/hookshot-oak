@@ -73,13 +73,14 @@ func (t *Titlescreen) AddBtn(text string, action BtnAction) {
 func BuildTitlescreenScene(thisScene, nextScene string) (
 	name string, strt scene.Start,lp scene.Loop,end scene.End) {
 
-	i := 0
 	var startGame = new(bool)
 	*startGame = false
 
 	var ttlScrnOpts TitlescreenOptions
 	var ttlScrn = new(Titlescreen)
 	var cycleKeyHeld bool = false
+
+	var ttlScrnR render.Renderable // variable for undrawing
 
 	name = thisScene
 
@@ -94,7 +95,12 @@ func BuildTitlescreenScene(thisScene, nextScene string) (
 		*ttlScrn = newTitlescreen(newGameBtn)
 		ttlScrn.AddBtn("quit", func() {os.Exit(0)})
 		ttlScrn.Update()
-		render.Draw(ttlScrn.R)
+		var err error
+		ttlScrnR, err = render.Draw(ttlScrn.R)
+		if err != nil {
+			panic(err)
+		}
+
 	}
 	lp = func() bool {
 		if oak.IsDown(key.Tab) {
@@ -102,9 +108,12 @@ func BuildTitlescreenScene(thisScene, nextScene string) (
 				cycleKeyHeld = true
 				ttlScrn.CycleFocus()
 				ttlScrn.Update()
-				// TODO: don't create a new layer every time you want to uptdate the titlescreen
-				i++
-				render.Draw(ttlScrn.R,0,i)
+				ttlScrnR.Undraw()
+				var err error
+				ttlScrnR, err = render.Draw(ttlScrn.R)
+				if err != nil {
+					panic(err)
+				}
 			}
 		} else {
 			cycleKeyHeld = false
