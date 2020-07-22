@@ -74,8 +74,8 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				if err != nil {
 					panic(err)
 				}
-				//pauseMenuR.Undraw()
-				pauseMenuR, err = render.Draw(pauseMenu.GetR())
+				(pauseMenuR).Undraw()
+				pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
 				if err != nil {
 					panic(err)
 				}
@@ -165,4 +165,8 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 
 	// return named return values
 	return
+}
+
+func updateMenu(*render.Renderable,*ui.Menu) {
+
 }
