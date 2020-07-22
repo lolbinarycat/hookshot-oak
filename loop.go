@@ -94,19 +94,9 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 	}
 
 	MainSceneLoop = func() bool {
-		//defer func () {recover()}()
-		//plr = player.GetPlayer(0)
 		hsOffX := float64(PlayerWidth/2 - HsWidth/2)
 		hsOffY := float64(PlayerHeight/2 - HsHeight/2)
 		if Paused == false {
-			//xdlog.SetDebugLevel(dlog.VERBOSE)
-			if oak.IsDown(key.L) {
-				//oak.ScreenWidth = 800
-				//oak.ScreenHeight = 600
-				//oak.ChangeWindow(800,600)
-				//oak.MoveWindow(20, 20, 800, 600)
-				//oak.SetAspectRatio(16 / 9)
-			}
 			if oak.IsDown(key.Q) {
 				if oak.IsDown(key.I) {
 					fmt.Println(plr)
@@ -165,8 +155,4 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 
 	// return named return values
 	return
-}
-
-func updateMenu(*render.Renderable,*ui.Menu) {
-
 }
