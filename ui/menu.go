@@ -18,7 +18,9 @@ type Menu struct {
 type Interactable interface {
 	// Do takes an int to allow multiple actions
 	// Interactables with one action may ignore this
-	Do(Action) error
+	// Do is variadic so nesting interactables can pass the remaining
+	// args to sub-interactables.
+	Do(...Action) error
 }
 
 type Action int
@@ -31,10 +33,11 @@ type Drawable interface {
 }
 
 const (
-	Activate Action = iota
+	Do Action = iota
 	CycleSelection
 	Focus
 	Unfocus
+	RunAction
 )
 
 func (m *Menu) GetR() render.Renderable {
@@ -54,16 +57,16 @@ func (e UnknownActionError) Error() string {
 	return fmt.Sprintf("unknow action '%d'", e.act)
 }
 
-func (m *Menu) Do(act Action) error {
-	switch act {
+func (m *Menu) Do(acts ...Action) error {
+	switch acts[0] {
+	case Do:
+		m.GetActive().Do(acts[1])
 	case CycleSelection:
 		m.GetActive().Do(Unfocus)
-		m.selIndex = m.selIndex % len(m.interactables)
+		m.selIndex = (m.selIndex + 1) % len(m.interactables)
 		m.GetActive().Do(Focus)
-	case Activate:
-		m.GetActive().Do(0)
 	default:
-		return UnknownActionError{act}
+		return UnknownActionError{acts[0]}
 	}
 	return nil
 }

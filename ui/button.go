@@ -1,6 +1,10 @@
 package ui
 
-import "github.com/oakmound/oak/v2/render"
+import (
+	"fmt"
+
+	"github.com/oakmound/oak/v2/render"
+)
 
 type Button struct {
 	R render.Renderable
@@ -12,17 +16,29 @@ type Button struct {
 	Action BtnAction
 }
 
+// WrongActionAmountError is an error for calling Do(...) with the wrong amount of actions
+type WrongActionAmountError struct {
+	Expected, Received int
+}
+
+func (e WrongActionAmountError) Error() string {
+	return fmt.Sprintf("wrong amount of actions, expected %d, got %d",e.Expected,e.Received)
+}
+
 // method Do fufils Interactable
-func (b *Button) Do(a Action) error {
-	switch a {
-	case Activate:
+func (b *Button) Do(as ...Action) error {
+	if len(as) != 1 {
+		return WrongActionAmountError{Expected:1,Received:len(as)}
+	}
+	switch as[0] {
+	case RunAction:
 		b.Action()
 	case Focus:
 		b.Focus()
 	case Unfocus:
 		b.Unfocus()
 	default:
-		return UnknownActionError{a}
+		return UnknownActionError{as[0]}
 	}
 	return nil
 }
