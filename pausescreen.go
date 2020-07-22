@@ -18,7 +18,7 @@ func buildPauseScreen(btnMap map[string]ui.BtnAction) *ui.Menu {
 			Bg: render.NewColorBox(200,200, color.RGBA{0,0,255,255}),
 		},
 	}
-	menu := style.NewMenu(20,20)
+	menu := style.NewMenu(200,20)
 	btns := style.NewButtonsWithActions(20, 50, 50, btnMap)
 	for _, b := range btns {
 		menu.AddDI(b)
