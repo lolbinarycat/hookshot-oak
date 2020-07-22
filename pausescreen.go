@@ -2,13 +2,12 @@ package main
 
 import (
 	"image/color"
-	"os"
 
 	"github.com/lolbinarycat/hookshot-oak/ui"
 	"github.com/oakmound/oak/v2/render"
 )
 
-func buildPauseScreen(paused *bool) *ui.Menu {
+func buildPauseScreen(btnMap map[string]ui.BtnAction) *ui.Menu {
 	const btnW, btnH = 50, 20
 	style := ui.Style{
 		Button: &ui.ButtonStyle{
@@ -20,16 +19,10 @@ func buildPauseScreen(paused *bool) *ui.Menu {
 		},
 	}
 	menu := style.NewMenu(20,20)
-	btns := style.NewButtonsWithActions(20, 50, 50, map[string]ui.BtnAction{
-		"resume": func () {
-			*paused = false
-		},
-		"quit": func () {
-			os.Exit(0)
-		},
-	})
+	btns := style.NewButtonsWithActions(20, 50, 50, btnMap)
 	for _, b := range btns {
 		menu.AddDI(b)
 	}
 	return menu
 }
+
