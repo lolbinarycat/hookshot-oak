@@ -46,6 +46,7 @@ func (m *Menu) GetR() render.Renderable {
 		x, y := d.Pos()
 		cR.AppendOffset(d.GetR(),floatgeom.Point2{x,y})
 	}
+	cR.SetPos(m.x,m.y)
 	return cR
 }
 
