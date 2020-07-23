@@ -1,7 +1,6 @@
 package player
 
 import (
-	// "runtime"
 	"time"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
@@ -45,9 +44,7 @@ func AirStateLoop(p *Player) {
 		p.DoGravity()
 	}
 
-	// runtime.Breakpoint()
 	if p.Ctrls.GetDir().IsDown() && p.Mods["groundpound"].Active() {
-		dlog.SetDebugLevel(dlog.INFO)
 		dlog.Info("groundpound started")
 		p.SetState(GroundPoundStartState)
 	}
