@@ -49,6 +49,10 @@ func (d Dir) IsDown() bool {
 	}
 }
 
+func (d Dir) IsNothing() bool {
+	return d.V == 0 && d.H == 0
+}
+
 func (d Dir) IsJustRight() bool {
 	return d.IsRight() && d.V == 0
 }
@@ -159,7 +163,7 @@ func ToCoeff(in int8) float64 {
 }
 
 func (d1 Dir) Add(d2 Dir) Dir {
-	return Dir{d1.H + d2.H,d1.V + d1.V}
+	return Dir{d1.H + d2.H,d1.V + d2.V}
 }
 
 func (d Dir) HCoeff() float64 {
