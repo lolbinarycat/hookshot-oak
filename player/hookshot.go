@@ -5,8 +5,6 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
-
-	oak "github.com/oakmound/oak/v2"
 )
 
 func (p *Player) EndHs() {
@@ -45,17 +43,12 @@ var HsStartState = PlayerState{
 			return
 		}
 		if p.TimeFromStateStart() > HsStartTime {
-			switch {
-			case oak.IsDown(currentControls.Right):
-				p.SetState(HsExtendState(direction.MaxRight()))
-			case oak.IsDown(currentControls.Left):
-				p.SetState(HsExtendState(direction.MaxLeft()))
-			case oak.IsDown(currentControls.Up):
-				p.SetState(HsExtendState(direction.MaxUp()))
-			case oak.IsDown(currentControls.Down):
-				p.SetState(HsExtendState(direction.MaxDown()))
-			default:
+			dir := p.Ctrls.GetDir()
+			if (dir == direction.Dir{}) {
+				// if no direction is held, return to airstate
 				p.SetState(AirState)
+			} else {
+				p.SetState(HsExtendState(dir.Orthogonalize().Maximize()))
 			}
 		}
 	}}.denil()
