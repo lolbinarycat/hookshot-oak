@@ -1,11 +1,13 @@
 package player
 
 import (
+	// "runtime"
 	"time"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	oak "github.com/oakmound/oak/v2"
+	"github.com/oakmound/oak/v2/dlog"
 )
 
 //StateCommon is the function for commands that should be run in most
@@ -19,21 +21,8 @@ const FlySpeed = 4
 
 var FlyState = PlayerState{
 	Loop: func(p *Player) {
-		if oak.IsDown(currentControls.Up) {
-			p.Body.Delta.SetY(-FlySpeed)
-		} else if oak.IsDown(curCtrls.Down) {
-			p.Body.Delta.SetY(FlySpeed)
-		} else {
-			p.Body.Delta.SetY(0)
-		}
-
-		if oak.IsDown(curCtrls.Left) {
-			p.Body.Delta.SetX(-FlySpeed)
-		} else if oak.IsDown(curCtrls.Right) {
-			p.Body.Delta.SetX(FlySpeed)
-		} else {
-			p.Body.Delta.SetX(0)
-		}
+		dir := p.Ctrls.GetDir()
+		p.Body.Delta.SetPos(dir.HCoeff()*FlySpeed,dir.VCoeff()*FlySpeed)
 	},
 }.denil()
 
@@ -56,7 +45,10 @@ func AirStateLoop(p *Player) {
 		p.DoGravity()
 	}
 
-	if oak.IsDown(curCtrls.Down) && p.Mods["groundpound"].Active() {
+	// runtime.Breakpoint()
+	if p.Ctrls.GetDir().IsDown() && p.Mods["groundpound"].Active() {
+		dlog.SetDebugLevel(dlog.INFO)
+		dlog.Info("groundpound started")
 		p.SetState(GroundPoundStartState)
 	}
 
