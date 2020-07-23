@@ -2,8 +2,6 @@ package player
 
 import (
 	"time"
-
-	oak "github.com/oakmound/oak/v2"
 )
 
 const GroundPoundStartTime = time.Second / 5
@@ -26,7 +24,7 @@ var GroundPoundState = PlayerState{
 	Loop: func(p *Player) {
 		if p.ActiColls.GroundHit {
 			p.SetState(GroundPoundEndState)
-		} else if oak.IsDown(curCtrls.Up) {
+		} else if p.Ctrls.GetDir().IsUp() {
 			p.Body.Delta.SetY(0)
 			p.SetState(AirState)
 		} else {

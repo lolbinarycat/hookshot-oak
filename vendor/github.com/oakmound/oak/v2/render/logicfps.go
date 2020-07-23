@@ -61,9 +61,6 @@ func (lf *LogicFPS) Copy() Stackable {
 }
 
 func (lf *LogicFPS) draw(world draw.Image, view image.Point, w, h int) {
-	if lf.txt == nil {
-		return
-	}
 	lf.txt.Draw(world)
 }
 

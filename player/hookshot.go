@@ -48,7 +48,12 @@ var HsStartState = PlayerState{
 				// if no direction is held, return to airstate
 				p.SetState(AirState)
 			} else {
-				p.SetState(HsExtendState(dir.Orthogonalize().Maximize()))
+				if p.Mods["diaghs"].Active() {
+					dir = dir.OrthoDiagonalize()
+				} else {
+					dir = dir.Orthogonalize()
+				}
+				p.SetState(HsExtendState(dir.Maximize()))
 			}
 		}
 	}}.denil()

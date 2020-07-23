@@ -140,4 +140,3 @@ golang.org/x/sys/windows
 ## explicit
 gopkg.in/yaml.v2
 # github.com/lolbinarycat/utils => /home/binarycat/go/src/github.com/lolbinarycat/utils
-# github.com/oakmound/oak/v2/dlog => /home/binarycat/go/src/github.com/lolbinarycat/hookshot-oak/dlog

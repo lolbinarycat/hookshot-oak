@@ -96,6 +96,7 @@ func InitMods(p *Player) {
 		AddBasic("groundpoundjump").
 		AddBasic("hsitemgrab").
 		AddBasic("itemcarry").
+		AddBasic("diaghs"). // diagonal hookshot
 		AddCtrld("jump",p,0,JumpInputTime).
 		AddCtrld("climb",p,2,time.Minute * 20).
 		AddCtrld("hs",p,1,HsInputTime).

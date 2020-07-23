@@ -28,7 +28,6 @@ var FlyState = PlayerState{
 var AirState PlayerState
 
 func AirStateLoop(p *Player) {
-
 	if p.PhysObject.ActiColls.GroundHit {
 		p.SetState(GroundState)
 		return

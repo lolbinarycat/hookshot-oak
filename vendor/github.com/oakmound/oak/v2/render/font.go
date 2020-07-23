@@ -183,7 +183,6 @@ func LoadFont(dir string, fontFile string) *truetype.Font {
 		fontBytes, err := fileutil.ReadFile(filepath.Join(dir, fontFile))
 		if err != nil {
 			dlog.Error(err)
-			//panic(err)
 			return nil
 		}
 		font, err := truetype.Parse(fontBytes)

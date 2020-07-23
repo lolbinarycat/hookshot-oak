@@ -1,7 +1,6 @@
 package render
 
 import (
-	"time"
 	"fmt"
 	"image/draw"
 	"strconv"
@@ -73,10 +72,6 @@ func (t *Text) DrawOffset(buff draw.Image, xOff, yOff float64) {
 
 // Draw for a text draws the text at its layeredPoint position
 func (t *Text) Draw(buff draw.Image) {
-	if t.d == nil {
-		time.Sleep(time.Second)
-		return
-	}
 	t.d.Drawer.Dst = buff
 	t.d.Drawer.Dot = fixed.P(int(t.X()), int(t.Y()))
 	t.d.DrawString(t.text.String())

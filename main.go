@@ -166,6 +166,7 @@ func loadScene() *player.Player {
 		render.NewColorBox(8, 8, color.RGBA{0, 255, 100, 255}), 72, "hs")
 	render.Draw(modClct.React.R, 3)
 
+	dlog.Info("player loaded with data:",*plr)
 	return plr
 }
 
