@@ -41,6 +41,36 @@ func BindCommands() {
 	oak.AddCommand("kill", func(args []string) {
 		player.GetPlayer(0).Die()
 	})
+	oak.AddCommand("dbglvl",func(args []string) {
+		switch len(args) {
+		case 0:
+			goto ShowLevel
+		case 1:
+			switch args[0] {
+			case "get":
+				goto ShowLevel
+			case "set":
+				args[0] = args[1]
+				goto SetLevel
+			default:
+				goto SetLevel
+			}
+		}
+		return
+	ShowLevel:
+		fmt.Println("log level:",dlog.GetLogLevel().String())
+		return
+	SetLevel: // sets level to args[0]
+		if i, err := strconv.Atoi(args[0]); err == nil {
+			// if arg[0] is int
+			dlog.SetDebugLevel(dlog.Level(i))
+		} else if lvl, err := dlog.ParseDebugLevel(args[0]); err == nil {
+			dlog.SetDebugLevel(lvl)
+		} else {
+			fmt.Println("invalid debug level", args[0])
+		}
+		return
+	})
 }
 
 func ModCommand(args []string) {
