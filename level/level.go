@@ -28,18 +28,6 @@ var (
 	DullRed color.RGBA = color.RGBA{100, 10, 10, 255}
 )
 
-//JsonScreen is a type to unmarshal the json of
-//a file with screen (i.e. one screen worth of level) data into
-type JsonScreen struct {
-	Rects []JsonRect
-}
-
-//type JsonRect defines a struct to
-//unmarshal json into
-type JsonRect struct {
-	X, Y, W, H float64
-	Label      collision.Label //warning: label is hardcoded in json file
-}
 
 func newCounter(n int) func() event.CID {
 	var num = n - 1
