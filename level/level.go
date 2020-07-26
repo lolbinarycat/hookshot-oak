@@ -8,7 +8,6 @@ import (
 
 	//"strconv"
 
-	"github.com/oakmound/oak/v2/collision"
 	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/event"
