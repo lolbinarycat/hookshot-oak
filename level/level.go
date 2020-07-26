@@ -8,6 +8,7 @@ import (
 
 	//"strconv"
 
+
 	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/event"
@@ -117,22 +118,37 @@ func LoadTmx(mapPath string) error {
 
 
 func LoadTileLayers(levelMap *tiled.Map) error {
-	// for each _Loop, the contents of the loop are ran once for every _
-	LayerLoop: for _, layer := range levelMap.Layers {
-		/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
-			BlockLoop: for j := 0; j < levelMap.Width; j++ {
-				tileIndex := j+(i*levelMap.Width)
-				if tileIndex >= len(layer.Tiles) {
-					continue LayerLoop
-				}
-				tile := layer.Tiles[tileIndex]
-				if tile.Nil == true {
-					continue BlockLoop
-				} else {
-					_, _, err := LoadTile(tile,layer,levelMap,j,i)
-					if err != nil {
-						return err
-					}
+	errs := make(chan error,len(levelMap.Layers))
+
+	for _, layer := range levelMap.Layers {
+		go func (lyr *tiled.Layer) {
+			errs <- LoadTileLayer(levelMap,lyr)
+		} (layer)
+	}
+
+	for i:=0;i<len(levelMap.Layers);i++ {
+		err := <-errs
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func LoadTileLayer(levelMap *tiled.Map, layer *tiled.Layer) error {
+	/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
+		BlockLoop: for j := 0; j < levelMap.Width; j++ {
+			tileIndex := j+(i*levelMap.Width)
+			if tileIndex >= len(layer.Tiles) {
+				return nil
+			}
+			tile := layer.Tiles[tileIndex]
+			if tile.Nil == true {
+				continue BlockLoop
+			} else {
+				_, _, err := LoadTile(tile,layer,levelMap,j,i)
+				if err != nil {
+					return err
 				}
 			}
 		}
