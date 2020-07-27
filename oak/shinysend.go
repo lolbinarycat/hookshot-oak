@@ -7,5 +7,5 @@ func ShinySend(event interface{}) {
 
 // ShinySendFirst is the same as ShinySend, but uses SendFirst instead of Send
 func ShinySendFirst(event interface{}) {
-	windownControl.SendFirst(event)
+	windowControl.SendFirst(event)
 }
