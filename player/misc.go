@@ -129,7 +129,7 @@ func (p *Player) SetState(state PlayerState) {
 }
 
 func (p *Player) DoAirControls() {
-	if oak.IsDown(currentControls.Left) && p.Body.Delta.X() > -AirMaxSpeed {
+	if p.HeldDir.IsLeft() && p.Body.Delta.X() > -AirMaxSpeed {
 		// check to prevent inconsistant top speeds
 		//(e.g. if you are half a AirAccel away from AirMaxSpeed)
 		if p.Body.Delta.X()-AirAccel > -AirMaxSpeed {
@@ -137,7 +137,7 @@ func (p *Player) DoAirControls() {
 		} else {
 			p.Body.Delta.SetX(-AirMaxSpeed)
 		}
-	} else if oak.IsDown(currentControls.Right) && p.Body.Delta.X() < AirMaxSpeed {
+	} else if p.HeldDir.IsRight() && p.Body.Delta.X() < AirMaxSpeed {
 		//second verse, same as the first
 		if p.Body.Delta.X()+AirAccel < AirMaxSpeed {
 			p.Body.Delta.ShiftX(AirAccel)
