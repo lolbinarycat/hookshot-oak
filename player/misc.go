@@ -252,21 +252,6 @@ func (o *PhysObject) HasHitInDir(d dir.Dir) bool {
 		(d.IsDown() && o.ActiColls.GroundHit)
 }
 
-func (p *Player) HeldDir() (d dir.Dir) {
-	if oak.IsDown(p.Ctrls.Up) {
-		d = d.Add(dir.MaxUp())
-	}
-	if oak.IsDown(p.Ctrls.Down) {
-		d = d.Add(dir.MaxDown())
-	}
-	if oak.IsDown(p.Ctrls.Left) {
-		d = d.Add(dir.MaxLeft())
-	}
-	if oak.IsDown(p.Ctrls.Right) {
-		d = d.Add(dir.MaxRight())
-	}
-	return d
-}
 
 
 // Depreciated

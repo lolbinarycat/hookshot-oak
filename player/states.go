@@ -95,13 +95,7 @@ func GroundStateLoop(p *Player) {
 }
 
 func (p *Player) DoGroundCtrls() {
-	if oak.IsDown(currentControls.Left) {
-		p.Body.Delta.SetX(-p.Body.Speed.X())
-	} else if oak.IsDown(currentControls.Right) {
-		p.Body.Delta.SetX(p.Body.Speed.X())
-	} else {
-		p.Body.Delta.SetX(0)
-	}
+	p.Body.Delta.SetX(p.HeldDir.HCoeff()*p.Body.Speed.X())
 }
 
 const BlockPushSpeed float64 = 1
@@ -293,7 +287,7 @@ var ItemCarryAirState PlayerState
 
 func ItemCarryLoop(p *Player) {
 	if p.Mods["hs"].JustActivated() {
-		p.ThrowHeldItem(5*p.HeldDir().HCoeff(), -7)
+		p.ThrowHeldItem(5*p.HeldDir.HCoeff(), -7)
 		p.SetState(ItemThrowLag)
 	} else {
 		p.HeldObj.SetPos(p.Body.X(), p.Body.Y()-p.HeldObj.H)

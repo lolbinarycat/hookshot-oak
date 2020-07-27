@@ -36,8 +36,6 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/oakmound/libudev v0.2.1 h1:gaXuw7Pbt3RSRxbUakAjl0dSW6Wo3TZWpwS5aMq8+EA=
 github.com/oakmound/libudev v0.2.1/go.mod h1:zYF5CkHY+UP6lzWbPR+XoVAscl/s+OncWA//qWjMLUs=
-github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75 h1:JmXsAfdM22rZm1Z4JvprUcfy8MNgzAZATz1ViElZveM=
-github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75/go.mod h1:IeLz/IxfiVKdrPFw45yebPmiBJMYyLHlHQOLWdmC76I=
 github.com/oakmound/shiny v0.4.2-beta.0.20200620232743-6df262b89055 h1:Q6pxnU82bqSWes7nvRhbHWDFPMDX2L+sgpN2MBuW8AI=
 github.com/oakmound/shiny v0.4.2-beta.0.20200620232743-6df262b89055/go.mod h1:fEGagtAluRRrVkMQyzyL+G3j+TdsyOjrIajWunGmy3M=
 github.com/oakmound/w32 v2.0.0+incompatible/go.mod h1:lzloWlclSXIU4cDr67WF8qjFFDO8gHHBIk4Qqe90enQ=

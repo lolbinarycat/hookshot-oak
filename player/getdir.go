@@ -4,7 +4,10 @@ import "github.com/lolbinarycat/hookshot-oak/direction"
 import "github.com/oakmound/oak/v2"
 import "github.com/oakmound/oak/v2/dlog"
 
+
+// GetDir does not respect the replay system, use HeldDir instead.
 func (c *ControlConfig) GetDir() (dir direction.Dir) {
+
 	if oak.IsDown(c.Up) {
 		dlog.Verb("Up held")
 		dir = dir.Add(direction.MaxUp())

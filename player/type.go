@@ -8,6 +8,8 @@ import (
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/key"
+
+	"github.com/lolbinarycat/hookshot-oak/direction"
 )
 //Player is a type representing the player
 //StateInit is a variable that should be set to true when changing states
@@ -24,6 +26,7 @@ type Player struct {
 	Hs             Hookshot `json:"-"`
 	HeldObj        *entities.Moving `json:"-"`
 	Eyes           [2]*render.Sprite `json:"-"`
+	HeldDir        direction.Dir `json:"-"`
 }
 
 type Hookshot struct {

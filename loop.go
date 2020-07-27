@@ -6,19 +6,20 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	oak "github.com/oakmound/oak/v2"
+	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/key"
 	"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/scene"
-	"github.com/oakmound/oak/v2/dlog"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
-	"github.com/lolbinarycat/hookshot-oak/ui"
 	"github.com/lolbinarycat/hookshot-oak/replay"
+	"github.com/lolbinarycat/hookshot-oak/ui"
 )
 
 var Paused = false
+
 const PauseButton = key.Enter
 const ConfirmButton = key.Z // activates the current selection
 const CycleButton = key.Tab // cycles the current selection
@@ -31,18 +32,17 @@ var MainSceneLoop func() bool
 
 func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneLoop func() bool, MainSceneEnd func() (string, *scene.Result)) {
 
-
 	// pauseMenuR is used to refernce the pause menu in order to undraw it.
 	// this should be it's only use
 	var pauseMenuR render.Renderable
 	var plr = new(player.Player)
 
 	pauseMenu := buildPauseScreen(map[string]ui.BtnAction{
-		"resume": func () {
+		"resume": func() {
 			Paused = false
 			// pauseMenuR.Undraw()
 		},
-		"quit": func () {
+		"quit": func() {
 			os.Exit(0)
 		},
 	})
@@ -65,7 +65,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				if err != nil {
 					panic(err)
 				}
-				fmt.Println("font:",render.DefFont())
+				fmt.Println("font:", render.DefFont())
 				// runtime.Breakpoint()
 			} else { // executed once each time the game is unpaused
 				pauseMenuR.Undraw()
@@ -95,6 +95,24 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			}
 			return 0
 		}, key.Down+ConfirmButton)
+
+
+		// set plr.HeldDir
+		event.BindPriority(
+			func(_ int, _ interface{}) int {
+				if replay.Active {
+					plr.HeldDir = replay.CurrentDir
+				} else {
+					plr.HeldDir = plr.Ctrls.GetDir()
+				}
+				return 0
+			},
+			event.BindingOption{
+				Event: event.Event{Name: event.Enter, CallerID: int(plr.Body.CID)},
+				Priority: 32,
+			},
+		)
+
 	}
 
 	MainSceneLoop = func() bool {
@@ -150,7 +168,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		// replay system test
 		dlog.SetDebugLevel(dlog.VERBOSE)
 		dlog.SetDebugFilter("Input:")
-		dlog.Verb("Input:",replay.GetInputFrom(plr))
+		dlog.Verb("Input:", replay.GetInputFrom(plr))
 		//if plr.Mods["quickrestart"].Active() {
 		//	plr.Respawn()
 		//}
