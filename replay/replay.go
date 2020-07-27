@@ -16,12 +16,6 @@ var Active bool
 
 var CurrentDir direction.Dir
 
-// testing
-func init() {
-	Active = true
-	CurrentDir = direction.MaxRight()
-}
-
 type FrameInput struct {
 	Dir     direction.Dir
 	ModBtns uint8 // bitmask

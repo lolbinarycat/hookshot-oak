@@ -165,9 +165,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				panic(err)
 			}
 		}
-		// replay system test
-		dlog.SetDebugLevel(dlog.VERBOSE)
-		dlog.SetDebugFilter("Input:")
+
 		dlog.Verb("Input:", replay.GetInputFrom(plr))
 		//if plr.Mods["quickrestart"].Active() {
 		//	plr.Respawn()
