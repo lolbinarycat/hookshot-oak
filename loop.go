@@ -10,10 +10,12 @@ import (
 	"github.com/oakmound/oak/v2/key"
 	"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/scene"
+	"github.com/oakmound/oak/v2/dlog"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/ui"
+	"github.com/lolbinarycat/hookshot-oak/replay"
 )
 
 var Paused = false
@@ -38,7 +40,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 	pauseMenu := buildPauseScreen(map[string]ui.BtnAction{
 		"resume": func () {
 			Paused = false
-			pauseMenuR.Undraw()
+			// pauseMenuR.Undraw()
 		},
 		"quit": func () {
 			os.Exit(0)
@@ -63,6 +65,8 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				if err != nil {
 					panic(err)
 				}
+				fmt.Println("font:",render.DefFont())
+				// runtime.Breakpoint()
 			} else { // executed once each time the game is unpaused
 				pauseMenuR.Undraw()
 			}
@@ -143,6 +147,10 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				panic(err)
 			}
 		}
+		// replay system test
+		dlog.SetDebugLevel(dlog.VERBOSE)
+		dlog.SetDebugFilter("Input:")
+		dlog.Verb("Input:",replay.GetInputFrom(plr))
 		//if plr.Mods["quickrestart"].Active() {
 		//	plr.Respawn()
 		//}
