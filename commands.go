@@ -87,7 +87,7 @@ func ModCommand(args []string) {
 				player.GetPlayer(0).Mods[args[1]].Equip()
 				fmt.Println("equipped", args[1])
 			}
-		case "unequip":
+		case "unequip", "remove":
 			if len(args) < 2 {
 				goto NeedMoreArgs
 			} else if args[1] == "all" {
