@@ -104,7 +104,7 @@ func (d Dir) Diagonalize() Dir {
 // direction that is either orthogonal or diagonal.
 func (d Dir) OrthoDiagonalize() Dir {
 	const threshold int8 = 64
-	if abs(d.H) - abs(d.V) > 64 {
+	if abs(abs(d.H) - abs(d.V)) > 64 {
 		return d.Orthogonalize()
 	} else {
 		return d.Diagonalize()
