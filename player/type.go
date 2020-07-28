@@ -10,7 +10,9 @@ import (
 	"github.com/oakmound/oak/v2/key"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
+	"github.com/lolbinarycat/hookshot-oak/player/condition"
 )
+
 //Player is a type representing the player
 //StateInit is a variable that should be set to true when changing states
 //it tells the state to initialize values like StateTimer
@@ -37,11 +39,15 @@ type Hookshot struct {
 
 type PlayerState struct {
 	Start, Loop, End PlayerStateFunc
+	Map  map[condition.Condition]PlayerStateMapFunc
 	MaxDuration time.Duration
 	NextState *PlayerState //only used when MaxDuration is reached
 }
 
 type PlayerStateFunc func(*Player)
+
+// if a PlayerStateMapFunc returns nil, the player's state will not change
+type PlayerStateMapFunc func (p *Player) *PlayerState
 
 type PhysObject struct {
 	Body      *entities.Moving

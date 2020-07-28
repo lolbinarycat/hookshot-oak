@@ -5,6 +5,7 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	"github.com/oakmound/oak/v2/dlog"
 )
 
 func (p *Player) EndHs() {
@@ -43,7 +44,7 @@ var HsStartState = PlayerState{
 			return
 		}
 		if p.TimeFromStateStart() > HsStartTime {
-			dir := p.Ctrls.GetDir()
+			dir := p.HeldDir
 			if (dir == direction.Dir{}) {
 				// if no direction is held, return to airstate
 				p.SetState(AirState)
@@ -61,6 +62,7 @@ var HsStartState = PlayerState{
 const HsExtendTime time.Duration = time.Second * 2
 
 func HsExtendState(dir direction.Dir) PlayerState {
+	dlog.Verb("hookshot extending with dir",dir)
 	coeffX := direction.ToCoeff(dir.H)
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
@@ -126,6 +128,9 @@ func HsPullState(dir direction.Dir) PlayerState {
 	coeffX := direction.ToCoeff(dir.H)
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
+		Start: func(p *Player) {
+			dlog.Verb("hsActive =",p.Hs.Active)
+		},
 		Loop: func(p *Player) {
 			if p.HasHitInDir(dir) {
 				p.EndHs()

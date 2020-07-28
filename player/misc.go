@@ -103,30 +103,7 @@ func (p *Player) Jump() {
 	p.SetState(JumpHeightDecState)
 }
 
-type SetStateOptArgs struct {
-	SkipEnd bool
-}
 
-func (p *Player) SetStateAdv(state PlayerState, opt SetStateOptArgs) {
-	defer func() {
-		if r := recover(); r != nil {
-			dlog.Error("error while setting state", r)
-			p.State = state
-		}
-	}()
-
-	if opt.SkipEnd == false {
-		p.State.End(p)
-	}
-	p.StateStartTime = time.Now()
-
-	p.State = state
-	p.State.Start(p)
-}
-
-func (p *Player) SetState(state PlayerState) {
-	p.SetStateAdv(state, SetStateOptArgs{})
-}
 
 func (p *Player) DoAirControls() {
 	if p.HeldDir.IsLeft() && p.Body.Delta.X() > -AirMaxSpeed {
@@ -210,7 +187,10 @@ func (p *Player) DoStateLoop() {
 		p.SetState(*p.State.NextState)
 		return
 	}
-	p.State.Loop(p)
+	// if DoMap returns true, it means that the state changed.
+	if p.State.DoMap(p) == false { 
+		p.State.Loop(p)
+	}
 }
 
 func (o *PhysObject) IsWallHit() bool {
