@@ -5,6 +5,7 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	"github.com/lolbinarycat/hookshot-oak/player/condition"
 	oak "github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
 )
@@ -70,7 +71,6 @@ func GroundStateLoop(p *Player) {
 		if p.IsJumpInput() {
 			p.Jump()
 		}
-
 	} else {
 		p.SetState(CoyoteState)
 	}
@@ -180,17 +180,18 @@ var JumpHeightDecState = PlayerState{
 }.denil()
 
 //CoyoteTime is how long CoyoteState lasts
-const CoyoteTime time.Duration = time.Millisecond * 7
+//const CoyoteTime time.Duration = time.Millisecond * 7
 
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var CoyoteState = PlayerState{
+	Map: map[condition.Condition]PlayerStateMapFunc{
+		&condition.FramesElapsed{N:7}:constState(&AirState),
+	},
 	Loop: func(p *Player) {
-		if p.StateStartTime.Add(CoyoteTime).Before(time.Now()) {
-			p.SetState(AirState)
+		if p.PhysObject.ActiColls.GroundHit == true {
+			p.SetState(GroundState)
 		}
-		//inherit code from AirState
-		//p.AirState()
 
 		if p.ActiColls.RightWallHit && p.ActiColls.HLabel == labels.Block {
 			p.SetState(BlockPushState(false))
@@ -201,10 +202,17 @@ var CoyoteState = PlayerState{
 		if p.IsJumpInput() {
 			p.Jump()
 		}
-
+		p.DoGravity()
+		p.DoAirControls()
 		p.StateCommon()
 	},
 }.denil()
+
+func constState(state *PlayerState) PlayerStateMapFunc {
+	return func (_ *Player) *PlayerState {
+		return state
+	}
+}
 
 var WallSlideLeftState = PlayerState{
 	Loop: func(p *Player) {

@@ -2,7 +2,7 @@ package condition
 
 import (
 	"github.com/oakmound/oak/v2"
-	"github.com/oakmound/oak/v2/event"
+	"github.com/oakmound/oak/v2/dlog"
 )
 
 type Condition interface {
@@ -21,21 +21,17 @@ func (k KeyDown) True() bool {
 }
 
 type FramesElapsed struct {
-	Target, current int
+	N, c int
 }
 
-func (f FramesElapsed) Init() {
-	event.GlobalBind(func (_ int, _ interface{}) int {
-		f.current++
-		if f.current > f.Target {
-			return event.UnbindSingle
-		}
-		return 0
-	}, event.Enter)
+func (f *FramesElapsed) Init() {
+	f.c = 0
 }
 
-func (f FramesElapsed) True() bool {
-	return f.current >= f.Target
+func (f *FramesElapsed) True() bool {
+	dlog.Verb("cond:",f.c,f.N)
+	f.c++
+	return f.c >= f.N
 }
 
 type Func func () bool

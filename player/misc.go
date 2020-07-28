@@ -180,13 +180,11 @@ func (o *PhysObject) GetLastHitObj(Horis bool) *entities.Moving {
 
 
 func (p *Player) DoStateLoop() {
-	defer func () {
-		recover()
-	}()
-	if p.TimeFromStateStart() > p.State.MaxDuration {
-		p.SetState(*p.State.NextState)
-		return
-	}
+
+	// if p.TimeFromStateStart() > p.State.MaxDuration {
+	// 	p.SetState(*p.State.NextState)
+	// 	return
+	// }
 	// if DoMap returns true, it means that the state changed.
 	if p.State.DoMap(p) == false { 
 		p.State.Loop(p)

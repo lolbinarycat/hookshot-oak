@@ -1,6 +1,6 @@
 {
 	"debug": {
 		"level": "verbose",
-        "filter": "hookshot"
+        "filter": "cond"
 	}
 }
