@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"image/color"
-
+	"regexp"
 	"os"
 	"time"
 
@@ -171,6 +171,23 @@ func loadScene() *player.Player {
 }
 
 func main() {
+	{
+		err := oak.LoadConf("config.json")
+		if err != nil {
+			dlog.Error("failed to load config.json, error:", err)
+		}
+		logger := dlog.NewRegexpLogger()
+		lvl , err := dlog.ParseDebugLevel(oak.SetupConfig.Debug.Level)
+		if err != nil {
+			panic(err)
+		}
+		logger.SetDebugLevel(lvl)
+		logger.SetRegexp(regexp.MustCompile(oak.SetupConfig.Debug.Filter))
+		dlog.SetLogger(logger)
+	}
+
+
+
 	// Apperenly 1 DynamicHeap = 1 layer.
 	render.SetDrawStack(
 		render.NewDynamicHeap(),
@@ -191,14 +208,10 @@ func main() {
 	oak.Add(ui.BuildTitlescreenScene("titlescreen","platformer"))
 
 	BindCommands()
+	dlog.Info("Commands bound")
 
-	err := oak.LoadConf("config.json")
-	if err != nil {
-		dlog.Error("failed to load config.json, error:", err)
-	}
 	oak.SetupConfig.Screen = oak.Screen{Height: 600, Width: 800}
 	oak.SetupConfig.FrameRate = 60
 	oak.SetAspectRatio(8.0 / 6.0)
 	oak.Init("titlescreen")
 }
-
