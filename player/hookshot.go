@@ -140,6 +140,7 @@ func HsPullState(dir direction.Dir) PlayerState {
 			}
 			p.Body.Delta.SetPos(coeffX*p.Hs.Body.Speed.X(),
 				coeffY*p.Hs.Body.Speed.Y())
+			p.Hs.Delta.SetPos(0,0)
 		},
 	}.denil()
 }
@@ -149,12 +150,13 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Start: func(p *Player) {
-			if dir.IsHoriz() {
-				p.HeldObj = p.Hs.ActiColls.LastHitH.E().(*physobj.Block)
-			} else {
-				p.HeldObj = p.Hs.ActiColls.LastHitV.E().(*physobj.Block)
-			}
-			
+
+				var ok bool
+				p.HeldObj, ok = p.Hs.ActiColls.LastHitH.E().(*physobj.Block)
+				if !ok {
+					p.HeldObj = p.Hs.ActiColls.LastHitV.E().(*physobj.Block)
+				}
+
 		},
 		Loop: func(p *Player) {
 			if (dir.IsJustRight() && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
