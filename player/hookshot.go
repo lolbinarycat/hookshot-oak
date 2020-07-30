@@ -5,6 +5,7 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	"github.com/lolbinarycat/hookshot-oak/physobj"
 	"github.com/oakmound/oak/v2/dlog"
 )
 
@@ -148,7 +149,12 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 	coeffY := direction.ToCoeff(dir.V)
 	return PlayerState{
 		Start: func(p *Player) {
-			p.HeldObj = p.Hs.GetLastHitObj(dir.IsHoriz())
+			if dir.IsHoriz() {
+				p.HeldObj = p.Hs.ActiColls.LastHitH.E().(*physobj.Block)
+			} else {
+				p.HeldObj = p.Hs.ActiColls.LastHitV.E().(*physobj.Block)
+			}
+			
 		},
 		Loop: func(p *Player) {
 			if (dir.IsJustRight() && (p.Hs.X <= 0 || p.ActiColls.RightWallHit)) ||
@@ -162,13 +168,13 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 			}
 			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X()*coeffX,
 				-p.Hs.Body.Speed.X()*coeffY)
-			p.HeldObj.Delta.SetPos(p.Hs.Body.Delta.GetPos())
+			p.HeldObj.Body.Delta.SetPos(p.Hs.Body.Delta.GetPos())
 		},
 		End: func(p *Player) {
 			if p.Mods["itemcarry"].Active() {
 				p.SetStateAdv(ItemCarryGroundState, SetStateOptArgs{SkipEnd: true})
 			} else {
-				p.HeldObj.Delta.SetPos(0, 0)
+				p.HeldObj.Body.Delta.SetPos(0, 0)
 				p.HeldObj = nil
 				p.SetState(AirState)
 			}

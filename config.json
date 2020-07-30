@@ -1,6 +1,6 @@
 {
 	"debug": {
-		"level": "verbose",
-        "filter": "cond"
+		"level": "warn",
+        "filter": ""
 	}
 }

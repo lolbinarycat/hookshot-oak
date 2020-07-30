@@ -2,6 +2,8 @@ package player
 
 import (
 	"time"
+
+	"github.com/lolbinarycat/hookshot-oak/physobj"
 )
 
 const GroundPoundStartTime = time.Second / 5
@@ -50,7 +52,7 @@ var GroundPoundEndState = PlayerState{
 	NextState:   &GroundState,
 }.denil()
 
-const GroundPoundJumpGravity float64 = Gravity / 2
+const GroundPoundJumpGravity float64 = physobj.Gravity / 2
 const GroundPoundJumpTime = time.Millisecond * 60
 const GroundPoundJumpForce = 9
 

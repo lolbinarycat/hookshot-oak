@@ -3,11 +3,15 @@ package player
 import (
 	"time"
 
+
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/player/condition"
+	"github.com/lolbinarycat/hookshot-oak/physobj"
 	oak "github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
+	
+
 )
 
 //StateCommon is the function for commands that should be run in most
@@ -100,22 +104,37 @@ func (p *Player) DoGroundCtrls() {
 
 const BlockPushSpeed float64 = 1
 
+// isHeldObjectNil checks if the player is not holding an object.
+// it exists as a variable so that it's address can be taken,
+// which needs to be done so it can be used as a map key
+var isHeldObjectNil condition.Func = func (p interface{}) bool {
+	return p.(*Player).HeldObj == nil 
+}
+
+
 func BlockPushState(isLeft bool) PlayerState {
 	return PlayerState{
+		//Map: map[condition.Condition]PlayerStateMapFunc{
+		//	&isHeldObjectNil:constState(&AirState),
+		//},
 		Start: func(p *Player) {
-			if isLeft {
-				p.GrabObjLeft(labels.Block)
-			} else {
-				p.GrabObjRight(labels.Block)
+			lastHit := p.ActiColls.LastHitH.E().(*physobj.Block)
+			p.HeldObj = lastHit
+			//runtime.Breakpoint()
+			if p.HeldObj == nil {
+				//lastHit := p.ActiColls.LastHitH.E()
+				dlog.Error("Could not enter BlockPushState: HeldObj is nil")
+				//p.HeldObj = lastHit.(*entities.Moving)
+				//return
+				p.SetState(GroundState)
+				return
 			}
 		},
 		Loop: func(p *Player) {
-			if p.HeldObj == nil {
-				p.SetState(GroundState)
-			}
+
 			if (isLeft && oak.IsDown(currentControls.Left) == false) ||
 				(isLeft == false && oak.IsDown(curCtrls.Right) == false) {
-				p.HeldObj.Delta.SetX(0)
+				p.HeldObj.Body.Delta.SetX(0)
 				p.SetState(GroundState)
 				return
 			} else {
@@ -127,7 +146,7 @@ func BlockPushState(isLeft bool) PlayerState {
 				}
 
 				p.Body.Delta.SetX(spd)
-				p.HeldObj.Delta.SetX(spd)
+				p.HeldObj.Body.Delta.SetX(spd)
 
 				p.StateCommon()
 			}
@@ -137,18 +156,18 @@ func BlockPushState(isLeft bool) PlayerState {
 
 const BlockPullSpeed float64 = BlockPushSpeed
 
-var BlockPullRightState = PlayerState{
-	Loop: func(p *Player) {
-		//if either button isn't pushed
-		if (p.Mods["hs"].JustActivated() && oak.IsDown(currentControls.Right)) == false {
-			p.SetState(GroundState)
-			return
-		}
+// var BlockPullRightState = PlayerState{
+// 	Loop: func(p *Player) {
+// 		//if either button isn't pushed
+// 		if (p.Mods["hs"].JustActivated() && oak.IsDown(currentControls.Right)) == false {
+// 			p.SetState(GroundState)
+// 			return
+// 		}
 
-		p.Body.Delta.SetX(BlockPullSpeed)
-		p.HeldObj.Delta.SetX(BlockPullSpeed)
-	},
-}.denil()
+// 		p.Body.Delta.SetX(BlockPullSpeed)
+// 		p.HeldObj.Delta.SetX(BlockPullSpeed)
+// 	},
+// }.denil()
 
 //JumpHeightDecTime is how long JumpHeightDecState lasts
 const JumpHeightDecTime time.Duration = time.Millisecond * 150
@@ -158,17 +177,20 @@ const JumpHeightDecTime time.Duration = time.Millisecond * 150
 const MinHeightJumpInputTime = time.Millisecond * 85
 
 var JumpHeightDecState = PlayerState{
+	Map: map[condition.Condition]PlayerStateMapFunc{
+		&condition.FramesElapsed{N:14}:func(*Player) *PlayerState {
+			return &AirState
+		},
+		&condition.FramesElapsed{N:4}:func(p *Player) *PlayerState {
+			if !p.Mods["jump"].Active() {
+				p.Body.Delta.SetY(-float64(JumpHeight) / 2)
+				return &AirState
+			}
+			// continue evaluating map, or if there are no more elements, eval Loop
+			return nil
+		},
+	},
 	Loop: func(p *Player) {
-		if p.TimeFromStateStart() > JumpHeightDecTime {
-			p.SetState(AirState)
-			return
-		}
-		if p.TimeFromStateStart() < MinHeightJumpInputTime &&
-			!p.Mods["jump"].Active() {
-			p.Body.Delta.SetY(-float64(JumpHeight) / 2)
-			p.SetState(AirState)
-			return
-		}
 		if p.Mods["jump"].Active() {
 			//p.DoCustomGravity(Gravity/5)
 		} else {
@@ -179,14 +201,13 @@ var JumpHeightDecState = PlayerState{
 	},
 }.denil()
 
-//CoyoteTime is how long CoyoteState lasts
-//const CoyoteTime time.Duration = time.Millisecond * 7
+const CoyoteFrames = 7
 
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var CoyoteState = PlayerState{
 	Map: map[condition.Condition]PlayerStateMapFunc{
-		&condition.FramesElapsed{N:7}:constState(&AirState),
+		&condition.FramesElapsed{N:CoyoteFrames}:constState(&AirState),
 	},
 	Loop: func(p *Player) {
 		if p.PhysObject.ActiColls.GroundHit == true {
@@ -298,21 +319,24 @@ func ItemCarryLoop(p *Player) {
 		p.ThrowHeldItem(5*p.HeldDir.HCoeff(), -7)
 		p.SetState(ItemThrowLag)
 	} else {
-		p.HeldObj.SetPos(p.Body.X(), p.Body.Y()-p.HeldObj.H)
-		p.HeldObj.Delta.SetPos(p.Body.Delta.GetPos())
-		p.HeldObj.ShiftPos(p.HeldObj.Delta.GetPos())
+		p.HeldObj.Body.SetPos(p.Body.X(), p.Body.Y()-p.HeldObj.Body.H)
+		p.HeldObj.Body.Delta.SetPos(p.Body.Delta.GetPos())
+		p.HeldObj.Body.ShiftPos(p.HeldObj.Delta.GetPos())
 	}
 }
 
 func (p *Player) ThrowHeldItem(xSpeed, ySpeed float64) {
-	p.HeldObj.Delta.SetPos(xSpeed, ySpeed)
-	if p.HeldObj.Space.Label < 0 {
-		p.HeldObj.Space.UpdateLabel(-p.HeldObj.Space.Label)
+	p.HeldObj.Body.Delta.SetPos(xSpeed, ySpeed)
+	p.HeldObj.Held = false
+	if p.HeldObj.Body.Space.Label < 0 {
+		p.HeldObj.Body.Space.UpdateLabel(-p.HeldObj.Space.Label)
 	}
 	p.HeldObj = nil
 }
 
 var ItemThrowLag = PlayerState{
-	MaxDuration: Frame * 3,
+	Map: map[condition.Condition]PlayerStateMapFunc{
+		&condition.FramesElapsed{N:3}:constState(&AirState),
+	},
 	NextState:   &AirState,
 }.denil()

@@ -10,12 +10,14 @@ import (
 	"os"
 	//"github.com/oakmound/oak/v2/fileutil"
 	"github.com/pkg/errors"
+	"github.com/lolbinarycat/hookshot-oak/physobj"
 )
 
-//var SaveFileName = "save.json"
 //type JSONSave struct {
 //	Player JSONPlayer
 //}
+type JSONVector = physobj.JSONVector
+
 type JSONPlayer struct {
 	Pos,RespawnPos JSONVector
 	Ctrls ControlConfig
@@ -33,10 +35,7 @@ const (
 	BasicMod JSONModType = iota
 	CtrldMod
 )
-type JSONVector struct {
-	X float64
-	Y float64
-}
+
 
 func (p Player) Save(saveFileName string) error {
 	saveFile, err := os.Create(saveFileName)
@@ -133,24 +132,6 @@ func (l *ModInputList) MarshalJSON() ([]byte,error) {
 //	return nil
 //}
 
-func (o PhysObject) MarshalJSON() ([]byte,error) {
-	buf := bytes.NewBuffer([]byte{})
-	enc := json.NewEncoder(buf)
-	pos := JSONVector{X:o.Body.X(),Y:o.Body.Y()}
-	enc.Encode(pos)
-	return buf.Bytes(), nil
-}
-
-func (o *PhysObject) UnmarshalJSON(b []byte) error {
-	rdr := bytes.NewReader(b)
-
-	dec := json.NewDecoder(rdr)
-	vec := JSONVector{}
-	dec.Decode(&vec)
-
-	o.Body.SetPos(vec.X,vec.Y)
-	return nil
-}
 
 func (p Player) MarshalJSON() ([]byte,error) {
 	return json.Marshal(

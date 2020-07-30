@@ -3,15 +3,15 @@ package player
 import (
 	"time"
 
-	"github.com/oakmound/oak/v2/entities"
-	"github.com/oakmound/oak/v2/collision"
-	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/key"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/player/condition"
+	"github.com/lolbinarycat/hookshot-oak/physobj"
 )
+
+type PhysObject = physobj.PhysObject
 
 //Player is a type representing the player
 //StateInit is a variable that should be set to true when changing states
@@ -19,20 +19,20 @@ import (
 type Player struct {
 	//Body           *entities.Moving
 	//ActiColls      ActiveCollisions
-	PhysObject
+	physobj.PhysObject
 	State          PlayerState  `json:"-"`
 	StateStartTime time.Time `json:"-"`
 	Mods           PlayerModuleList
 	Ctrls          ControlConfig
 	RespawnPos     Pos
 	Hs             Hookshot `json:"-"`
-	HeldObj        *entities.Moving `json:"-"`
+	HeldObj        *physobj.Block
 	Eyes           [2]*render.Sprite `json:"-"`
 	HeldDir        direction.Dir `json:"-"`
 }
 
 type Hookshot struct {
-	PhysObject
+	physobj.PhysObject
 	X, Y   float64
 	Active bool
 }
@@ -49,21 +49,7 @@ type PlayerStateFunc func(*Player)
 // if a PlayerStateMapFunc returns nil, the player's state will not change
 type PlayerStateMapFunc func (p *Player) *PlayerState
 
-type PhysObject struct {
-	Body      *entities.Moving
-	ActiColls ActiveCollisions `json:"-"`
-	//ExtraSolids defines labels that should be solid only for this object.
-	ExtraSolids []collision.Label 
-}
 
-type ActiveCollisions struct {
-	GroundHit          bool
-	LeftWallHit        bool
-	RightWallHit       bool
-	CeilingHit         bool
-	HLabel, VLabel     collision.Label // these define the LAST label that was hit (horizontaly and verticaly), as ints cannot be nil
-	LastHitV, LastHitH event.CID       // cid of the last collision space that was hit
-}
 
 type ControlConfig struct {
 	Left, Right, Up, Down, Quit string //`json:"-"`

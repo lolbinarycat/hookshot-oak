@@ -34,7 +34,6 @@ func init() {
 		Start:func(p *Player) {},
 		End:func(p *Player) {},
 	}.denil()
-	
 	GroundState = PlayerState{
 		Loop: GroundStateLoop,
 	}.denil()

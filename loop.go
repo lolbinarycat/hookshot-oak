@@ -114,7 +114,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		)
 
 	}
-
+	// 0xc0001b1720
 	MainSceneLoop = func() bool {
 		hsOffX := float64(PlayerWidth/2 - HsWidth/2)
 		hsOffY := float64(PlayerHeight/2 - HsHeight/2)
@@ -134,10 +134,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			}
 
 			//blocks := collision.WithLabels(labels.Block)
-			for _, block := range blocks {
-				block.DoCollision(block.BlockUpdater(plr))
-				//	block.CID.E().(PhysObject).DoCollision(block.BlockUpdater)
-			}
+
 
 			plr.DoCollision(plr.DoStateLoop)
 

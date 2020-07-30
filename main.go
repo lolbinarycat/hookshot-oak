@@ -22,6 +22,7 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/ui"
+	"github.com/lolbinarycat/hookshot-oak/physobj"
 
 	"github.com/lolbinarycat/utils"
 )
@@ -127,24 +128,28 @@ func loadScene() *player.Player {
 	plr.ExtraSolids = []collision.Label{labels.Block}
 	render.Draw(plr.Hs.Body.R, 0)
 
-	var block PhysObject
-	var block2 PhysObject
+	// var block PhysObject
+	// var block2 PhysObject
 
-	block.Body = entities.NewMoving(150, 100, 16, 16,
-		render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
-		nil, 2, 1)
-	block2.Body = entities.NewMoving(200, 130, 16, 32,
-		render.NewColorBox(16, 32, color.RGBA{0, 255, 0, 255}),
-		nil, 3, 0)
-	block2.Body.Init()
-	block2.Body.UpdateLabel(labels.Block)
-	render.Draw(block2.Body.R)
+	// block.Body = entities.NewMoving(150, 100, 16, 16,
+	// 	render.NewColorBox(16, 16, color.RGBA{0, 200, 0, 255}),
+	// 	nil, 2, 1)
+	// block2.Body = entities.NewMoving(200, 130, 16, 32,
+	// 	render.NewColorBox(16, 32, color.RGBA{0, 255, 0, 255}),
+	// 	nil, 3, 0)
+	// block2.Body.Init()
+	// block2.Body.UpdateLabel(labels.Block)
+	// render.Draw(block2.Body.R)
 
-	render.Draw(block.Body.R)
-	block.Body.Init()
-	block.ExtraSolids = []collision.Label{labels.Player}
-	block.Body.UpdateLabel(labels.Block)
-	blocks = append(blocks, &block, &block2)
+	block := physobj.NewBlock(32,32,
+		render.NewColorBox(32, 32, color.RGBA{0, 200, 0, 255}),
+		300,500)
+	render.Draw(block.Body.R,1,3)
+	
+	//block.Body.Init()
+	//block.ExtraSolids = []collision.Label{labels.Player}
+	//block.Body.UpdateLabel(labels.Block)
+	//blocks = append(blocks, &block, &block2)
 
 	//screenSpace = collision.NewSpace(0,0,float64(WindowWidth),float64(WindowHeight),3)
 
@@ -215,3 +220,4 @@ func main() {
 	oak.SetAspectRatio(8.0 / 6.0)
 	oak.Init("titlescreen")
 }
+

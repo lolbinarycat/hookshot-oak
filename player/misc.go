@@ -2,14 +2,14 @@ package player
 
 import (
 	"time"
-	"math"
+	//"math"
 
 	dir "github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/oakmound/oak/v2"
-	"github.com/oakmound/oak/v2/event"
-	"github.com/oakmound/oak/v2/collision"
-	"github.com/oakmound/oak/v2/entities"
-	"github.com/oakmound/oak/v2/dlog"
+	//"github.com/oakmound/oak/v2/event"
+	//"github.com/oakmound/oak/v2/collision"
+	//"github.com/oakmound/oak/v2/entities"
+	//"github.com/oakmound/oak/v2/dlog"
 )
 
 const JumpHeight int = 5
@@ -21,20 +21,7 @@ const (
 	AirAccel    float64 = 0.4
 	AirMaxSpeed float64 = 3
 )
-const Gravity float64 = 0.35
 
-func (b *PhysObject) BlockUpdater(p *Player) func(){
-	//b.Body.ApplyFriction(1)
-	//b.Body.Delta.
-
-	return func() {
-		if p.HeldObj != b.Body {
-		b.DoGravity()
-		if b.ActiColls.GroundHit {
-			b.Body.Delta.SetPos(0, 0)
-		}
-	}}
-}
 
 func (p *Player) WallJump(dir dir.Dir, EnterLaunch bool) {
 	p.Body.Delta.SetY(-WallJumpHeight)
@@ -140,43 +127,23 @@ func (p *Player) Respawn() {
 	p.Body.SetPos(p.RespawnPos.X, p.RespawnPos.Y)
 }
 
-func (o *PhysObject) DoGravity() {
-	o.Body.Delta.ShiftY(Gravity)
-}
-
-func (o *PhysObject) DoCustomGravity(grav float64) {
-	o.Body.Delta.ShiftY(grav)
-}
 
 
 
-func (p *Player) GrabObjRight(targetLabels ...collision.Label) (bool, event.CID) {
-	return p.GrabObject(p.Body.W, p.Body.H, p.Body.W, targetLabels...)
-}
+// func (p *Player) GrabObjRight(targetLabels ...collision.Label) (bool, event.CID) {
+// 	return p.GrabObject(p.Body.W, p.Body.H, p.Body.W, targetLabels...)
+// }
 
-func (p *Player) GrabObjLeft(targetLabels ...collision.Label) (bool, event.CID) {
-	return p.GrabObject(-p.Body.W, -p.Body.H, p.Body.W, targetLabels...)
-}
+// func (p *Player) GrabObjLeft(targetLabels ...collision.Label) (bool, event.CID) {
+// 	return p.GrabObject(-p.Body.W, -p.Body.H, p.Body.W, targetLabels...)
+// }
 
 // GetLastHitObj attempts to get an entity from a PhysObject's
 // ActiColls.LastHit* attribute. .LastHitH if Horis == true,
 // and .LastHitV if false.
 // it will return nil if unsucssesful.
 
-func (o *PhysObject) GetLastHitObj(Horis bool) *entities.Moving {
-	_, iface := event.ScanForEntity(func(ent interface{}) bool {
-		mov, ok := ent.(*entities.Moving)
-		if !ok {
-			return false
-		}
-		if (Horis && mov.Space.CID == o.ActiColls.LastHitH) ||
-			(!Horis && mov.Space.CID == o.ActiColls.LastHitV) {
-			return true
-		}
-		return false
-	})
-	return iface.(*entities.Moving)
-}
+
 
 
 func (p *Player) DoStateLoop() {
@@ -191,12 +158,7 @@ func (p *Player) DoStateLoop() {
 	}
 }
 
-func (o *PhysObject) IsWallHit() bool {
-	if o.ActiColls.LeftWallHit || o.ActiColls.RightWallHit {
-		return true
-	}
-	return false
-}
+
 
 // Depreciated
 func (p *Player) IsHsInPlayer() bool {
@@ -223,65 +185,60 @@ func (p *Player) DoHsCheck() bool {
 //	*a = a.Attach(attachTo,offsets...)
 //}
 
-func (o *PhysObject) HasHitInDir(d dir.Dir) bool {
-	return (d.IsRight() && o.ActiColls.RightWallHit) ||
-		(d.IsLeft() && o.ActiColls.LeftWallHit) ||
-		(d.IsUp() && o.ActiColls.CeilingHit) ||
-		(d.IsDown() && o.ActiColls.GroundHit)
-}
 
 
 
 // Depreciated
-func (p *Player) GrabObject(xOff, yOff, maxDist float64, targetLabels ...collision.Label) (bool, event.CID) {
-	if len(targetLabels) > 1 {
-		dlog.Error("muliple labels not implemented yet")
-	}
+// func (p *Player) GrabObject(xOff, yOff, maxDist float64, targetLabels ...collision.Label) (bool, event.CID) {
+// 	if len(targetLabels) > 1 {
+// 		dlog.Error("muliple labels not implemented yet")
+// 	}
 
-	id, ent := event.ScanForEntity(func(e interface{}) bool {
-		if ent, ok := e.(*entities.Moving); ok {
+// 	id, ent := event.ScanForEntity(func(e interface{}) bool {
+// 		if ent, ok := e.(*entities.Moving); ok {
 
-			if ent.Space.Label != targetLabels[0] {
-				dlog.Verb("label check failed")
-				return false
-			}
-			if !(ent.Space.CID == p.ActiColls.LastHitH) {
-				dlog.Verb("id is equal. id:", ent.CID)
-				return false
-			}
+// 			if ent.Space.Label != targetLabels[0] {
+// 				dlog.Verb("label check failed")
+// 				return false
+// 			}
+// 			if !(ent.Space.CID == p.ActiColls.LastHitH) {
+// 				dlog.Verb("id is equal. id:", ent.CID)
+// 				return false
+// 			}
 
-			if ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <=
-				maxDist+(math.Max(ent.W, ent.H)) {
+// 			if ent.DistanceTo(p.Body.X()+xOff, p.Body.Y()+yOff) <=
+// 				maxDist+(math.Max(ent.W, ent.H)) {
 
-				dlog.Verb("distance condition fufilled")
-				// if the entity has the correct label, and is within the max distance:
-				return true
-			}
+// 				dlog.Verb("distance condition fufilled")
+// 				// if the entity has the correct label, and is within the max distance:
+// 				return true
+// 			}
 
-			//dlog.Verb("d ==",d)
-		} else {
-			// if the entity is not a entities.Solid, we cannot grab it
-			dlog.Verb("type check failed")
-			return false
-		}
-		//this is just to stop "missing return at end of function"
-		return false
-	})
+// 			//dlog.Verb("d ==",d)
+// 		} else {
+// 			// if the entity is not a entities.Solid, we cannot grab it
+// 			dlog.Verb("type check failed")
+// 			return false
+// 		}
+// 		//this is just to stop "missing return at end of function"
+// 		return false
+// 	})
 
-	// if id is equal to -1, it means ScanForEntity was unable
-	// to find an entity within the given paramaters
-	if id == -1 {
-		dlog.Verb("ScanForEntity Failed")
-		return false, -1
-	}
-	//p.HeldObjId = event.CID(id)
-	if mov, ok := ent.(*entities.Moving); ok {
-		p.HeldObj = &*mov
-		dlog.Verb("HeldObj set")
-	} else {
-		dlog.Verb("ent exists, but is not *entities.Moving")
-		return false, -1
-	}
+// 	// if id is equal to -1, it means ScanForEntity was unable
+// 	// to find an entity within the given paramaters
+// 	if id == -1 {
+// 		dlog.Verb("ScanForEntity Failed")
+// 		return false, -1
+// 	}
+// 	//p.HeldObjId = event.CID(id)
+// 	if mov, ok := ent.(*entities.Moving); ok {
+// 		p.HeldObj = &*mov
+// 		event.Trigger("holdUpdate",true)
+// 		dlog.Verb("HeldObj set")
+// 	} else {
+// 		dlog.Verb("ent exists, but is not *entities.Moving")
+// 		return false, -1
+// 	}
 
-	return true, event.CID(id)
-}
+// 	return true, event.CID(id)
+// }
