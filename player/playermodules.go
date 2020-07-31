@@ -59,6 +59,7 @@ type PlayerModule interface{
 type ModInput struct {
 	Key string `json:"key"`
 	Button string `json:"button"`
+	Bound bool
 }
 
 //whether modules should be automaticaly equipped when recived (depreciated)
@@ -66,7 +67,7 @@ var autoEquipMods bool = true
 
 
 func NewModInput(k string,b string) ModInput {
-	return ModInput{k,b}
+	return ModInput{k,b,false}
 }
 
 func (i ModInput) IsDown() bool {
@@ -125,7 +126,7 @@ func (l *PlayerModuleList) AddCtrld(key string,p *Player,inputNum int,inpTime ti
 		inputTime:inpTime,
 		//player:p,
 	}
-	mod.Bind(p,inputNum)
+	mod.Bind(p,-1)
 	(*l)[key] = PlayerModule(&mod)
 	return l
 }
@@ -197,6 +198,7 @@ func (m *BasicPlayerModule) Unequip() {
 
 func (m *CtrldPlayerModule) Unequip() {
 	m.Equipped = false
+	m.input.Bound = false
 	m.input = nil
 }
 
@@ -210,6 +212,7 @@ func (m *CtrldPlayerModule) Bind(p *Player,i int) {
 	var inp *ModInput
 	if IsValidInputNum(i) {
 		inp = &m.player.Ctrls.Mod[i]
+		inp.Bound = m.Equipped
 	} else {
 		inp = nil
 	}
