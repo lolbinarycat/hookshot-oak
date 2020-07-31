@@ -16,8 +16,6 @@ import (
 	"github.com/oakmound/oak/v2/render"
 
 
-
-	"github.com/lolbinarycat/hookshot-oak/collectables"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/player"
@@ -166,10 +164,8 @@ func loadScene() *player.Player {
 		}
 	}
 
-	plr.Mods.GiveAll(true)
-	modClct := collectables.NewModuleClct(120, 550, 8, 8,
-		render.NewColorBox(8, 8, color.RGBA{0, 255, 100, 255}), 72, "hs")
-	render.Draw(modClct.React.R, 3)
+	//plr.Mods.GiveAll(true)
+	
 
 	dlog.Info("player loaded with data:",*plr)
 	return plr

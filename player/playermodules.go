@@ -69,6 +69,15 @@ func NewModInput(k string,b string) ModInput {
 	return ModInput{k,b}
 }
 
+func (i ModInput) IsDown() bool {
+	// we don't just return this to make implementing controller support easier
+	if oak.IsDown(i.Key) {
+		return true
+	} else {
+		return false
+	}
+}
+
 type ModInputList [8]ModInput
 
 func (cnf *ControlConfig) DefaultMapCtrls() {

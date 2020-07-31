@@ -1,6 +1,6 @@
 {
 	"debug": {
-		"level": "warn",
-        "filter": ""
+		"level": "info",
+        "filter": "ModGetState"
 	}
 }

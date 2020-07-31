@@ -19,7 +19,7 @@ type ModuleClct struct {
 
 
 func (m ModuleClct) ClctdBy(p *player.Player) {
-	p.Mods[m.Name].Obtain()
+	p.SetState(player.ModGetState(p.State,m.Name))
 	dlog.Info("module",m.Name,"collected")
 }
 
@@ -32,7 +32,6 @@ func NewModuleClct(x, y, w, h float64, r render.Renderable, cID event.CID, modNa
 			m.ClctdBy(player.GetPlayer(0))
 			m.Destroy()
 		}
-
 	})
 	m.React.Bind(func(_ int, _ interface{}) int {
 		m.React.RSpace.CallOnHits()

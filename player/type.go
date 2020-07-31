@@ -38,6 +38,7 @@ type Hookshot struct {
 }
 
 type PlayerState struct {
+	Name string
 	Start, Loop, End PlayerStateFunc
 	Map  map[condition.Condition]PlayerStateMapFunc
 	MaxDuration time.Duration
