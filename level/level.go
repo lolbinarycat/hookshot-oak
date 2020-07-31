@@ -167,11 +167,12 @@ func LoadObjects(levelMap *tiled.Map) {
 	for _, objGroup := range levelMap.ObjectGroups {
 		for _, obj := range objGroup.Objects {
 			if obj.Type == moduleCollectable {
-				collectables.NewModuleClct(
+				clct := collectables.NewModuleClct(
 					obj.X + float64(objGroup.OffsetX),
 					obj.Y + float64(objGroup.OffsetY),
 					obj.Width, obj.Height,
 					render.NewColorBox(int(obj.Width), int(obj.Height), color.RGBA{255,255,0,255}),70,obj.Name)
+				render.Draw(clct.React.R)
 				//o.Init()
 			}
 		}
