@@ -2,6 +2,7 @@ package physobj
 
 import (
 
+
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/oakmound/oak/v2/collision"
 )
@@ -31,24 +32,16 @@ func (object *PhysObject) DoCollision(updater func()) {
 		object.ActiColls.LastHitH = hit.CID
 	}
 CheckY:
-
-	// //TODO: apply this anti-clip system to horizontal collision
-	// steps := math.Ceil(math.Abs(object.Body.Delta.Y() / stepThreshold))
-	// steps
-	// for i := 0; i < int(steps); i++ {
-
 	object.Body.ShiftY(object.Body.Delta.Y())
 
 	if hit := collision.HitLabel(object.Body.Space,
 		append(object.ExtraSolids, labels.Solids...)...); hit != nil {
 
 		if object.Body.Delta.Y() > 0 { //Ground
-			object.ActiColls.GroundHit = true
-			//object.Body.SetY(hit.Y() - object.Body.H)
 			object.Body.SetY(oldY)
+			object.ActiColls.GroundHit = true
 		} else if object.Body.Delta.Y() < 0 { //Ceiling
 			object.ActiColls.CeilingHit = true
-			//TODO: make this work like other collision
 			object.Body.SetY(oldY)
 		} else {
 			return
@@ -59,5 +52,4 @@ CheckY:
 	}
 	//}
 	//EndYMovementStep:
-
 }
