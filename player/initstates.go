@@ -2,6 +2,8 @@ package player
 
 import (
 	"time"
+
+	"github.com/oakmound/oak/v2/dlog"
 )
 
 // denil returns a modified version of a playerstate with nil functions replaced
@@ -39,6 +41,11 @@ func init() {
 	}.denil()
 	ItemCarryGroundState = PlayerState{
 		Start: func(p *Player) {
+			if p.HeldObj == nil {
+				dlog.Error("HeldObj == nil at start of ItemCarryGroundState, fallback to AirState")
+				p.SetState(AirState)
+				return
+			}
 			if p.HeldObj.Space.Label > 0 {
 				// disbles collision
 				p.HeldObj.UpdateLabel(-p.HeldObj.Space.Label)
