@@ -145,6 +145,12 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 
 			plr.Hs.DoCollision(plr.HsUpdater)
 
+			if (plr.ActiColls.CeilingHit && plr.ActiColls.GroundHit) ||
+				(plr.ActiColls.LeftWallHit && plr.ActiColls.RightWallHit) {
+
+				plr.Die()
+			}
+
 			//player.Eyes[1].SetX(5)
 		} else { // if game is paused
 			// Do nothing for now, later display the pause menu
