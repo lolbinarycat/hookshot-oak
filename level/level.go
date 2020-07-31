@@ -100,29 +100,34 @@ func LoadDevRoom() error {
 
 
 func LoadTmx(mapPath string) error {
-
+	// load level data
 	levelMap, err := tiled.LoadFromFile(mapPath)
 	if err != nil {
 		return err
 	}
 
-	err = LoadTileLayers(levelMap)
+	// create tilemap entity
+	tileMapEntity := NewTileMap(float64(levelMap.TileWidth),
+		float64(levelMap.TileHeight))
+
+	err = LoadTileLayers(levelMap,tileMapEntity)
 	if err != nil {
 		return err
 	}
 	LoadObjects(levelMap)
+	dlog.Info("tilemap: TileMapEntity loaded:",tileMapEntity)
 
 	return nil
 }
 
 
 
-func LoadTileLayers(levelMap *tiled.Map) error {
+func LoadTileLayers(levelMap *tiled.Map, tileMapEntity *TileMap) error {
 	errs := make(chan error,len(levelMap.Layers))
 
 	for _, layer := range levelMap.Layers {
 		go func (lyr *tiled.Layer) {
-			errs <- LoadTileLayer(levelMap,lyr)
+			errs <- LoadTileLayer(levelMap,lyr,tileMapEntity)
 		} (layer)
 	}
 
@@ -135,7 +140,7 @@ func LoadTileLayers(levelMap *tiled.Map) error {
 	return nil
 }
 
-func LoadTileLayer(levelMap *tiled.Map, layer *tiled.Layer) error {
+func LoadTileLayer(levelMap *tiled.Map, layer *tiled.Layer,tileMapEntity *TileMap) error {
 	/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
 		BlockLoop: for j := 0; j < levelMap.Width; j++ {
 			tileIndex := j+(i*levelMap.Width)
@@ -146,7 +151,7 @@ func LoadTileLayer(levelMap *tiled.Map, layer *tiled.Layer) error {
 			if tile.Nil == true {
 				continue BlockLoop
 			} else {
-				_, _, err := LoadTile(tile,layer,levelMap,j,i)
+				_, _, err := LoadTile(tile,layer,levelMap,j,i,tileMapEntity)
 				if err != nil {
 					return err
 				}
@@ -176,8 +181,11 @@ func LoadObjects(levelMap *tiled.Map) {
 // LoadTile loads `tile` from `layer` of `levelMap`.
 // (x, y) is the position of the tile (in tiles), reletive to the offset of `layer`
 // It returns the loaded tile (or nil), whether tile.Nil == true, and any error that occurred
-func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y int) (
-	*entities.Solid,bool,error) {
+// levelMap is the input map of data, while tileMap is a custom entity that is
+// having tiles added to it
+func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map,
+	x,y int, tileMap *TileMap) (
+	*Tile,bool,error) {
 	if tile.Nil == true {
 		return nil, true, nil
 	} else {
@@ -199,37 +207,32 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map, x,y 
 		if err != nil {
 			return nil, false, err
 		}
-		e := entities.NewSolid(
-			float64(x*levelMap.TileWidth+layer.OffsetX),
-			float64(y*levelMap.TileHeight+layer.OffsetY),
-			float64(levelMap.TileWidth),
-			float64(levelMap.TileHeight),
-			sprite,
-			nil, event.CID(100+x+(y*levelMap.Width)))
-		e.Init()
+		t := tileMap.AddTile(float64(x*levelMap.TileWidth+layer.OffsetX),
+			float64(y*levelMap.TileWidth+layer.OffsetY),sprite)
+		dlog.Verb("tilemap: Tile created:",t)
 		switch tilesetTile.Type {
 		case "ground":
-			e.UpdateLabel(labels.Ground)
+			t.UpdateLabel(labels.Ground)
 		case "spikes":
-			e.UpdateLabel(labels.Death)
+			t.UpdateLabel(labels.Death)
 		case "checkpoint":
-			e.UpdateLabel(labels.Checkpoint)
+			t.UpdateLabel(labels.Checkpoint)
 		case "dirt":
-			e.UpdateLabel(labels.NoHs)
+			t.UpdateLabel(labels.NoHs)
 		case "background":
 			// no label
 			goto Background
 		default:
 			return nil, false, UnknownTileTypeError{*tilesetTile}
 		}
-		_, err = render.Draw(e.R,1)
+		_, err = render.Draw(t.R,3)
 	ErrCheckAndReturn:
 		if err != nil {
 			return nil, false, err
 		}
-		return e, false, nil
+		return t, false, nil
 	Background:
-		_, err = render.Draw(e.R,0,-1)
+		_, err = render.Draw(t.R,0,-1)
 		goto ErrCheckAndReturn
 	}
 }
