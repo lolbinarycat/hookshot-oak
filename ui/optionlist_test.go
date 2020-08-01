@@ -24,7 +24,11 @@ func TestOptionList(t *testing.T) {
 		Name: "noop",
 		Action: func() {},
 	}
-	ol := NewOptionList(30,20,&quit,&noop)
+	noop2 := noop
+	noop2.Name = "noop2"
+	noop3 := noop
+	noop3.Name = "noop3"
+	ol := NewOptionList(30,20,&quit,&noop,&noop2,&noop3)
 	oak.Add("test",
 		func (_ string, _ interface{}) {
 			render.Draw(ol)

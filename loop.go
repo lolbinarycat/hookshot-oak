@@ -9,13 +9,13 @@ import (
 	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/key"
-	"github.com/oakmound/oak/v2/render"
+	// 
 	"github.com/oakmound/oak/v2/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/replay"
-	"github.com/lolbinarycat/hookshot-oak/ui"
+	// "github.com/lolbinarycat/hookshot-oak/ui"
 )
 
 var Paused = false
@@ -34,18 +34,18 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 
 	// pauseMenuR is used to refernce the pause menu in order to undraw it.
 	// this should be it's only use
-	var pauseMenuR render.Renderable
+	// var pauseMenuR render.Renderable
 	var plr = new(player.Player)
 
-	pauseMenu := buildPauseScreen(map[string]ui.BtnAction{
-		"resume": func() {
-			Paused = false
-			// pauseMenuR.Undraw()
-		},
-		"quit": func() {
-			os.Exit(0)
-		},
-	})
+	// pauseMenu := buildPauseScreen(map[string]ui.BtnAction{
+	// 	"resume": func() {
+	// 		Paused = false
+	// 		// pauseMenuR.Undraw()
+	// 	},
+	// 	"quit": func() {
+	// 		os.Exit(0)
+	// 	},
+	// })
 
 	MainSceneStart = func(_ string, _ interface{}) {
 		//*plr = new(player.Player)
@@ -58,40 +58,40 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		//render.Draw(pauseScreen.Text, 3)
 
 		event.GlobalBind(func(_ int, _ interface{}) int {
-			Paused = !Paused
-			if Paused { // executed once each time the game is paused
-				var err error
-				pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
-				if err != nil {
-					panic(err)
-				}
-				fmt.Println("font:", render.DefFont())
-				// runtime.Breakpoint()
-			} else { // executed once each time the game is unpaused
-				pauseMenuR.Undraw()
-			}
+			// Paused = !Paused
+			// if Paused { // executed once each time the game is paused
+			// 	var err error
+			// 	pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
+			// 	fmt.Println("font:", render.DefFont())
+			// 	// runtime.Breakpoint()
+			// } else { // executed once each time the game is unpaused
+			// 	pauseMenuR.Undraw()
+			// }
 			return 0
 		}, key.Down+PauseButton)
 		event.GlobalBind(func(_ int, _ interface{}) int {
 			if Paused {
-				err := pauseMenu.Do(ui.CycleSelection)
-				if err != nil {
-					panic(err)
-				}
-				(pauseMenuR).Undraw()
-				pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
-				if err != nil {
-					panic(err)
-				}
+				// err := pauseMenu.Do(ui.CycleSelection)
+				// if err != nil {
+				// 	panic(err)
+				// }
+				// (pauseMenuR).Undraw()
+				// pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
+				// if err != nil {
+				// 	panic(err)
+				// }
 			}
 			return 0
 		}, key.Down+CycleButton)
 		event.GlobalBind(func(_ int, _ interface{}) int {
 			if Paused {
-				err := pauseMenu.Do(ui.Do, ui.RunAction)
-				if err != nil {
-					panic(err)
-				}
+				// err := pauseMenu.Do(ui.Do, ui.RunAction)
+				// if err != nil {
+				// 	panic(err)
+				// }
 			}
 			return 0
 		}, key.Down+ConfirmButton)

@@ -19,7 +19,6 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/player"
-	"github.com/lolbinarycat/hookshot-oak/ui"
 	"github.com/lolbinarycat/hookshot-oak/physobj"
 
 	"github.com/lolbinarycat/utils"
@@ -171,6 +170,8 @@ func loadScene() *player.Player {
 	return plr
 }
 
+const mainSceneName = "platformer"
+
 func main() {
 	{
 		err := oak.LoadConf("config.json")
@@ -200,13 +201,13 @@ func main() {
 	)
 
 	MainSceneStart, MainSceneLoop, MainSceneEnd := buildMainSceneFuncs()
-	oak.Add("platformer",
+	oak.Add(mainSceneName,
 		MainSceneStart,
 		MainSceneLoop,
 		MainSceneEnd,
 	)
 
-	oak.Add(ui.BuildTitlescreenScene("titlescreen","platformer"))
+	oak.AddScene("titlescreen",titlescreenScene)
 
 	BindCommands()
 	dlog.Info("Commands bound")

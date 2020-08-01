@@ -51,9 +51,9 @@ func (l OptionList) DrawOffset(buff draw.Image, xOff, yOff float64) {
 	txt[0] = render.NewStrText(l.Options[0].Name, x, y)
 	_ , lineH := txt[0].GetDims()
 
-	for i, ln := range txt[1:] {
-		txt[i+1] = render.NewStrText(l.Options[i+1].Name, x, y+float64(lineH*i))
-		_ = ln
+	for i := range txt[1:] {
+		// through some witchcraft, y is incremented.
+		txt[i+1] = render.NewStrText(l.Options[i+1].Name, x, y)
 	}
 
 	//txtW, txtH := txt[l.focused].GetDims()
