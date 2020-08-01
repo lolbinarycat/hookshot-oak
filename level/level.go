@@ -141,6 +141,9 @@ func LoadTileLayers(levelMap *tiled.Map, tileMapEntity *TileMap) error {
 }
 
 func LoadTileLayer(levelMap *tiled.Map, layer *tiled.Layer,tileMapEntity *TileMap) error {
+	if layer.Properties.GetBool("NoLoad") {
+		return nil
+	}
 	/* RowLoop: */ for i := 0; i < levelMap.Height; i++ {
 		BlockLoop: for j := 0; j < levelMap.Width; j++ {
 			tileIndex := j+(i*levelMap.Width)
