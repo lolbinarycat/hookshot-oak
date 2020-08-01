@@ -116,11 +116,11 @@ func loadPlayer() *player.Player {
 
 	return plr
 }
-
+const HsSpeedX, HsSpeedY = 7, 7
 func loadScene() *player.Player {
 	plr := loadPlayer()
 
-	plr.Hs.Body.Speed = physics.NewVector(3, 3)
+	plr.Hs.Body.Speed = physics.NewVector(HsSpeedX, HsSpeedY)
 	plr.Body.UpdateLabel(labels.Player)
 	plr.ExtraSolids = []collision.Label{labels.Block}
 	render.Draw(plr.Hs.Body.R, 0)
@@ -156,12 +156,6 @@ func loadScene() *player.Player {
 	}
 
 	player.InitMods(plr)
-	if loadSave {
-		err := plr.Load("save.json")
-		if err != nil {
-			panic(err)
-		}
-	}
 
 	//plr.Mods.GiveAll(true)
 	

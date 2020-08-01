@@ -105,6 +105,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		// set plr.HeldDir
 		event.BindPriority(
 			func(_ int, _ interface{}) int {
+				plr.LastHeldDir = plr.HeldDir
 				if replay.Active {
 					plr.HeldDir = replay.CurrentDir
 				} else {

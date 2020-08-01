@@ -2,7 +2,7 @@ package player
 
 import (
 	"time"
-
+	"math"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	"github.com/lolbinarycat/hookshot-oak/labels"
@@ -22,6 +22,20 @@ func (p *Player) StateCommon() {
 }
 
 const FlySpeed = 4
+
+func (p *Player) HandleJump() {
+	if p.IsJumpInput() {
+		if p.Mods["longjump"].Active() && p.HeldDir.IsDown() {
+			p.Delta.SetY(-LongJumpH)
+			p.Delta.SetX(p.Delta.X()/2+LongJumpW*p.HeldDir.HCoeff())
+			p.SetState(AirState)
+			dlog.Info("longjump")
+			return
+		}
+		dlog.Info(p.HeldDir)
+		p.Jump()
+	}
+}
 
 var FlyState = PlayerState{
 	Loop: func(p *Player) {
@@ -48,7 +62,9 @@ func AirStateLoop(p *Player) {
 		p.DoGravity()
 	}
 
-	if p.Ctrls.GetDir().IsDown() && p.Mods["groundpound"].Active() {
+	if p.HeldDir.IsDown() && !p.LastHeldDir.IsDown() &&
+		p.Mods["groundpound"].Active() {
+
 		dlog.Info("groundpound started")
 		p.SetState(GroundPoundStartState)
 	}
@@ -69,12 +85,13 @@ var RespawnFallState = PlayerState{
 
 var GroundState PlayerState
 
+const LongJumpH = 4
+const LongJumpW = 10
+
 func GroundStateLoop(p *Player) {
 
 	if p.PhysObject.ActiColls.GroundHit == true {
-		if p.IsJumpInput() {
-			p.Jump()
-		}
+		p.HandleJump()
 	} else {
 		p.SetState(CoyoteState)
 	}
@@ -99,7 +116,15 @@ func GroundStateLoop(p *Player) {
 }
 
 func (p *Player) DoGroundCtrls() {
-	p.Body.Delta.SetX(p.HeldDir.HCoeff()*p.Body.Speed.X())
+	if math.Abs(p.Delta.X()) > math.Abs(p.Speed.X()) {
+		p.Delta.SetX(p.Delta.X()*0.9)
+	} else {
+		p.Body.Delta.SetX(p.HeldDir.HCoeff()*p.Speed.X())
+	}
+
+	if p.HeldDir.IsDown() {
+		p.Delta.SetX(p.Delta.X()*0.6)
+	}
 }
 
 const BlockPushSpeed float64 = 1
@@ -220,9 +245,8 @@ var CoyoteState = PlayerState{
 			p.SetState(BlockPushState(true))
 		}
 
-		if p.IsJumpInput() {
-			p.Jump()
-		}
+		p.HandleJump()
+
 		p.DoGravity()
 		p.DoAirControls()
 		p.StateCommon()

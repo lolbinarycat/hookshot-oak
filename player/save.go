@@ -122,9 +122,8 @@ func (p Player) MarshalJSON() ([]byte,error) {
 }
 
 func (p *Player) UnmarshalJSON(b []byte) error {
-	//dec := json.NewDecoder(bytes.NewReader(b))
-	jsonP :=  newJSONPlayer(p)
-
+	jsonP := JSONPlayer{}
+	jsonP.Ctrls = p.Ctrls
 	err := json.Unmarshal(b,&jsonP)
 	fmt.Println(jsonP.Ctrls.Mod)
 	if err != nil {
@@ -155,13 +154,3 @@ func (p *Player) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-
-
-func newJSONPlayer(plr *Player) JSONPlayer {
-	jplr := JSONPlayer{}
-
-	//InitMods(plr)
-	//jplr.Mods = plr.Mods
-	jplr.Ctrls = plr.Ctrls
-	return jplr
-}

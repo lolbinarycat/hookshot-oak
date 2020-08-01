@@ -16,7 +16,7 @@
  <tile id="3" type="dirt">
   <image width="8" height="8" source="images/dirt.png"/>
  </tile>
- <tile id="4">
+ <tile id="4" type="ice">
   <image width="8" height="8" source="images/ice.png"/>
  </tile>
  <tile id="5" type="spikes">

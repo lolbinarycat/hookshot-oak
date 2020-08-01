@@ -28,7 +28,7 @@ type Player struct {
 	Hs             Hookshot `json:"-"`
 	HeldObj        *physobj.Block
 	Eyes           [2]*render.Sprite `json:"-"`
-	HeldDir        direction.Dir `json:"-"`
+	HeldDir, LastHeldDir      direction.Dir `json:"-"`
 }
 
 type Hookshot struct {
