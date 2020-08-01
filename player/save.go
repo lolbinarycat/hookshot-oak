@@ -2,7 +2,7 @@ package player
 
 import (
 	//"fmt"
-	"bytes"
+
 	"encoding/json"
 	"fmt"
 
@@ -21,10 +21,12 @@ type JSONVector = physobj.JSONVector
 type JSONPlayer struct {
 	Pos,RespawnPos JSONVector
 	Ctrls ControlConfig
-	Mods PlayerModuleList
+	Mods []JSONMod
 }
-type JSONModList map[string]JSONMod
+//type JSONModList map[string]JSONMod
 type JSONMod struct {
+	Name string
+	// JSON doesn't encode types, so we do it manually with an enum.
 	Type JSONModType
 	Obtained bool
 	Equipped bool
@@ -79,54 +81,11 @@ func (p *Player) Load(filename string) error {
 	return nil
 }
 
-func (m CtrldPlayerModule) UnmarshalJSON(b []byte) error {
-	return PlayerModUnmarshalJSON(&m,b)
-}
-
-func (m CtrldPlayerModule) MarshalJSON() ([]byte,error)  {
-	return PlayerModMarshalJSON(&m)
-}
-
-func (m BasicPlayerModule) UnmarshalJSON(b []byte) error {
-	return PlayerModUnmarshalJSON(&m,b)
-}
-
-func (m BasicPlayerModule) MarshalJSON() ([]byte, error) {
-	return PlayerModMarshalJSON(&m)
-}
 
 
-func (l PlayerModuleList) UnmarshalJSON(b []byte) error {
-	dec := json.NewDecoder(bytes.NewReader(b))
 
-	for dec.More() {
-		toc, err := dec.Token()
-		if err != nil {
-			return err
-		}
-		if _, ok := toc.(json.Delim);ok {
-			continue
-		}
 
-		err = dec.Decode(l[toc.(string)])
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
-func (l *ModInputList) MarshalJSON() ([]byte,error) {
-	buf := bytes.Buffer{}
-	enc := json.NewEncoder(&buf)
-	for _, m := range l {
-		err := enc.Encode(m)
-		if err != nil {
-			return []byte{}, errors.Wrapf(err,"%v.MarshalJSON() failed",l)
-		}
-	}
-	return buf.Bytes(), nil
-}
 
 //func (ac ActiveCollisions) UnmarshalJSON(b []byte) error {
 //	return nil
@@ -134,19 +93,38 @@ func (l *ModInputList) MarshalJSON() ([]byte,error) {
 
 
 func (p Player) MarshalJSON() ([]byte,error) {
+	var jMods = make([]JSONMod,len(p.Mods))
+	var i int = 0
+	for name, mod := range p.Mods {
+		bMod := mod.GetBasic()
+		modType := BasicMod
+		inputNum := -1
+		if ctrldM, isCtrld := mod.(*CtrldPlayerModule); isCtrld {
+			modType = CtrldMod
+			inputNum = ctrldM.GetInputNum()
+		}
+		jMods[i] = JSONMod{
+			Name:name,
+			Equipped:bMod.Equipped,
+			Obtained:bMod.Obtained,
+			Type: modType,
+			InputNum: inputNum,
+		}
+		i++
+	}
 	return json.Marshal(
 		JSONPlayer{
 			JSONVector{p.Body.X(),p.Body.Y()},
 			JSONVector(p.RespawnPos),
 			p.Ctrls,
-			p.Mods,
+			jMods,
 		})
 }
 
 func (p *Player) UnmarshalJSON(b []byte) error {
 	//dec := json.NewDecoder(bytes.NewReader(b))
 	jsonP :=  newJSONPlayer(p)
-	
+
 	err := json.Unmarshal(b,&jsonP)
 	fmt.Println(jsonP.Ctrls.Mod)
 	if err != nil {
@@ -155,57 +133,35 @@ func (p *Player) UnmarshalJSON(b []byte) error {
 	p.Body.SetPos(jsonP.Pos.X,jsonP.Pos.Y)
 	p.RespawnPos = Pos(jsonP.RespawnPos)
 	p.Ctrls = jsonP.Ctrls
-	fmt.Println(jsonP.Mods["jump"])
-	p.Mods = jsonP.Mods
+	for _, jMod := range jsonP.Mods {
+		mn := jMod.Name // mod name
+		switch jMod.Type {
+		case BasicMod:
+			p.Mods[mn] = &BasicPlayerModule{
+				Equipped:jMod.Equipped,Obtained:jMod.Obtained}
+		case CtrldMod:
+			if jMod.Obtained {
+				p.Mods[mn].Obtain()
+				if jMod.Equipped {
+					p.Mods[mn].Equip()
+					p.Mods[mn].(*CtrldPlayerModule).Bind(p,jMod.InputNum)
+				}
+			}
+		default:
+			return errors.New("unknown json mod type")
+		}
+	}
 	fmt.Println(p.Mods["jump"])
 	return nil
 }
 
-func PlayerModMarshalJSON(m PlayerModule) ([]byte,error) {
-	jsonM := JSONMod{}
-	if ctrldM, ok := m.(*CtrldPlayerModule); ok {
-		jsonM.Type = CtrldMod
-		jsonM.InputNum = ctrldM.GetInputNum()
-	} else {
-		jsonM.Type = BasicMod
-		jsonM.InputNum = -1
-	}
-	basicM := m.GetBasic()
-	jsonM.Equipped = basicM.Equipped
-	jsonM.Obtained = basicM.Obtained
-	fmt.Println(jsonM)
 
-	b, err := json.Marshal(jsonM)
-	if err != nil {
-		return []byte{}, errors.Wrap(err,"PlayerModMarshalJSON")
-	}
-	return b, nil
-}
-
-func PlayerModUnmarshalJSON(m PlayerModule,b []byte) error {
-	fmt.Println(string(b))
-	jsonM := JSONMod{}
-	err := json.Unmarshal(b,&jsonM)
-	if err != nil {
-		return errors.Wrapf(err,"PlayerModUnmarshalJSON(%v,%v) failed",m,b)
-	}
-	basicM := m.GetBasic()
-	basicM.Equipped = jsonM.Equipped
-	basicM.Obtained = jsonM.Obtained
-	if jsonM.Type == CtrldMod {
-		ctrldM := m.(*CtrldPlayerModule)
-		ctrldM.Bind(nil,jsonM.InputNum)
-		//fmt.Println(ctrldM)
-	}
-	fmt.Println("m:",m)
-	return nil
-}
 
 func newJSONPlayer(plr *Player) JSONPlayer {
 	jplr := JSONPlayer{}
 
 	//InitMods(plr)
-	jplr.Mods = plr.Mods
+	//jplr.Mods = plr.Mods
 	jplr.Ctrls = plr.Ctrls
 	return jplr
 }

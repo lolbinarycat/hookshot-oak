@@ -47,9 +47,14 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 	// 	},
 	// })
 
-	MainSceneStart = func(_ string, _ interface{}) {
-		//*plr = new(player.Player)
+	MainSceneStart = func(_ string, res interface{}) {
 		plr = loadScene()
+		if res.(TitlescreenResult).LoadSave {
+			err := plr.Load("save.json")
+			if err != nil {
+				panic(err)
+			}
+		}
 		camera.StartCameraLoop(player.GetPlayer(0).Body)
 		//pauseScreen := PauseScreen{
 		//	Text: render.NewStrText("Paused", 0, 0),
