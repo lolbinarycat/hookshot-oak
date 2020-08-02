@@ -9,13 +9,13 @@ import (
 	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/key"
-	// 
+	"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/scene"
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/replay"
-	// "github.com/lolbinarycat/hookshot-oak/ui"
+	"github.com/lolbinarycat/hookshot-oak/ui"
 )
 
 var Paused = false
@@ -31,24 +31,34 @@ var MainSceneLoop func() bool
 //}
 
 func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneLoop func() bool, MainSceneEnd func() (string, *scene.Result)) {
-
-	// pauseMenuR is used to refernce the pause menu in order to undraw it.
-	// this should be it's only use
-	// var pauseMenuR render.Renderable
+	// if nextScene is set to something other than the zero value,
+	// the game will transition to that scene
+	var nextScene string
+	
 	var plr = new(player.Player)
 
-	// pauseMenu := buildPauseScreen(map[string]ui.BtnAction{
-	// 	"resume": func() {
-	// 		Paused = false
-	// 		// pauseMenuR.Undraw()
-	// 	},
-	// 	"quit": func() {
-	// 		os.Exit(0)
-	// 	},
-	// })
+	var pauseMenu *ui.PauseMenu
+
 
 	MainSceneStart = func(_ string, res interface{}) {
+		pauseMenu = ui.NewPauseMenu(50,50,[]*ui.Option{
+			{"Resume",func() {
+				pauseMenu.Unpause()
+			}},
+			{"Titlescreen",func() {
+				nextScene = "titlescreen"
+			}},
+		},PauseButton,ConfirmButton,CycleButton)
 		plr = loadScene()
+		pauseMenu.Paused = false
+		{
+			_, err := render.Draw(pauseMenu,3)
+			if err != nil {
+				panic(err)
+			}
+			//pauseMenu = m.(*ui.PauseMenu)
+		}
+
 		if res.(TitlescreenResult).LoadSave {
 			err := plr.Load("save.json")
 			if err != nil {
@@ -62,44 +72,6 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		//pauseScreen.Text.Center()
 		//render.Draw(pauseScreen.Text, 3)
 
-		event.GlobalBind(func(_ int, _ interface{}) int {
-			// Paused = !Paused
-			// if Paused { // executed once each time the game is paused
-			// 	var err error
-			// 	pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
-			// 	if err != nil {
-			// 		panic(err)
-			// 	}
-			// 	fmt.Println("font:", render.DefFont())
-			// 	// runtime.Breakpoint()
-			// } else { // executed once each time the game is unpaused
-			// 	pauseMenuR.Undraw()
-			// }
-			return 0
-		}, key.Down+PauseButton)
-		event.GlobalBind(func(_ int, _ interface{}) int {
-			if Paused {
-				// err := pauseMenu.Do(ui.CycleSelection)
-				// if err != nil {
-				// 	panic(err)
-				// }
-				// (pauseMenuR).Undraw()
-				// pauseMenuR, err = render.Draw(pauseMenu.GetR(), 3, 3)
-				// if err != nil {
-				// 	panic(err)
-				// }
-			}
-			return 0
-		}, key.Down+CycleButton)
-		event.GlobalBind(func(_ int, _ interface{}) int {
-			if Paused {
-				// err := pauseMenu.Do(ui.Do, ui.RunAction)
-				// if err != nil {
-				// 	panic(err)
-				// }
-			}
-			return 0
-		}, key.Down+ConfirmButton)
 
 
 		// set plr.HeldDir
@@ -124,7 +96,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 	MainSceneLoop = func() bool {
 		hsOffX := float64(PlayerWidth/2 - HsWidth/2)
 		hsOffY := float64(PlayerHeight/2 - HsHeight/2)
-		if Paused == false {
+		if pauseMenu.Paused == false {
 			if oak.IsDown(key.Q) {
 				if oak.IsDown(key.I) {
 					fmt.Println(plr)
@@ -179,11 +151,11 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		//if plr.Mods["quickrestart"].Active() {
 		//	plr.Respawn()
 		//}
-		return true
+		return nextScene == ""
 	}
 
 	MainSceneEnd = func() (string, *scene.Result) {
-		return "platformer", nil
+		return nextScene, nil
 	}
 
 	// return named return values
