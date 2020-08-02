@@ -16,6 +16,7 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/replay"
 	"github.com/lolbinarycat/hookshot-oak/ui"
+	"github.com/lolbinarycat/hookshot-oak/layers"
 )
 
 var Paused = false
@@ -34,7 +35,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 	// if nextScene is set to something other than the zero value,
 	// the game will transition to that scene
 	var nextScene string
-	
+
 	var plr = new(player.Player)
 
 	var pauseMenu *ui.PauseMenu
@@ -42,17 +43,20 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 
 	MainSceneStart = func(_ string, res interface{}) {
 		pauseMenu = ui.NewPauseMenu(50,50,[]*ui.Option{
-			{"Resume",func() {
+			{"Resume", func() {
 				pauseMenu.Unpause()
 			}},
-			{"Titlescreen",func() {
+			{"Titlescreen", func() {
 				nextScene = "titlescreen"
 			}},
-		},PauseButton,ConfirmButton,CycleButton)
+			{"Quit", func() {
+				os.Exit(0)
+			}},
+		}, PauseButton, ConfirmButton, CycleButton)
 		plr = loadScene()
 		pauseMenu.Paused = false
 		{
-			_, err := render.Draw(pauseMenu,3)
+			_, err := render.Draw(pauseMenu,layers.UI)
 			if err != nil {
 				panic(err)
 			}
@@ -66,13 +70,6 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			}
 		}
 		camera.StartCameraLoop(player.GetPlayer(0).Body)
-		//pauseScreen := PauseScreen{
-		//	Text: render.NewStrText("Paused", 0, 0),
-		//}
-		//pauseScreen.Text.Center()
-		//render.Draw(pauseScreen.Text, 3)
-
-
 
 		// set plr.HeldDir
 		event.BindPriority(
