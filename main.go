@@ -20,6 +20,7 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/level"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/physobj"
+	_ "github.com/lolbinarycat/hookshot-oak/layers"
 
 	"github.com/lolbinarycat/utils"
 )
@@ -75,47 +76,8 @@ func openFileAsBytes(filename string) ([]byte, error) {
 
 var screenSpace *collision.Space
 
-const PlayerWidth = 12
-const PlayerHeight = 12
 
-const HsWidth = 4
-const HsHeight = 4
 
-func loadPlayer() *player.Player {
-	var eyeColor = color.RGBA{0, 255, 255, 255}
-	playerSprite := utils.Check2(
-		render.LoadSprite("assets/images", "player_new.png")).(render.Renderable)
-
-	var plr = new(player.Player)
-	eye1 := render.NewColorBox(1, 4, eyeColor)
-	eye2 := eye1.Copy().(*render.Sprite)
-	plr.Eyes = [2]*render.Sprite{eye1, eye2}
-	plr.Body = entities.NewMoving(300, 400, PlayerWidth, PlayerHeight,
-		playerSprite,
-		nil, 0, 0)
-	plr.Body.Init()
-	plr.Body.Space.UpdateLabel(labels.Player)
-
-	eye1.LayeredPoint.Vector = eye1.Attach(plr.Body, 4, 3)
-	eye2.LayeredPoint.Vector = eye1.Attach(plr.Body, 8, 3)
-
-	player.SetPlayer(0, plr)
-
-	render.Draw(eye1, 2)
-	render.Draw(eye2, 2)
-
-	plr.State = player.RespawnFallState
-	plr.RespawnPos = player.Pos{X: plr.Body.X(), Y: plr.Body.Y()}
-	render.Draw(plr.Body.R, 1)
-	plr.Body.Speed = physics.NewVector(3, float64(player.JumpHeight))
-
-	plr.Hs.Body = &*entities.NewMoving(100, 100, HsWidth, HsHeight,
-		render.NewColorBox(HsHeight, HsWidth, color.RGBA{0, 0, 255, 255}),
-		nil, 1, 0)
-	plr.Hs.Body.Init()
-
-	return plr
-}
 const HsSpeedX, HsSpeedY = 7, 7
 func loadScene() *player.Player {
 	plr := loadPlayer()
@@ -158,7 +120,6 @@ func loadScene() *player.Player {
 	player.InitMods(plr)
 
 	//plr.Mods.GiveAll(true)
-	
 
 	dlog.Info("player loaded with data:",*plr)
 	return plr
@@ -183,16 +144,17 @@ func main() {
 	}
 
 
-
-	// Apperenly 1 DynamicHeap = 1 layer.
-	render.SetDrawStack(
-		render.NewDynamicHeap(),
-		render.NewDynamicHeap(),
-		render.NewDynamicHeap(),
-		render.NewDynamicHeap(),
-		//render.NewDrawFPS(),
-		render.NewLogicFPS(),
-	)
+	// bgLayer = render.NewDynamicHeap()
+	// fgLayer = render.NewDynamicHeap()
+	// uiLayer = render.NewDynamicHeap()
+	// render.SetDrawStack(
+	// 	render.NewDynamicHeap(),
+	// 	render.NewDynamicHeap(),
+	// 	render.NewDynamicHeap(),
+	// 	render.NewDynamicHeap(),
+	// 	//render.NewDrawFPS(),
+	// 	render.NewLogicFPS(),
+	// )
 
 	MainSceneStart, MainSceneLoop, MainSceneEnd := buildMainSceneFuncs()
 	oak.Add(mainSceneName,
