@@ -1,9 +1,12 @@
 package main
 
 import (
+	"image/color"
+
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/oakmound/oak/v2/entities"
+	"github.com/oakmound/oak/v2/physics"
 	"github.com/oakmound/oak/v2/render"
 )
 
@@ -16,9 +19,10 @@ const HsHeight = 4
 
 func loadPlayer() *player.Player {
 	var eyeColor = color.RGBA{0, 255, 255, 255}
-	playerSprite := utils.Check2(
-		render.LoadSprite("assets/images", "player_new.png")).(render.Renderable)
-
+	playerSprite, err := render.LoadSprite("assets/images", "player_new.png")
+	if err != nil {
+		panic(err)
+	}
 	var plr = new(player.Player)
 	eye1 := render.NewColorBox(1, 4, eyeColor)
 	eye2 := eye1.Copy().(*render.Sprite)

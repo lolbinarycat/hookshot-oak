@@ -11,7 +11,6 @@ import (
 
 	"github.com/oakmound/oak/v2/collision"
 	"github.com/oakmound/oak/v2/dlog"
-	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/physics"
 	"github.com/oakmound/oak/v2/render"
 
@@ -21,8 +20,6 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/lolbinarycat/hookshot-oak/physobj"
 	_ "github.com/lolbinarycat/hookshot-oak/layers"
-
-	"github.com/lolbinarycat/utils"
 )
 
 const Frame = time.Second / 60
