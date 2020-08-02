@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
+	"github.com/lolbinarycat/hookshot-oak/layers"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/physics"
@@ -38,8 +39,8 @@ func loadPlayer() *player.Player {
 
 	player.SetPlayer(0, plr)
 
-	render.Draw(eye1, 2)
-	render.Draw(eye2, )
+	render.Draw(eye1, layers.FG, 2)
+	render.Draw(eye2, layers.FG, 2)
 
 	plr.State = player.RespawnFallState
 	plr.RespawnPos = player.Pos{X: plr.Body.X(), Y: plr.Body.Y()}
