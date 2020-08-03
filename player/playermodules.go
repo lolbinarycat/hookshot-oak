@@ -4,7 +4,6 @@ import (
 	"time"
 	"fmt"
 	
-
 	"github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/key"
@@ -227,7 +226,7 @@ func (m CtrldPlayerModule) GetInputNum() int {
 			return i
 		}
 	}
-	fmt.Println("GetInputNum failed on:",m)
+	dlog.Info("GetInputNum failed on:",m)
 	return -1
 }
 
