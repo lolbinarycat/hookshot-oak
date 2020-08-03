@@ -115,15 +115,24 @@ func GroundStateLoop(p *Player) {
 	p.StateCommon()
 }
 
-func (p *Player) DoGroundCtrls() {
-	if math.Abs(p.Delta.X()) > math.Abs(p.Speed.X()) {
-		p.Delta.SetX(p.Delta.X()*0.9)
-	} else {
-		p.Body.Delta.SetX(p.HeldDir.HCoeff()*p.Speed.X())
-	}
+const (
+	luigiMode_groundAccel = 1
+	luigiMode_groundFriction = 1.14
+)
 
-	if p.HeldDir.IsDown() {
-		p.Delta.SetX(p.Delta.X()*0.6)
+func (p *Player) DoGroundCtrls() {
+	if p.Mods["luigi"].Active() {
+		p.Delta.SetX(p.Delta.X()/luigiMode_groundFriction)
+		p.Delta.ShiftX(p.HeldDir.HCoeff()*luigiMode_groundAccel)
+	} else {
+		if math.Abs(p.Delta.X()) > math.Abs(p.Speed.X()) {
+			p.Delta.SetX(p.Delta.X()*0.9)
+		} else {
+			p.Body.Delta.SetX(p.HeldDir.HCoeff()*p.Speed.X())
+		}
+		if p.HeldDir.IsDown() {
+			p.Delta.SetX(p.Delta.X()*0.6)
+		}
 	}
 }
 

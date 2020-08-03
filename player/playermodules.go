@@ -107,6 +107,7 @@ func InitMods(p *Player) {
 		AddBasic("hsitemgrab").
 		AddBasic("itemcarry").
 		AddBasic("diaghs"). // diagonal hookshot
+		AddBasic("luigi"). // "luigi mode": slippery, but faster max speed.
 		AddBasic("longjump").
 		AddCtrld("jump",p,0,JumpInputTime).
 		AddCtrld("climb",p,2,time.Minute * 20).
