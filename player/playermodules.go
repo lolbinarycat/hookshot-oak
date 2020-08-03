@@ -3,7 +3,7 @@ package player
 import (
 	"time"
 	"fmt"
-	
+
 	"github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/key"
@@ -54,7 +54,8 @@ type PlayerModule interface{
 }
 
 // ModInput refers to a keyboard key/controller button input.
-// An empty string refers to an unbound input
+// An empty string refers to an unbound (to a button/key) input
+// Bound refers to whether a module is bound to this input.
 type ModInput struct {
 	Key string `json:"key"`
 	Button string `json:"button"`
