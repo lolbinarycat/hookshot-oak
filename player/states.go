@@ -117,7 +117,7 @@ func GroundStateLoop(p *Player) {
 
 const (
 	luigiMode_groundAccel = 1
-	luigiMode_groundFriction = 1.14
+	luigiMode_groundFriction = 1.17
 )
 
 func (p *Player) DoGroundCtrls() {
@@ -130,7 +130,9 @@ func (p *Player) DoGroundCtrls() {
 		} else {
 			p.Body.Delta.SetX(p.HeldDir.HCoeff()*p.Speed.X())
 		}
-		if p.HeldDir.IsDown() {
+		// TODO: make this feature into it's own module with
+		// it's own states. ("crawl"?)
+		if p.HeldDir.IsDown() { 
 			p.Delta.SetX(p.Delta.X()*0.6)
 		}
 	}
