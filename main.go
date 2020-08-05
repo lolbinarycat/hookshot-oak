@@ -40,12 +40,6 @@ type PlayerModule player.PlayerModule
 type PlayerState player.PlayerState
 
 
-
-//temporary global
-var blocks []*PhysObject
-
-
-
 func openFileAsBytes(filename string) ([]byte, error) {
 	dlog.Info("opening file", filename)
 	file, err := os.Open(filename)
