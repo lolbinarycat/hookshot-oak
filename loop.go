@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	//"image"
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	oak "github.com/oakmound/oak/v2"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
+	//prenderable "github.com/lolbinarycat/hookshot-oak/player/renderable"
 	"github.com/lolbinarycat/hookshot-oak/replay"
 	"github.com/lolbinarycat/hookshot-oak/ui"
 	"github.com/lolbinarycat/hookshot-oak/layers"
@@ -80,6 +82,8 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				} else {
 					plr.HeldDir = plr.Ctrls.GetDir()
 				}
+
+				plr.R.SetEyeDir(plr.HeldDir)
 				return 0
 			},
 			event.BindingOption{

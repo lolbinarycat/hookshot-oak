@@ -3,11 +3,12 @@ package player
 import (
 	"time"
 
-	"github.com/oakmound/oak/v2/render"
+	//"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/key"
 
-	"github.com/lolbinarycat/hookshot-oak/direction"
-	"github.com/lolbinarycat/hookshot-oak/player/condition"
+	"github.com/lolbinarycat/hookshot-oak/direction"	
+	"github.com/lolbinarycat/hookshot-oak/player/condition"	
+	"github.com/lolbinarycat/hookshot-oak/player/renderable"
 	"github.com/lolbinarycat/hookshot-oak/physobj"
 )
 
@@ -20,6 +21,7 @@ type Player struct {
 	//Body           *entities.Moving
 	//ActiColls      ActiveCollisions
 	physobj.PhysObject
+	R renderable.ComPlayerR
 	State          PlayerState  `json:"-"`
 	StateStartTime time.Time `json:"-"`
 	Mods           PlayerModuleList
@@ -27,7 +29,7 @@ type Player struct {
 	RespawnPos     Pos
 	Hs             Hookshot `json:"-"`
 	HeldObj        *physobj.Block
-	Eyes           [2]*render.Sprite `json:"-"`
+	//Eyes           [2]*render.Sprite `json:"-"`
 	HeldDir, LastHeldDir      direction.Dir `json:"-"`
 }
 
