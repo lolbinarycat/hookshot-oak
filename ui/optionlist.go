@@ -20,7 +20,7 @@ func NewOptionList(x, y float64, opts ...*Option) *OptionList {
 	ol := OptionList{
 		LayeredPoint: render.NewLayeredPoint(x, y, 0),
 		Options:      opts,
-		FocusMarker:  render.NewStrText(">", 14, 1),
+		FocusMarker:  render.NewStrText(">", -10, 0),
 	}
 	return &ol
 }
@@ -55,10 +55,10 @@ func (l OptionList) DrawOffset(buff draw.Image, xOff, yOff float64) {
 		txt[i+1] = render.NewStrText(l.Options[i+1].Name, x, y)
 	}
 
-	l.FocusMarker.DrawOffset(buff, x,
-		y+float64(lineH*(1+l.focused)+lineH/2))
+	l.FocusMarker.DrawOffset(buff, x, y+float64(lineH*l.focused))
+		//y+float64(lineH*(1+l.focused)+lineH/2))
 	for i, ln := range txt {
-		ln.DrawOffset(buff, x, y+float64(lineH*i))
+		ln.DrawOffset(buff, 0, float64(lineH*i))
 	}
 }
 
