@@ -93,8 +93,8 @@ func loadScene() *player.Player {
 
 	block := physobj.NewBlock(32,32,
 		render.NewColorBox(32, 32, color.RGBA{0, 200, 0, 255}),
-		300,500)
-	render.Draw(block.Body.R,1,3)
+		300,500+600)
+	render.Draw(block.R,1,3)
 	
 	//block.Body.Init()
 	//block.ExtraSolids = []collision.Label{labels.Player}
