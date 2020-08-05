@@ -19,6 +19,7 @@ import (
 	"github.com/lafriks/go-tiled"
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	"github.com/lolbinarycat/hookshot-oak/collectables"
+	"github.com/lolbinarycat/hookshot-oak/layers"
 )
 
 
@@ -229,14 +230,14 @@ func LoadTile(tile *tiled.LayerTile,layer *tiled.Layer,levelMap *tiled.Map,
 		default:
 			return nil, false, UnknownTileTypeError{*tilesetTile}
 		}
-		_, err = render.Draw(t.R,3)
+		_, err = render.Draw(t.R,layers.FG)
 	ErrCheckAndReturn:
 		if err != nil {
 			return nil, false, err
 		}
 		return t, false, nil
 	Background:
-		_, err = render.Draw(t.R,0,-1)
+		_, err = render.Draw(t.R,layers.BG)
 		goto ErrCheckAndReturn
 	}
 }
