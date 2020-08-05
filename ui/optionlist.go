@@ -33,6 +33,15 @@ func (ol *OptionList) Init() event.CID {
 type Option struct {
 	Name   string
 	Action func()
+	Extras *OptionExtras
+}
+
+type OptionExtras struct {
+	// OnCycle is activated when the cycle button is pressed,
+	// and returns whether the OptionList should cycle.
+	// this allows things like SubOptionLists to capture the press and
+	// use it for themselves
+	OnCycle func() bool
 }
 
 func (l OptionList) String() string {
@@ -67,9 +76,20 @@ func (l OptionList) Draw(buff draw.Image) {
 }
 
 func (l *OptionList) Cycle() {
+	if l.Foc().Extras != nil &&
+		l.Foc().Extras.OnCycle != nil {
+		if l.Foc().Extras.OnCycle() == false {
+			// if OnCycle return false, it means to skip the actual cycleing
+			return
+		}
+	}
 	l.focused = (l.focused + 1) % len(l.Options)
 }
 
 func (l OptionList) ActivateSelected() {
 	l.Options[l.focused].Action()
+}
+
+func (l OptionList) Foc() *Option {
+	return l.Options[l.focused]
 }

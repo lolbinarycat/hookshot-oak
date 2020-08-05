@@ -28,10 +28,19 @@ func TestOptionList(t *testing.T) {
 	noop2.Name = "noop2"
 	noop3 := noop
 	noop3.Name = "noop3"
-	ol := NewOptionList(30,20,&quit,&noop,&noop2,&noop3)
+	var subopt *SubOptionList
+	exitSub := Option{
+		Name: "back",
+		Action: func() {
+			subopt.Active = false
+		},
+	}
+	subopt = NewSubOptionList("sublist",80,45,&quit,&exitSub)
+	ol := NewOptionList(30,20,&quit,&noop,subopt.BuildOption(),&noop3)
 	oak.Add("test",
 		func (_ string, _ interface{}) {
 			render.Draw(ol)
+			render.Draw(subopt)
 			ol.Init()
 			event.Bind(func(_ int, k interface{}) int {
 				switch k.(string) {

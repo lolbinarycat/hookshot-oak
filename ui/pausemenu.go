@@ -8,12 +8,11 @@ import (
 )
 
 type PauseMenu struct {
-	*OptionList
-	Paused bool
+	ToggleableOptionList
 }
 
 func (m PauseMenu) DrawOffset(buff draw.Image, xOff, yOff float64) {
-	if m.Paused {
+	if m.Active {
 		m.OptionList.DrawOffset(buff,xOff,yOff)
 	}
 }
@@ -23,33 +22,34 @@ func (m PauseMenu) Draw(buff draw.Image) {
 }
 
 func (m *PauseMenu) Pause() {
-	m.Paused = true
+	m.Active = true
 }
 
 func (m *PauseMenu) Unpause() {
-	m.Paused = false
+	m.Active = false
 }
 
 func (m *PauseMenu) TogglePause() {
-m.Paused = !m.Paused
+	m.Toggle()
 }
 
 func NewPauseMenu(x, y float64, options []*Option,
 	pause, confirm, cycle string) *PauseMenu {
 
 	pm := new(PauseMenu)
-	pm.OptionList = NewOptionList(x, y, options...)
+	pm.ToggleableOptionList =
+		ToggleableOptionList{OptionList:NewOptionList(x, y, options...)}
 
 	event.Bind(func(_ int,key interface{}) int {
 		switch key.(string) {
 		case pause:
 			pm.TogglePause()
 		case confirm:
-			if pm.Paused {
+			if pm.Active {
 				pm.ActivateSelected()
 			}
 		case cycle:
-			if pm.Paused {
+			if pm.Active {
 				pm.Cycle()
 			}
 		}
