@@ -58,7 +58,7 @@ var HsStartState = PlayerState{
 				p.SetState(HsExtendState(dir.Maximize()))
 			}
 		}
-	}}.denil()
+	}}
 
 const HsExtendTime time.Duration = time.Second * 2
 
@@ -102,7 +102,7 @@ func HsExtendState(dir direction.Dir) PlayerState {
 				p.SetState(HsRetractState(dir))
 
 		},
-	}.denil()
+	}
 }
 
 func HsRetractState(dir direction.Dir) PlayerState {
@@ -122,7 +122,7 @@ func HsRetractState(dir direction.Dir) PlayerState {
 			p.Hs.Body.Delta.SetPos(-p.Hs.Body.Speed.X()*coeffX,
 				-p.Hs.Body.Speed.Y()*coeffY)
 		},
-	}.denil()
+	}
 }
 
 func HsPullState(dir direction.Dir) PlayerState {
@@ -142,7 +142,7 @@ func HsPullState(dir direction.Dir) PlayerState {
 				coeffY*p.Hs.Body.Speed.Y())
 			p.Hs.Delta.SetPos(0,0)
 		},
-	}.denil()
+	}
 }
 
 func HsItemGrabState(dir direction.Dir) PlayerState {
@@ -181,5 +181,5 @@ func HsItemGrabState(dir direction.Dir) PlayerState {
 				p.SetState(AirState)
 			}
 		},
-	}.denil()
+	}
 }
