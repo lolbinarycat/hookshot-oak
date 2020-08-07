@@ -190,7 +190,7 @@ func BlockPushState(isLeft bool) PlayerState {
 				p.StateCommon()
 			}
 		},
-	}.denil()
+	}
 }
 
 const BlockPullSpeed float64 = BlockPushSpeed
@@ -216,18 +216,16 @@ const JumpHeightDecTime time.Duration = time.Millisecond * 150
 const MinHeightJumpInputTime = time.Millisecond * 85
 
 var JumpHeightDecState = PlayerState{
-	Map: map[condition.Condition]interface{}{
-		&condition.FramesElapsed{N:14}:&AirState,
-		&condition.FramesElapsed{N:4}:func(p *Player) *PlayerState {
-			if !p.Mods["jump"].Active() {
-				p.Body.Delta.SetY(-float64(JumpHeight) / 2)
-				return &AirState
-			}
-			// continue evaluating map, or if there are no more elements, eval Loop
-			return nil
-		},
+	LLoop: func(p *Player) *PlayerState {
+		if p.FramesInState > 14 {
+			return &AirState
+		}
+		if p.FramesInState > 4 && !p.Mods["jump"].Active() {
+			p.Body.Delta.SetY(-float64(JumpHeight) / 2)
+			return &AirState
+		}
+		return nil
 	},
-
 	Loop: func(p *Player) {
 		if p.Mods["jump"].Active() {
 			//p.DoCustomGravity(Gravity/5)
@@ -237,15 +235,18 @@ var JumpHeightDecState = PlayerState{
 		p.DoAirControls()
 		p.StateCommon()
 	},
-}.denil()
+}
 
 const CoyoteFrames = 7
 
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var CoyoteState = PlayerState{
-	Map: map[condition.Condition]interface{} {
-		&condition.FramesElapsed{N:CoyoteFrames}:&AirState,
+	LLoop: func(p *Player) *PlayerState {
+		if p.FramesInState > CoyoteFrames {
+			return &AirState
+		}
+		return nil
 	},
 	Loop: func(p *Player) {
 		if p.PhysObject.ActiColls.GroundHit == true {
@@ -369,8 +370,11 @@ func (p *Player) ThrowHeldItem(xSpeed, ySpeed float64) {
 }
 
 var ItemThrowLag = PlayerState{
-	Map: map[condition.Condition]interface{}{
-		&condition.FramesElapsed{N:3}:&AirState,
+	LLoop: func(p *Player) *PlayerState {
+		if p.FramesInState > 3 {
+			return &AirState
+		}
+		return nil
 	},
 	NextState:   &AirState,
 }.denil()

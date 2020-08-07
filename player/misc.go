@@ -147,19 +147,31 @@ func (p *Player) Respawn() {
 
 
 func (p *Player) DoStateLoop() {
-
+	
 	// if p.TimeFromStateStart() > p.State.MaxDuration {
 	// 	p.SetState(*p.State.NextState)
 	// 	return
 	// }
 	// if DoMap returns true, it means that the state changed.
-	if p.State.DoMap(p) == false {
-		nextState := p.State.LLoop(p)
-		if nextState == nil {
+	// if p.State.DoMap(p) == false {
+	// 	nextState := p.State.LLoop(p)
+	// 	if nextState == nil {
+	// 		p.State.Loop(p)
+	// 	} else {
+	// 		p.SetState(*nextState)
+	// 	}
+	// }
+	var nextState *PlayerState = nil
+	if p.State.LLoop != nil {
+		nextState = p.State.LLoop(p)
+	}
+	if nextState != nil {
+		p.SetState(*nextState)
+	} else {
+		if p.State.Loop != nil {
 			p.State.Loop(p)
-		} else {
-			p.SetState(*nextState)
 		}
+		p.FramesInState++
 	}
 }
 

@@ -2,7 +2,6 @@ package player
 
 import (
 	"time"
-	"fmt"
 
 	"github.com/oakmound/oak/v2/dlog"
 )
@@ -28,19 +27,6 @@ func (s PlayerState) denil() PlayerState {
 	}
 	if (s.MaxDuration == 0) {
 		s.MaxDuration = time.Minute * 20
-	}
-	for k, v := range s.Map {
-		switch v.(type) {
-		case *PlayerState:
-			state := v.(*PlayerState)
-			s.Map[k] = func(_ *Player) *PlayerState {
-				return state
-			}
-		case PlayerStateMapFunc, (func(*Player) *PlayerState) :
-			break // do nothing
-		default:
-			panic(fmt.Sprintf("unexpected type %T as value to StateMap",v))
-		}
 	}
 	return s
 }

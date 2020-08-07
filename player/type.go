@@ -7,7 +7,7 @@ import (
 	"github.com/oakmound/oak/v2/key"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
-	"github.com/lolbinarycat/hookshot-oak/player/condition"
+	//"github.com/lolbinarycat/hookshot-oak/player/condition"
 	"github.com/lolbinarycat/hookshot-oak/player/renderable"
 	"github.com/lolbinarycat/hookshot-oak/physobj"
 )
@@ -24,6 +24,7 @@ type Player struct {
 	R renderable.ComPlayerR
 	State          PlayerState  `json:"-"`
 	StateStartTime time.Time `json:"-"`
+	FramesInState  int // increments every frame, set to zero when p.SetState is called
 	Mods           PlayerModuleList
 	Ctrls          ControlConfig
 	RespawnPos     Pos
@@ -40,12 +41,12 @@ type Hookshot struct {
 }
 
 type PlayerState struct {
-	Name string
+	// Name string
 	// LLoop stands for logic loop, if the returned value is not nil, the setstate is run on that value, and the normal loop is skipped.
 	LLoop func(*Player) *PlayerState 
 	Start, Loop, End PlayerStateFunc
 	// using Map is now depreciated
-	Map  map[condition.Condition]interface{} // *PlayerState or PlayerStateMapFunc
+	// Map  map[condition.Condition]interface{} // *PlayerState or PlayerStateMapFunc
 	// MaxDuration and NextState are depreciated
 	MaxDuration time.Duration
 	NextState *PlayerState //only used when MaxDuration is reached
