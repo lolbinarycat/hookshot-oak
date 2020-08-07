@@ -14,7 +14,7 @@ const (
 
 // Actual pointers to layers
 var (
-	BGLayer, 
+	BGLayer,
 	FGLayer,
 	UILayer *render.RenderableHeap
 )

@@ -47,16 +47,16 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		pauseMenu = ui.NewPauseMenu(50,50,[]*ui.Option{
 			{"Resume", func() {
 				pauseMenu.Unpause()
-			}},
+			},nil},
 			{"Titlescreen", func() {
 				nextScene = "titlescreen"
-			}},
+			},nil},
 			{"Quit", func() {
 				os.Exit(0)
-			}},
+			},nil},
 		}, PauseButton, ConfirmButton, CycleButton)
 		plr = loadScene()
-		pauseMenu.Paused = false
+		pauseMenu.Active = false
 		{
 			_, err := render.Draw(pauseMenu,layers.UI)
 			if err != nil {
@@ -97,7 +97,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 	MainSceneLoop = func() bool {
 		hsOffX := float64(PlayerWidth/2 - HsWidth/2)
 		hsOffY := float64(PlayerHeight/2 - HsHeight/2)
-		if pauseMenu.Paused == false {
+		if pauseMenu.Active == false {
 			if oak.IsDown(key.Q) {
 				if oak.IsDown(key.I) {
 					fmt.Println(plr)

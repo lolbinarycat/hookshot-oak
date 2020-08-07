@@ -89,7 +89,10 @@ const LongJumpH = 4
 const LongJumpW = 10
 
 func GroundStateLoop(p *Player) {
-
+	//if p.Mods["compgm"].Active() {
+	//	p.SetState(CompgmIdleState)
+	//	return
+	//}
 	if p.PhysObject.ActiColls.GroundHit == true {
 		p.HandleJump()
 	} else {
@@ -213,10 +216,8 @@ const JumpHeightDecTime time.Duration = time.Millisecond * 150
 const MinHeightJumpInputTime = time.Millisecond * 85
 
 var JumpHeightDecState = PlayerState{
-	Map: map[condition.Condition]PlayerStateMapFunc{
-		&condition.FramesElapsed{N:14}:func(*Player) *PlayerState {
-			return &AirState
-		},
+	Map: map[condition.Condition]interface{}{
+		&condition.FramesElapsed{N:14}:&AirState,
 		&condition.FramesElapsed{N:4}:func(p *Player) *PlayerState {
 			if !p.Mods["jump"].Active() {
 				p.Body.Delta.SetY(-float64(JumpHeight) / 2)
@@ -226,6 +227,7 @@ var JumpHeightDecState = PlayerState{
 			return nil
 		},
 	},
+
 	Loop: func(p *Player) {
 		if p.Mods["jump"].Active() {
 			//p.DoCustomGravity(Gravity/5)
@@ -242,8 +244,8 @@ const CoyoteFrames = 7
 //CoyoteState implements "coyote time" a window of time after
 //running off an edge in which you can still jump
 var CoyoteState = PlayerState{
-	Map: map[condition.Condition]PlayerStateMapFunc{
-		&condition.FramesElapsed{N:CoyoteFrames}:constState(&AirState),
+	Map: map[condition.Condition]interface{} {
+		&condition.FramesElapsed{N:CoyoteFrames}:&AirState,
 	},
 	Loop: func(p *Player) {
 		if p.PhysObject.ActiColls.GroundHit == true {
@@ -263,12 +265,6 @@ var CoyoteState = PlayerState{
 		p.StateCommon()
 	},
 }.denil()
-
-func constState(state *PlayerState) PlayerStateMapFunc {
-	return func (_ *Player) *PlayerState {
-		return state
-	}
-}
 
 var WallSlideLeftState = PlayerState{
 	LLoop: func(p *Player) *PlayerState {
@@ -373,8 +369,8 @@ func (p *Player) ThrowHeldItem(xSpeed, ySpeed float64) {
 }
 
 var ItemThrowLag = PlayerState{
-	Map: map[condition.Condition]PlayerStateMapFunc{
-		&condition.FramesElapsed{N:3}:constState(&AirState),
+	Map: map[condition.Condition]interface{}{
+		&condition.FramesElapsed{N:3}:&AirState,
 	},
 	NextState:   &AirState,
 }.denil()

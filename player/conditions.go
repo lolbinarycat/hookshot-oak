@@ -9,7 +9,7 @@ func (s *PlayerState) DoMap(p *Player) (stateChanged bool) {
 	stateChanged = false
 	for cond, fun := range s.Map {
 		if cond.True(p) {
-			nextState := fun(p)
+			nextState := fun.(func(*Player) *PlayerState)(p)
 			if nextState != nil {
 				dlog.Verb("cond: not nil")
 				p.SetState(*nextState)

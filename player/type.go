@@ -6,8 +6,8 @@ import (
 	//"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/key"
 
-	"github.com/lolbinarycat/hookshot-oak/direction"	
-	"github.com/lolbinarycat/hookshot-oak/player/condition"	
+	"github.com/lolbinarycat/hookshot-oak/direction"
+	"github.com/lolbinarycat/hookshot-oak/player/condition"
 	"github.com/lolbinarycat/hookshot-oak/player/renderable"
 	"github.com/lolbinarycat/hookshot-oak/physobj"
 )
@@ -44,7 +44,9 @@ type PlayerState struct {
 	// LLoop stands for logic loop, if the returned value is not nil, the setstate is run on that value, and the normal loop is skipped.
 	LLoop func(*Player) *PlayerState 
 	Start, Loop, End PlayerStateFunc
-	Map  map[condition.Condition]PlayerStateMapFunc
+	// using Map is now depreciated
+	Map  map[condition.Condition]interface{} // *PlayerState or PlayerStateMapFunc
+	// MaxDuration and NextState are depreciated
 	MaxDuration time.Duration
 	NextState *PlayerState //only used when MaxDuration is reached
 }

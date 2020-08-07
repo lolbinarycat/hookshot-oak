@@ -27,14 +27,14 @@ func init() {
 				{"Continue", func() {
 					res.LoadSave = true
 					startGame = true
-				}},
+				},nil},
 				{"New Game", func() {
 					res.LoadSave = false
 					startGame = true
-				}},
+				},nil},
 				{"Quit", func () {
 					os.Exit(0)
-				}},
+				},nil},
 			}...)
 			optList.Init()
 			render.Draw(optList)
