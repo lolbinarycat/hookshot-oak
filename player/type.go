@@ -41,6 +41,8 @@ type Hookshot struct {
 
 type PlayerState struct {
 	Name string
+	// LLoop stands for logic loop, if the returned value is not nil, the setstate is run on that value, and the normal loop is skipped.
+	LLoop func(*Player) *PlayerState 
 	Start, Loop, End PlayerStateFunc
 	Map  map[condition.Condition]PlayerStateMapFunc
 	MaxDuration time.Duration

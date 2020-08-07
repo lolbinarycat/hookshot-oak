@@ -153,8 +153,13 @@ func (p *Player) DoStateLoop() {
 	// 	return
 	// }
 	// if DoMap returns true, it means that the state changed.
-	if p.State.DoMap(p) == false { 
-		p.State.Loop(p)
+	if p.State.DoMap(p) == false {
+		nextState := p.State.LLoop(p)
+		if nextState == nil {
+			p.State.Loop(p)
+		} else {
+			p.SetState(*nextState)
+		}
 	}
 }
 
