@@ -132,7 +132,7 @@ func (p *Player) DoGroundCtrls() {
 		}
 		// TODO: make this feature into it's own module with
 		// it's own states. ("crawl"?)
-		if p.HeldDir.IsDown() { 
+		if p.HeldDir.IsDown() {
 			p.Delta.SetX(p.Delta.X()*0.6)
 		}
 	}
@@ -289,17 +289,18 @@ var WallSlideLeftState = PlayerState{
 }.denil()
 
 var WallSlideRightState = PlayerState{
-	Loop: func(p *Player) {
+	LLoop: func(p *Player) *PlayerState {
 		if p.Mods["climb"].Active() {
-			p.SetState(ClimbRightState)
-			return //return to stop airstate for overwriting our change
-		}
-		if p.IsJumpInput() {
-			p.WallJump(direction.MaxLeft(), true)
-			return
+			return &ClimbRightState
 		}
 		if p.ActiColls.RightWallHit == false {
-			p.SetState(AirState)
+			return &AirState
+		}
+		return nil
+	},
+	Loop: func(p *Player) {
+		if p.IsJumpInput() {
+			p.WallJump(direction.MaxLeft(), true)
 			return
 		}
 		AirState.Loop(p)
