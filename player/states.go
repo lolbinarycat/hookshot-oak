@@ -81,7 +81,7 @@ var RespawnFallState = PlayerState{
 		}
 		p.DoGravity()
 	},
-}.denil()
+}
 
 var GroundState PlayerState
 
@@ -265,7 +265,7 @@ var CoyoteState = PlayerState{
 		p.DoAirControls()
 		p.StateCommon()
 	},
-}.denil()
+}
 
 var WallSlideLeftState = PlayerState{
 	LLoop: func(p *Player) *PlayerState {
@@ -285,7 +285,7 @@ var WallSlideLeftState = PlayerState{
 
 		AirState.Loop(p)
 	},
-}.denil()
+}
 
 var WallSlideRightState = PlayerState{
 	LLoop: func(p *Player) *PlayerState {
@@ -304,7 +304,7 @@ var WallSlideRightState = PlayerState{
 		}
 		AirState.Loop(p)
 	},
-}.denil()
+}
 
 const WallJumpLaunchDuration time.Duration = time.Millisecond * 230
 
@@ -320,7 +320,7 @@ var WallJumpLaunchState = PlayerState{
 		p.DoGravity()
 		p.StateCommon()
 	},
-}.denil()
+}
 
 var ClimbRightState = PlayerState{
 	Loop: func(p *Player) {
@@ -332,7 +332,7 @@ var ClimbRightState = PlayerState{
 		p.Body.Delta.SetX(1)
 		//don't call StateCommon() here because it is called in DoCliming
 	},
-}.denil()
+}
 
 var ClimbLeftState = PlayerState{
 	Loop: func(p *Player) {
@@ -344,7 +344,7 @@ var ClimbLeftState = PlayerState{
 		p.DoCliming()
 		//don't call StateCommon() because ... (see ClimbRightState)
 	},
-}.denil()
+}
 
 var ItemCarryGroundState PlayerState
 var ItemCarryAirState PlayerState
@@ -377,4 +377,4 @@ var ItemThrowLag = PlayerState{
 		return nil
 	},
 	NextState:   &AirState,
-}.denil()
+}
