@@ -13,6 +13,9 @@ func (s PlayerState) denil() PlayerState {
 	if s.Start == nil {
 		s.Start = func(p *Player) {}
 	}
+	if s.LLoop == nil {
+		s.LLoop = func(p *Player) *PlayerState {return nil}
+	}
 	if s.Loop == nil {
 		s.Loop = func(p *Player) {}
 	}
