@@ -271,19 +271,21 @@ func constState(state *PlayerState) PlayerStateMapFunc {
 }
 
 var WallSlideLeftState = PlayerState{
-	Loop: func(p *Player) {
+	LLoop: func(p *Player) *PlayerState {
 		if p.Mods["climb"].Active() {
-			p.SetState(ClimbLeftState)
-			return
+			return &ClimbLeftState
 		}
+		if p.ActiColls.LeftWallHit == false {
+			return &AirState
+		}
+		return nil
+	},
+	Loop: func(p *Player) {
 		if p.IsJumpInput() {
 			p.WallJump(direction.MaxRight(), true)
 			return
 		}
-		if p.ActiColls.LeftWallHit == false {
-			p.SetState(AirState)
-			return
-		}
+
 		AirState.Loop(p)
 	},
 }.denil()
