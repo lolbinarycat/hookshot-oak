@@ -56,13 +56,13 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				if err != nil {
 					panic(err)
 				}
-			}},
+			},nil},
 			{"Load", func() {
 				err := plr.Load("save.json")
 				if err != nil {
 					panic(err)
 				}
-			}},
+			},nil},
 			{"Quit", func() {
 				os.Exit(0)
 			},nil},
