@@ -37,7 +37,7 @@ func loadPlayer() *player.Player {
 
 	player.SetPlayer(0, plr)
 
-	plr.State = player.RespawnFallState
+	plr.State = &player.RespawnFallState
 	plr.RespawnPos = player.Pos{X: plr.Body.X(), Y: plr.Body.Y()}
 	render.Draw(plr.Body.R, 1)
 	plr.Body.Speed = physics.NewVector(3, float64(player.JumpHeight))

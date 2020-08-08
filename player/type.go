@@ -22,7 +22,7 @@ type Player struct {
 	//ActiColls      ActiveCollisions
 	physobj.PhysObject
 	R renderable.ComPlayerR
-	State          PlayerState  `json:"-"`
+	State          *PlayerState  `json:"-"`
 	StateStartTime time.Time `json:"-"`
 	FramesInState  int // increments every frame, set to zero when p.SetState is called
 	Mods           PlayerModuleList

@@ -19,7 +19,7 @@ type ModuleClct struct {
 
 
 func (m ModuleClct) ClctdBy(p *player.Player) {
-	p.SetState(player.ModGetState(p.State,m.Name))
+	p.SetState(player.ModGetState(*p.State,m.Name))
 	dlog.Info("module",m.Name,"collected")
 }
 
