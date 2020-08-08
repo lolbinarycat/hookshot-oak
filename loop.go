@@ -51,6 +51,18 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			{"Titlescreen", func() {
 				nextScene = "titlescreen"
 			},nil},
+			{"Save", func() {
+				err := plr.Load("save.json")
+				if err != nil {
+					panic(err)
+				}
+			}},
+			{"Load", func() {
+				err := plr.Load("save.json")
+				if err != nil {
+					panic(err)
+				}
+			}},
 			{"Quit", func() {
 				os.Exit(0)
 			},nil},
@@ -135,18 +147,6 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			// Do nothing for now, later display the pause menu
 		}
 
-		if oak.IsDown(key.S) {
-			err := plr.Save("save.json")
-			if err != nil {
-				panic(err)
-			}
-		}
-		if oak.IsDown(key.L) {
-			err := plr.Load("save.json")
-			if err != nil {
-				panic(err)
-			}
-		}
 
 		dlog.Verb("Input:", replay.GetInputFrom(plr))
 		//if plr.Mods["quickrestart"].Active() {
