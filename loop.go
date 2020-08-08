@@ -52,7 +52,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				nextScene = "titlescreen"
 			},nil},
 			{"Save", func() {
-				err := plr.Load("save.json")
+				err := plr.Save("save.json")
 				if err != nil {
 					panic(err)
 				}
