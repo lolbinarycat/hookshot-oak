@@ -5,6 +5,7 @@ import (
 
 	//"github.com/oakmound/oak/v2/render"
 	"github.com/oakmound/oak/v2/key"
+	"github.com/oakmound/oak/v2/joystick"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	//"github.com/lolbinarycat/hookshot-oak/player/condition"
@@ -62,6 +63,7 @@ type PlayerStateMapFunc func(p *Player) *PlayerState
 type ControlConfig struct {
 	Left, Right, Up, Down, Quit string       //`json:"-"`
 	Mod                         ModInputList //`json:"-"`
+	Controller     *joystick.Joystick
 }
 
 var currentControls ControlConfig = ControlConfig{

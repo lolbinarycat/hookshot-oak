@@ -27,10 +27,20 @@ func (p *Player) HandleJump() {
 	if p.IsJumpInput() {
 		if p.Mods["longjump"].Active() && p.HeldDir.IsDown() {
 			p.Delta.SetY(-LongJumpH)
-			p.Delta.SetX(p.Delta.X()/2+LongJumpW*p.HeldDir.HCoeff())
+			if p.Seq("→↘↓") {
+				p.Delta.SetX(p.Delta.X()/2+LongJumpW)
+			} else if p.Seq("←↙↓") {
+				p.Delta.SetX(p.Delta.X()/2-LongJumpW)
+			} else {
+				p.Delta.SetX(LongJumpW*p.HeldDir.HCoeff())
+			}
+			
 			p.SetState(AirState)
 			dlog.Info("longjump")
 			return
+		}
+		if p.Seq("↓↘→↗↑") {
+			p.JumpC(float64(JumpHeight*2.0))
 		}
 		dlog.Info(p.HeldDir)
 		p.Jump()

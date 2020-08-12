@@ -11,6 +11,8 @@ import (
 	"github.com/oakmound/oak/v2/physics"
 	"github.com/oakmound/oak/v2/render"
 	"github.com/lolbinarycat/hookshot-oak/fginput"
+	"github.com/oakmound/oak/v2/joystick"
+	"github.com/oakmound/oak/v2/dlog"
 )
 
 const (
@@ -49,7 +51,22 @@ func loadPlayer() *player.Player {
 	plr.Hs.Body.Init()
 
 	plr.DirBuffer = fginput.NewBuffer(30)
-
+	dlog.Info("listening for joystick")
+	joyCh, cancel := joystick.WaitForJoysticks(10000)
+	defer cancel()
+	(<-joyCh).Prepare()
+	dlog.Info("got joystick")
+	dlog.Info("joystick:",*joystick.GetJoysticks()[0])
+	plr.Ctrls.Controller = joystick.GetJoysticks()[0]
+	err = plr.Ctrls.Controller.Prepare()
+	if err != nil {
+		panic(err)
+	}
+	s, _ := plr.Ctrls.Controller.GetState()
+	for k, _ := range s.Buttons {
+		dlog.SetDebugLevel(dlog.INFO)
+		dlog.Info("button",k,"exists")
+	}
 	return plr
 }
 

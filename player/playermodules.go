@@ -75,6 +75,12 @@ func (i ModInput) IsDown() bool {
 	if oak.IsDown(i.Key) {
 		return true
 	} else {
+		// TODO: fix this
+		ctrlr := GetPlayer(0).Ctrls.Controller
+		if ctrlr != nil {
+			st, _ := ctrlr.GetState()
+			return st.Buttons[i.Button]
+		}
 		return false
 	}
 }
@@ -88,10 +94,10 @@ func (cnf *ControlConfig) DefaultMapCtrls() {
 	cnf.Down  = key.DownArrow
 	cnf.Quit  = key.Q
 	cnf.Mod = ModInputList{
-		NewModInput(key.Z,""),
-		NewModInput(key.X,""),
-		NewModInput(key.LeftShift,""),
-		NewModInput(key.R,""),
+		NewModInput(key.Z,"A"),
+		NewModInput(key.X,"b"),
+		NewModInput(key.LeftShift,"x"),
+		NewModInput(key.R,"y"),
 	}
 }
 

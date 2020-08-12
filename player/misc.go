@@ -86,8 +86,12 @@ func (p *Player) IfHsPressedStartHs() {
 }
 
 func (p *Player) Jump() {
-	p.Body.Delta.ShiftY(-p.Body.Speed.Y())
-	p.Body.ShiftY(p.Body.Delta.Y())
+	p.JumpC(p.Speed.Y())
+}
+
+func (p *Player) JumpC(s float64) {
+	p.Body.Delta.ShiftY(-s)
+	//p.Body.ShiftY(p.Body.Delta.Y())
 	p.SetState(JumpHeightDecState)
 }
 
@@ -196,7 +200,7 @@ func (p *Player) DoHsCheck() bool {
 }
 
 func (p *Player) Seq(s string) bool {
-	p.DirBuffer.Check(fginput.Seq(s))
+	return p.DirBuffer.Check(fginput.Seq(s))
 }
 
 //func (p *Player) SetEyePos() {

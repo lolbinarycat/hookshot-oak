@@ -7,7 +7,15 @@ import "github.com/oakmound/oak/v2/dlog"
 
 // GetDir does not respect the replay system, use HeldDir instead.
 func (c *ControlConfig) GetDir() (dir direction.Dir) {
-
+	if c.Controller != nil {
+		state, err := c.Controller.GetState()
+		if err != nil {
+			goto Keyboard
+		}
+		defer recover()
+		return direction.Dir{H:int8(state.StickLX/256),V:int8(state.StickLY/256)}
+	}
+Keyboard:
 	if oak.IsDown(c.Up) {
 		dlog.Verb("Up held")
 		dir = dir.Add(direction.MaxUp())

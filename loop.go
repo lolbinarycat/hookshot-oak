@@ -19,7 +19,6 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/replay"
 	"github.com/lolbinarycat/hookshot-oak/ui"
 	"github.com/lolbinarycat/hookshot-oak/layers"
-	"github.com/lolbinarycat/hookshot-oak/fginput"
 )
 
 var Paused = false
@@ -142,11 +141,6 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 				(plr.ActiColls.LeftWallHit && plr.ActiColls.RightWallHit) {
 
 				plr.Die()
-			}
-
-			if plr.DirBuffer.Check([]fginput.Input{fginput.Down,fginput.Down|fginput.Right,fginput.Right}) {
-				dlog.SetDebugLevel(dlog.INFO)
-				dlog.Info("Hadoken!")
 			}
 
 			//player.Eyes[1].SetX(5)

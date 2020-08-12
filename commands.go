@@ -120,6 +120,7 @@ func ModCommand(args []string) {
 				fmt.Println("malformed command")
 			}
 		case "inputs":
+			fallthrough
 		case "input":
 			if len(args) < 2 || args[1] == "list" {
 				for _, m := range player.GetPlayer(0).Ctrls.Mod {
