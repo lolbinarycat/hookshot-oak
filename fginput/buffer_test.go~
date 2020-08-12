@@ -1,0 +1,10 @@
+package fginput
+
+import (
+	"testing"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestBuffer(t *testing.T) {
+
+}

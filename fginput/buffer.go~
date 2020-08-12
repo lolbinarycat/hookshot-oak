@@ -1,0 +1,14 @@
+package fginput
+
+type Buffer struct {
+	buf []Input
+	index int
+}
+
+func NewBuffer(len int) *Buffer {
+	return &Buffer{
+		buf: make([]Input,len),
+		index: 0,
+	}
+}
+

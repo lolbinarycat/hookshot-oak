@@ -4,8 +4,8 @@ package fginput
 type Input uint8
 
 const (
-	None Input = 1 << iota -1
-	Up
+	None Input = 0x00
+	Up Input = 1 << iota
 	Down
 	Left
 	Right
@@ -15,11 +15,39 @@ const (
 
 func (i Input) Canon() Input {
 	switch i {
-	case None, Up, Down, Left, Right, Up&Left, Up&Right, Down&Left, Down&Right:
+		case None, Up, Down, Left, Right, Up|Left, Up|Right, Down|Left, Down|Right:
 		return i
-	case Up&Down:
+	case Up|Down:
 		return None
-	case Left&Right:
-		return none
+	case Left|Right:
+		return None
+	default:
+		panic("fallthrough in Input.Cannon")
 	}
 }
+
+type Sequence []Input
+
+type Direction interface{
+	IsLeft() bool
+	IsRight() bool
+	IsUp() bool
+	IsDown() bool
+}
+
+func DirToInput(dir Direction) (inp Input) {
+	if dir.IsLeft() {
+		inp = inp|Left
+	}
+	if dir.IsRight() {
+		inp = inp|Right
+	}
+	if dir.IsUp() {
+		inp = inp|Up
+	}
+	if dir.IsDown() {
+		inp = inp|Down
+	}
+	return inp
+}
+
