@@ -5,6 +5,7 @@ import (
 	//"math"
 
 	dir "github.com/lolbinarycat/hookshot-oak/direction"
+	"github.com/lolbinarycat/hookshot-oak/fginput"
 	"github.com/oakmound/oak/v2"
 	//"github.com/oakmound/oak/v2/event"
 	//"github.com/oakmound/oak/v2/collision"
@@ -192,6 +193,10 @@ func (p *Player) DoHsCheck() bool {
 		return true
 	}
 	return false
+}
+
+func (p *Player) Seq(s string) bool {
+	p.DirBuffer.Check(fginput.Seq(s))
 }
 
 //func (p *Player) SetEyePos() {
