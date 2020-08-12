@@ -2,13 +2,10 @@ module github.com/lolbinarycat/hookshot-oak
 
 go 1.14
 
-replace github.com/lolbinarycat/utils => /home/binarycat/go/src/github.com/lolbinarycat/utils
-
 require (
 	github.com/disintegration/gift v1.2.1 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.0 // indirect
 	github.com/lafriks/go-tiled v0.1.0
-	github.com/lolbinarycat/utils v0.0.0-00010101000000-000000000000
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75
 	github.com/pkg/errors v0.9.1

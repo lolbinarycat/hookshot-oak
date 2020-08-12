@@ -10,6 +10,7 @@ import (
 	"github.com/oakmound/oak/v2/entities"
 	"github.com/oakmound/oak/v2/physics"
 	"github.com/oakmound/oak/v2/render"
+	"github.com/lolbinarycat/hookshot-oak/fginput"
 )
 
 const (
@@ -46,6 +47,8 @@ func loadPlayer() *player.Player {
 		render.NewColorBox(HsHeight, HsWidth, color.RGBA{0, 0, 255, 255}),
 		nil, 1, 0)
 	plr.Hs.Body.Init()
+
+	plr.DirBuffer = fginput.NewBuffer(30)
 
 	return plr
 }

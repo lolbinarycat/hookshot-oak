@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/lolbinarycat/hookshot-oak/player"
-	"github.com/lolbinarycat/utils"
 	oak "github.com/oakmound/oak/v2"
 	"github.com/oakmound/oak/v2/dlog"
 )
@@ -26,7 +25,9 @@ func BindCommands() {
 	oak.AddCommand("fly", func(args []string) {
 		if player.GetPlayer(0).Mods["fly"].Active() {
 			if len(args) == 1 &&
-				utils.EqualsAny(args[0], "stop", "end", "halt") {
+				args[0] == "stop" ||
+				args[0] == "end" ||
+				args[0] == "halt" {
 
 				player.GetPlayer(0).SetState(player.AirState)
 			} else {

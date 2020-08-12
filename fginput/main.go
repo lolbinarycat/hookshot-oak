@@ -26,7 +26,6 @@ func (i Input) Canon() Input {
 	}
 }
 
-type Sequence []Input
 
 type Direction interface{
 	IsLeft() bool
