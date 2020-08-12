@@ -26,6 +26,10 @@ func (b *Buffer) Push(inp Input) {
 	b.buf[b.index] = inp
 }
 
+func (b *Buffer) PushDir(dir Direction) {
+	b.Push(DirToInput(dir))
+}
+
 func (b *Buffer) PushN(inps []Input) {
 	for _, inp := range inps {
 		b.Push(inp)
