@@ -21,9 +21,7 @@ func (m *BasicMod) Obtain() {
 }
 
 func (m *BasicMod) Equip() {
-	if m.Obtained {
-		m.Equipped = true
-	}
+	m.Equipped = true
 }
 
 func (m *BasicMod) Unequip() {
