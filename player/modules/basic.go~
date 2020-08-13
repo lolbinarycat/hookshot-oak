@@ -1,6 +1,0 @@
-package modules
-
-type BasicModule struct {
-	Equipped bool
-	Obtained bool //`default:true`
-}
