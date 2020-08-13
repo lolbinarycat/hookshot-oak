@@ -1,0 +1,3 @@
+package modules
+
+type List map[string]PlayerModule

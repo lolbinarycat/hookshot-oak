@@ -151,7 +151,7 @@ BindInput:
 			fmt.Println("module", args[2], "cannot be bound")
 		} else {
 			pl := player.GetPlayer(0)
-			mod.Bind(pl, inpNum)
+			mod.Bind(pl.Ctrls.Mod, inpNum)
 			fmt.Println("module", args[2], "bound to input", args[3])
 		}
 	}

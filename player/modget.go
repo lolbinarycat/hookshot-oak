@@ -32,7 +32,7 @@ func ModGetState(prevState PlayerState,modName string) PlayerState {
 						}
 						dlog.Info("ModGetState: module",modName,"bound to input",i)
 						mod.Equip()
-						mod.(interface{SetInput(int)}).SetInput(i)
+						mod.(interface{Bind(ModInputList,int)}).Bind(p.Ctrls.Mod,i)
 						goto Resume
 					} else {
 						mod.Equip()

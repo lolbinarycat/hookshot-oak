@@ -1,6 +1,7 @@
 package main
 
 import (
+	"time"
 	"image/color"
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
@@ -52,21 +53,30 @@ func loadPlayer() *player.Player {
 
 	plr.DirBuffer = fginput.NewBuffer(30)
 	dlog.Info("listening for joystick")
-	joyCh, cancel := joystick.WaitForJoysticks(10000)
-	defer cancel()
-	(<-joyCh).Prepare()
-	dlog.Info("got joystick")
-	dlog.Info("joystick:",*joystick.GetJoysticks()[0])
-	plr.Ctrls.Controller = joystick.GetJoysticks()[0]
-	err = plr.Ctrls.Controller.Prepare()
-	if err != nil {
-		panic(err)
+	joyCh, cancel := joystick.WaitForJoysticks(time.Millisecond*80)
+	select {
+	case plr.Ctrls.Controller = <- joyCh:
+		dlog.Info("got joystick")
+		err = plr.Ctrls.Controller.Prepare()
+		if err != nil {
+			panic(err)
+		}
+		if true { // debugging
+			s, err := plr.Ctrls.Controller.GetState()
+			if err != nil {
+				panic(err)
+			}
+			dlog.SetDebugLevel(dlog.INFO)
+			dlog.Info("there are",len(s.Buttons),"buttons")
+			for k, _ := range s.Buttons {
+				dlog.Info("button",k,"exists")
+			}
+		}
+	case <-time.After(time.Second*5):
+		dlog.Info("failed to get joystick, continuing")
 	}
-	s, _ := plr.Ctrls.Controller.GetState()
-	for k, _ := range s.Buttons {
-		dlog.SetDebugLevel(dlog.INFO)
-		dlog.Info("button",k,"exists")
-	}
+	cancel()
+
 	return plr
 }
 

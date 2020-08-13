@@ -143,7 +143,10 @@ func (p *Player) UnmarshalJSON(b []byte) error {
 				p.Mods[mn].Obtain()
 				if jMod.Equipped {
 					p.Mods[mn].Equip()
-					p.Mods[mn].(*CtrldPlayerModule).Bind(p,jMod.InputNum)
+					
+				}
+				if jMod.InputNum != -1 {
+					p.Mods[mn].(*CtrldPlayerModule).Bind(p.Ctrls.Mod,jMod.InputNum)
 				}
 			}
 		default:
