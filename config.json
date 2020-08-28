@@ -1,6 +1,6 @@
 {
 	"debug": {
-		"level": "warn",
+		"level": "error",
         "filter": ""
 	}
 }
