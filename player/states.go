@@ -72,7 +72,7 @@ func AirStateLoop(p *Player) {
 		p.DoGravity()
 	}
 
-	if p.HeldDir.IsDown() && !p.LastHeldDir.IsDown() &&
+	if p.HeldDir.IsDown() && !p.DirBuffer.Get(1).IsDown() &&
 		p.Mods["groundpound"].Active() {
 
 		dlog.Info("groundpound started")
