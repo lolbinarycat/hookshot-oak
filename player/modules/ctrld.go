@@ -97,13 +97,7 @@ func (m CtrldMod) GetInputNum() int {
 	// return -1
 }
 
-func (m *CtrldMod) Obtain() {
-	m.BasicMod.Obtain()
-}
 
-func (m *CtrldMod) Equip() {
-	m.BasicMod.Equip()
-}
 
 
 
