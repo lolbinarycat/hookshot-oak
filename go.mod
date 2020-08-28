@@ -19,4 +19,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-replace github.com/oakmound/oak/v2 => github.com/lolbinarycat/oak/v2 v2.0.0-20200826190938-8ab47e832150
+replace github.com/oakmound/oak/v2 => /home/binarycat/go/src/github.com/lolbinarycat/oak
