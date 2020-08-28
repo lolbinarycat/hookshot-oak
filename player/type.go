@@ -4,8 +4,8 @@ import (
 	"time"
 
 	//"github.com/oakmound/oak/v2/render"
-	"github.com/oakmound/oak/v2/key"
 	"github.com/oakmound/oak/v2/joystick"
+	"github.com/oakmound/oak/v2/key"
 
 	"github.com/lolbinarycat/hookshot-oak/direction"
 	//"github.com/lolbinarycat/hookshot-oak/player/condition"
@@ -32,9 +32,8 @@ type Player struct {
 	RespawnPos     Pos
 	Hs             Hookshot `json:"-"`
 	HeldObj        *physobj.Block
-	//Eyes           [2]*render.Sprite `json:"-"`
-	HeldDir, LastHeldDir direction.Dir `json:"-"`
-	DirBuffer            *fginput.Buffer
+	HeldDir        direction.Dir `json:"-"`
+	DirBuffer      *fginput.Buffer
 }
 
 type Hookshot struct {
@@ -63,7 +62,7 @@ type PlayerStateMapFunc func(p *Player) *PlayerState
 type ControlConfig struct {
 	Left, Right, Up, Down, Quit string       //`json:"-"`
 	Mod                         ModInputList //`json:"-"`
-	Controller     *joystick.Joystick
+	Controller                  *joystick.Joystick
 }
 
 var currentControls ControlConfig = ControlConfig{
