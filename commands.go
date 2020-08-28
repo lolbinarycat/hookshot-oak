@@ -88,6 +88,9 @@ func ModCommand(args []string) {
 				player.GetPlayer(0).Mods[args[1]].Equip()
 				fmt.Println("equipped", args[1])
 			}
+		case "grant":
+			oak.RunCommand("mod","give",args[1])
+			oak.RunCommand("mod","equip",args[1])
 		case "give":
 			if len(args) < 2 {
 				goto NeedMoreArgs
