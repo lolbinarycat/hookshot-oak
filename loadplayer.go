@@ -52,6 +52,7 @@ func loadPlayer() *player.Player {
 	plr.Hs.Body.Init()
 
 	plr.DirBuffer = fginput.NewBuffer(30)
+	dlog.ErrorCheck(joystick.Init())
 	dlog.Info("listening for joystick")
 	joyCh, cancel := joystick.WaitForJoysticks(time.Millisecond*80)
 	select {
@@ -61,15 +62,16 @@ func loadPlayer() *player.Player {
 		if err != nil {
 			panic(err)
 		}
+		dlog.Info("prepared joystick")
 		if true { // debugging
+			dlog.Info("gettng joystick state to list buttons")
 			s, err := plr.Ctrls.Controller.GetState()
 			if err != nil {
 				panic(err)
 			}
-			dlog.SetDebugLevel(dlog.INFO)
-			dlog.Info("there are",len(s.Buttons),"buttons")
+			dlog.Info("joystick: there are",len(s.Buttons),"buttons")
 			for k, _ := range s.Buttons {
-				dlog.Info("button",k,"exists")
+				dlog.Info("joystick: button",k,"exists")
 			}
 		}
 	case <-time.After(time.Second*5):
