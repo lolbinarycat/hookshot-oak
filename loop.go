@@ -25,7 +25,9 @@ var Paused = false
 
 const PauseButton = key.Enter
 const ConfirmButton = key.Z // activates the current selection
-const CycleButton = key.Tab // cycles the current selection
+const CycleFwdBtn = key.DownArrow // cycles the current selection
+const CycleBackBtn = key.UpArrow
+
 
 var MainSceneLoop func() bool
 
@@ -66,7 +68,16 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			{"Quit", func() {
 				os.Exit(0)
 			},nil},
-		}, PauseButton, ConfirmButton, CycleButton)
+		}, ui.MenuActions{
+			Btns: ui.MenuActionBtns{
+				Pause: PauseButton,
+				Confirm: ConfirmButton,
+				Next: CycleFwdBtn,
+				Prev: CycleBackBtn,
+			},
+			PauseIsConfirm: true,
+		})
+		
 		plr = loadScene()
 		pauseMenu.Active = false
 		{
