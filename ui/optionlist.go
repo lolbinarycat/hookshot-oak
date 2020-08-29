@@ -75,7 +75,7 @@ func (l OptionList) Draw(buff draw.Image) {
 	l.DrawOffset(buff, 0, 0)
 }
 
-func (l *OptionList) Cycle() {
+func (l *OptionList) CycleN(n int) {
 	if l.Foc().Extras != nil &&
 		l.Foc().Extras.OnCycle != nil {
 		if l.Foc().Extras.OnCycle() == false {
@@ -83,7 +83,15 @@ func (l *OptionList) Cycle() {
 			return
 		}
 	}
-	l.focused = (l.focused + 1) % len(l.Options)
+	l.focused = (l.focused + n) % len(l.Options)
+}
+
+func (l *OptionList) Cycle() {
+	l.CycleN(1)
+}
+
+func (l *OptionList) CycleBack() {
+	l.CycleN(-1)
 }
 
 func (l OptionList) ActivateSelected() {

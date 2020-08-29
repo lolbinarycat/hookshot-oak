@@ -34,7 +34,7 @@ func (m *PauseMenu) TogglePause() {
 }
 
 func NewPauseMenu(x, y float64, options []*Option,
-	pause, confirm, cycle string) *PauseMenu {
+	pause, confirm, cycleFwd, cycleBack string) *PauseMenu {
 
 	pm := new(PauseMenu)
 	pm.ToggleableOptionList =
@@ -48,7 +48,11 @@ func NewPauseMenu(x, y float64, options []*Option,
 			if pm.Active {
 				pm.ActivateSelected()
 			}
-		case cycle:
+		case cycleFwd:
+			if pm.Active {
+				pm.Cycle()
+			}
+		case cycleBack:
 			if pm.Active {
 				pm.Cycle()
 			}
