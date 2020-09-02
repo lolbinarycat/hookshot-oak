@@ -29,15 +29,24 @@ func (t *ToggleableOptionList) BindActions(acts ToggleMenuActions) {
 				t.Active = !t.Active
 			}
 		} else if t.Active {
-			switch key.(string) {
-			case acts.Btns.Confirm:				
-				t.ActivateSelected()
-			case acts.Btns.Next:
-				t.Cycle()
-			case acts.Btns.Prev:
-				t.CycleBack()
-			}
+			t.ProcessInput(acts.Btns.MenuActionBtns,key.(string))
 		}
 		return 0
 	},key.Down,int(t.Init()))
+}
+
+// ProcessInput processes inp according to btns.
+// It returns true if any action was taken, and false otherwise.
+func (o *OptionList) ProcessInput(btns MenuActionBtns,inp string) bool {
+	switch inp {
+	case btns.Confirm:				
+		o.ActivateSelected()
+	case btns.Next:
+		o.Cycle()
+	case btns.Prev:
+		o.CycleBack()
+	default:
+		return false
+	}
+	return true
 }
