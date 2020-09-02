@@ -1,3 +1,4 @@
+
 package ui
 
 import (
@@ -30,7 +31,7 @@ func (m *PauseMenu) TogglePause() {
 	m.Toggle()
 }
 
-func NewPauseMenu(x, y float64, options []*Option, acts MenuActions) *PauseMenu {
+func NewPauseMenu(x, y float64, options []*Option, acts ToggleMenuActions) *PauseMenu {
 	pm := new(PauseMenu)
 	pm.ToggleableOptionList =
 		ToggleableOptionList{OptionList:NewOptionList(x, y, options...)}

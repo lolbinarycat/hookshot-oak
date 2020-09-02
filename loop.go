@@ -68,12 +68,14 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 			{"Quit", func() {
 				os.Exit(0)
 			},nil},
-		}, ui.MenuActions{
-			Btns: ui.MenuActionBtns{
+		}, ui.ToggleMenuActions{
+			Btns: ui.ToggleMenuActionBtns{
+				MenuActionBtns: ui.MenuActionBtns{
+					Confirm: ConfirmButton,
+					Next: CycleFwdBtn,	   
+					Prev: CycleBackBtn,	   
+				},
 				Pause: PauseButton,
-				Confirm: ConfirmButton,
-				Next: CycleFwdBtn,
-				Prev: CycleBackBtn,
 			},
 			PauseIsConfirm: true,
 		})
