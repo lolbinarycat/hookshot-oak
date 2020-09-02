@@ -21,6 +21,12 @@ func init() {
 	var optList *ui.OptionList
 	var res TitlescreenResult
 	var startGame bool
+	var actBtns = ui.MenuActionBtns{
+		// constants set in loop.go
+		Confirm: PauseButton,
+		Next: CycleFwdBtn,
+		Prev: CycleBackBtn,
+	}
 	titlescreenScene = scene.Scene{
 		Start: func(_ string, _ interface{}) {
 			optList = ui.NewOptionList(20,20,[]*ui.Option{
@@ -39,12 +45,7 @@ func init() {
 			optList.Init()
 			render.Draw(optList)
 			event.Bind(func(_ int, k interface{}) int {
-				switch k.(string) {
-				case key.Tab:
-					optList.Cycle()
-				case key.Enter:
-					optList.ActivateSelected()
-				}
+				optList.ProcessInput(actBtns,k.(string))
 				return 0
 			},key.Down,int(optList.CID))
 		},
