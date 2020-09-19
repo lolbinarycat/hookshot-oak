@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"image/color"
-	"regexp"
+	//"regexp"
 	"os"
 	"time"
 
@@ -119,7 +119,7 @@ func loadScene() *player.Player {
 const mainSceneName = "platformer"
 
 func main() {
-	{
+	/*{
 		err := oak.LoadConf("config.json")
 		if err != nil {
 			dlog.Error("failed to load config.json, error:", err)
@@ -132,7 +132,7 @@ func main() {
 		logger.SetDebugLevel(lvl)
 		logger.SetRegexp(regexp.MustCompile(oak.SetupConfig.Debug.Filter))
 		dlog.SetLogger(logger)
-	}
+	}*/
 
 
 	// bgLayer = render.NewDynamicHeap()

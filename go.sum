@@ -1,5 +1,7 @@
 github.com/200sc/go-dist v1.0.0 h1:Y9bl++4+d8NFv5hzwHyaxbXZmexVCic/rUdQOTq7Jec=
 github.com/200sc/go-dist v1.0.0/go.mod h1:+hhVw6j4BQF2HPwLFmsVM4VooSH9sn04apvH52hfboU=
+github.com/200sc/klangsynthese v0.2.0 h1:kVveiDyAXOylXJLsQKiT1wXD6Yy+jewrdrfB3urZC6c=
+github.com/200sc/klangsynthese v0.2.0/go.mod h1:1yEA6LmYbsEoAPJx+JN+UQk7k5yXebfWsuM1yGPK/3s=
 github.com/200sc/klangsynthese v0.2.1 h1:29bwwxHqZmqz0nScJgdc11vvfuE2oyaPJb3DcHUCPaQ=
 github.com/200sc/klangsynthese v0.2.1/go.mod h1:1yEA6LmYbsEoAPJx+JN+UQk7k5yXebfWsuM1yGPK/3s=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
@@ -40,6 +42,10 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/oakmound/libudev v0.2.1 h1:gaXuw7Pbt3RSRxbUakAjl0dSW6Wo3TZWpwS5aMq8+EA=
 github.com/oakmound/libudev v0.2.1/go.mod h1:zYF5CkHY+UP6lzWbPR+XoVAscl/s+OncWA//qWjMLUs=
+github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75 h1:JmXsAfdM22rZm1Z4JvprUcfy8MNgzAZATz1ViElZveM=
+github.com/oakmound/oak/v2 v2.3.4-0.20200625001801-7a48ec29af75/go.mod h1:IeLz/IxfiVKdrPFw45yebPmiBJMYyLHlHQOLWdmC76I=
+github.com/oakmound/shiny v0.4.2-beta.0.20200620232743-6df262b89055 h1:Q6pxnU82bqSWes7nvRhbHWDFPMDX2L+sgpN2MBuW8AI=
+github.com/oakmound/shiny v0.4.2-beta.0.20200620232743-6df262b89055/go.mod h1:fEGagtAluRRrVkMQyzyL+G3j+TdsyOjrIajWunGmy3M=
 github.com/oakmound/shiny v0.4.2 h1:QfkgNG4ktT0g8wTM6bjWn1uAPOBk6NoQVxD/Bvwt5xk=
 github.com/oakmound/shiny v0.4.2/go.mod h1:fEGagtAluRRrVkMQyzyL+G3j+TdsyOjrIajWunGmy3M=
 github.com/oakmound/w32 v2.0.0+incompatible/go.mod h1:lzloWlclSXIU4cDr67WF8qjFFDO8gHHBIk4Qqe90enQ=

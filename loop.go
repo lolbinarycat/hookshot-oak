@@ -7,7 +7,7 @@ import (
 
 	"github.com/lolbinarycat/hookshot-oak/labels"
 	oak "github.com/oakmound/oak/v2"
-	"github.com/oakmound/oak/v2/dlog"
+	//"github.com/oakmound/oak/v2/dlog"
 	"github.com/oakmound/oak/v2/event"
 	"github.com/oakmound/oak/v2/key"
 	"github.com/oakmound/oak/v2/render"
@@ -16,7 +16,6 @@ import (
 	"github.com/lolbinarycat/hookshot-oak/camera"
 	"github.com/lolbinarycat/hookshot-oak/player"
 	//prenderable "github.com/lolbinarycat/hookshot-oak/player/renderable"
-	"github.com/lolbinarycat/hookshot-oak/replay"
 	"github.com/lolbinarycat/hookshot-oak/ui"
 	"github.com/lolbinarycat/hookshot-oak/layers"
 )
@@ -101,12 +100,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		// set plr.HeldDir
 		event.BindPriority(
 			func(_ int, _ interface{}) int {
-				if replay.Active {
- 					plr.HeldDir = replay.CurrentDir
-				} else {
-					plr.HeldDir = plr.Ctrls.GetDir()
-				}
-
+				plr.HeldDir = plr.Ctrls.GetDir()
 				plr.R.SetEyeDir(plr.HeldDir)
 				plr.DirBuffer.PushDir(plr.HeldDir)
 				return 0
@@ -161,7 +155,7 @@ func buildMainSceneFuncs() (MainSceneStart func(string, interface{}), MainSceneL
 		}
 
 
-		dlog.Verb("Input:", replay.GetInputFrom(plr))
+		//dlog.Verb("Input:", replay.GetInputFrom(plr))
 		//if plr.Mods["quickrestart"].Active() {
 		//	plr.Respawn()
 		//}

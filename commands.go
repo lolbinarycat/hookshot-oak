@@ -59,7 +59,7 @@ func BindCommands() {
 		}
 		return
 	ShowLevel:
-		fmt.Println("log level:",dlog.GetLogLevel().String())
+		fmt.Println("log level:",dlog.GetLogLevel())
 		return
 	SetLevel: // sets level to args[0]
 		if i, err := strconv.Atoi(args[0]); err == nil {
@@ -89,8 +89,10 @@ func ModCommand(args []string) {
 				fmt.Println("equipped", args[1])
 			}
 		case "grant":
-			oak.RunCommand("mod","give",args[1])
-			oak.RunCommand("mod","equip",args[1])
+			fmt.Println("Not Implemented")
+			// Uncomment this when RunCommand gets released
+			/*oak.RunCommand("mod","give",args[1])
+			oak.RunCommand("mod","equip",args[1])*/
 		case "give":
 			if len(args) < 2 {
 				goto NeedMoreArgs
